@@ -47,7 +47,7 @@ public class LineGraph {
 
 	public static void plot(ArrayList<int[]> table,ArrayList<String> machineNames,String xName,String yName)
 	{		
-		colors = new Color[7];
+		colors = new Color[8];
 		colors[0] = Color.RED;
 		colors[1] = Color.GREEN;
 		colors[2] = Color.YELLOW;
@@ -55,6 +55,7 @@ public class LineGraph {
 		colors[4] = Color.ORANGE;
 		colors[5] = Color.PURPLE;
 		colors[6] = Color.BROWN;
+		colors[7] = Color.BLACK;
 		
 		xAxisName = xName;
 		yAxisName = yName;
