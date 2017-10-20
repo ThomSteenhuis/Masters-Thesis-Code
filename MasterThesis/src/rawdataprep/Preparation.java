@@ -10,6 +10,7 @@ public class Preparation {
 	private static final String DALocation = "C:/Users/emp5220514/Desktop/Data/die_attach.txt";
 	private static final String DAMLocation = "C:/Users/emp5220514/Desktop/Data/DA_machines.txt";
 	private static final String machineList = "C:/Users/emp5220514/Desktop/Data/machine_list.txt";
+	private static final String FCLLocation = "C:/Users/emp5220514/Desktop/Data/fcl.txt";
 
 	public static ArrayList<String> findDistinctMachines(ArrayList<String> machines) 
 	{
@@ -92,6 +93,7 @@ public class Preparation {
 		
 		ArrayList<String>[] output = new ArrayList[Run.machineNames.size()];
 		ArrayList<String> DAText = null;
+		ArrayList<String> FCLText = null;
 		String[][] DATable = null;
 		
 		if(txt.size() < 2)
@@ -104,6 +106,7 @@ public class Preparation {
 			output[idx] = new ArrayList<String>();
 		
 		DAText = Read.readTxt(DALocation);
+		FCLText = Read.readTxt(FCLLocation);
 		
 		DATable = new String[DAText.size()][2];
 		String[] line = null;
@@ -132,6 +135,8 @@ public class Preparation {
 				
 				if(test1.startsWith("950") && (test1.length() > 7) && !test2.startsWith("45"))
 					addDieAttach(txt.get(idx),test1,output,DATable);
+				else if(checkFCL(test1,FCLText))
+					output[6].add(txt.get(idx));
 				else if(test1.startsWith("5") && !test2.startsWith("45") )
 				{
 					if( (test1.length() == 5) && (test3.contains("AMS") || test3.contains("MMS") ) )
@@ -141,11 +146,27 @@ public class Preparation {
 						if(test1.substring(5,11).equals(" SYSTEM"))
 							output[5].add(txt.get(idx));
 					}
-				}
+				}				
 				else if(test1.startsWith("41") && !test2.startsWith("45") && test3.contains("FSL") && test3.contains("SML"))
-					output[6].add(txt.get(idx));
-				else if(test1.startsWith("801.000") && !test2.startsWith("45") )
 					output[7].add(txt.get(idx));
+				else if(test1.startsWith("801.000") && !test2.startsWith("45") )
+					output[8].add(txt.get(idx));
+			}
+		}
+		
+		return output;
+	}
+	
+	private static boolean checkFCL(String test,ArrayList<String> compare)
+	{
+		boolean output = false;
+		
+		for(int idx=0;idx<compare.size();++idx)
+		{
+			if(compare.get(idx).trim().equals(test))
+			{
+				output = true;
+				break;
 			}
 		}
 		
