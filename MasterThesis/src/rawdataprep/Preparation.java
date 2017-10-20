@@ -8,7 +8,6 @@ import java.util.Scanner;
 public class Preparation {
 	
 	private static final String DALocation = "C:/Users/emp5220514/Desktop/Data/die_attach.txt";
-	private static final String moldingLocation = "C:/Users/emp5220514/Desktop/Data/molding.txt";
 	private static final String DAMLocation = "C:/Users/emp5220514/Desktop/Data/DA_machines.txt";
 	private static final String machineList = "C:/Users/emp5220514/Desktop/Data/machine_list.txt";
 
@@ -94,7 +93,6 @@ public class Preparation {
 		ArrayList<String>[] output = new ArrayList[Run.machineNames.size()];
 		ArrayList<String> DAText = null;
 		String[][] DATable = null;
-		ArrayList<String> moldingText = null;
 		
 		if(txt.size() < 2)
 		{
@@ -106,7 +104,6 @@ public class Preparation {
 			output[idx] = new ArrayList<String>();
 		
 		DAText = Read.readTxt(DALocation);
-		moldingText = Read.readTxt(moldingLocation);
 		
 		DATable = new String[DAText.size()][2];
 		String[] line = null;
@@ -120,38 +117,37 @@ public class Preparation {
 		
 		String test1 = null;
 		String test2 = null;
+		String test3 = null;
 		String[] split = null;
 		
 		for(int idx = 1; idx<txt.size(); ++idx)
 		{
 			split = txt.get(idx).split("\t");
 			
-			if(split.length > 15)
+			if(split.length > 16)
 			{
 				test1 = split[15].trim();
 				test2 = split[2].trim();
+				test3 = split[16].trim();
+				
 				if(test1.startsWith("950") && (test1.length() > 7) && !test2.startsWith("45"))
 					addDieAttach(txt.get(idx),test1,output,DATable);
-				else if(test1.startsWith("56") && (test1.length() == 5) && !test2.startsWith("45") )
-					addMolding(txt.get(idx),test1,output,moldingText);
+				else if(test1.startsWith("5") && !test2.startsWith("45") )
+				{
+					if( (test1.length() == 5) && (test3.contains("AMS") || test3.contains("MMS") ) )
+						output[5].add(txt.get(idx));
+					else if(test1.length() > 11)
+					{
+						if(test1.substring(5,11).equals(" SYSTEM"))
+							output[5].add(txt.get(idx));
+					}
+				}
 				else if(test1.startsWith("801.000") && !test2.startsWith("45") )
 					output[6].add(txt.get(idx));
 			}
 		}
 		
 		return output;
-	}
-	
-	private static void addMolding(String line, String materialNo,ArrayList<String>[] output,ArrayList<String> moldingTxt)
-	{
-		for(int idx=0;idx<moldingTxt.size();++idx)
-		{
-			if(moldingTxt.get(idx).trim().equals(materialNo))
-			{
-				output[5].add(line);
-				break;
-			}
-		}
 	}
 	
 	private static void addDieAttach(String line, String materialNo,ArrayList<String>[] output,String[][] DATable)
