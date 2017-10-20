@@ -1,9 +1,11 @@
-package rawdataprep;
+package input;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
+
+import rawdataprep.Run;
 
 public class Read {
 

@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import input.Read;
+
 public class Preparation {
 
 	private static final String DALocation = "src/data/die_attach.txt";

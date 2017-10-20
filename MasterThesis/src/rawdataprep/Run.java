@@ -3,6 +3,7 @@ package rawdataprep;
 import java.util.ArrayList;
 
 import graph.Plot;
+import input.Read;
 
 public class Run {
 	private static ArrayList<String> wholeTxt;
@@ -38,20 +39,15 @@ public class Run {
 
 		createPivotTable(monthYears);
 		Print.printTable(pivotTable);
-		
+
 		String[] header = new String[2+machineNames.size()];
 		header[0] = "Month";
 		header[1] = "Year";
-		
+
 		for(int idx=0;idx<machineNames.size();++idx)
 			header[idx+2] = machineNames.get(idx);
-		
+
 		Write.writeArray(pivotTable,header,pivotLocation);
-
-		String[] input = new String[1];
-		input[0] = "pivot";
-
-		Plot.main(input);
 	}
 
 	private static void createPivotTable(ArrayList<Integer[]>[] input)
