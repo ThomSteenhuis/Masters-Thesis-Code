@@ -47,15 +47,7 @@ public class LineGraph {
 
 	public static void plot(ArrayList<int[]> table,ArrayList<String> machineNames,String xName,String yName)
 	{		
-		colors = new Color[8];
-		colors[0] = Color.RED;
-		colors[1] = Color.GREEN;
-		colors[2] = Color.YELLOW;
-		colors[3] = Color.BLUE;
-		colors[4] = Color.ORANGE;
-		colors[5] = Color.PURPLE;
-		colors[6] = Color.BROWN;
-		colors[7] = Color.BLACK;
+		colors = getColors(machineNames.size());
 		
 		xAxisName = xName;
 		yAxisName = yName;
@@ -531,6 +523,36 @@ public class LineGraph {
 		
 		output[0] = min;
 		output[1] = max;
+		
+		return output;
+	}
+	
+	private static Color[] getColors(int no)
+	{
+		int maxNoColors = 9;
+		
+		if(no > maxNoColors)
+		{
+			System.out.println("Error (getColors): too many colors requested");
+			return null;
+		}
+		
+		Color[] colors = new Color[maxNoColors];
+		
+		colors[0] = Color.RED;
+		colors[1] = Color.GREEN;
+		colors[2] = Color.YELLOW;
+		colors[3] = Color.BLUE;
+		colors[4] = Color.ORANGE;
+		colors[5] = Color.PURPLE;
+		colors[6] = Color.BROWN;
+		colors[7] = Color.BLACK;
+		colors[8] = Color.PINK;
+		
+		Color[] output = new Color[no];
+		
+		for(int idx=0;idx<no;++idx)
+			output[idx] = colors[idx];
 		
 		return output;
 	}
