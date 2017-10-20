@@ -142,7 +142,7 @@ public class Preparation {
 							output[5].add(txt.get(idx));
 					}
 				}
-				else if(test1.startsWith("41") && !test2.startsWith("45") && test3.contains("FSL"))
+				else if(test1.startsWith("41") && !test2.startsWith("45") && test3.contains("FSL") && test3.contains("SML"))
 					output[6].add(txt.get(idx));
 				else if(test1.startsWith("801.000") && !test2.startsWith("45") )
 					output[7].add(txt.get(idx));
