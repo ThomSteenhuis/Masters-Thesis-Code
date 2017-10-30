@@ -7,6 +7,12 @@ import graph.Plot;
 public class Run{
 
 	private static final String dataLocation = "src/data/prepared_data.txt";
+	
+	public static String[] header;
+	public static String[] categories;
+	public static double[][] volumes;
+	public static String[] dates;
+	public static String[] labels;
 
 	public static void main(String[] args)
 	{
@@ -15,18 +21,18 @@ public class Run{
 		if(data.size() <2)
 			mainError();
 
-		String[] header = data.get(0).split("\t");
+		header = data.get(0).split("\t");
 
 		if(header.length < 3)
 			mainError();
 
-		String[] categories = new String[header.length - 2];
+		categories = new String[header.length - 2];
 
 		for(int idx=2;idx<header.length;++idx)
 			categories[idx-2] = header[idx];
 
-		double[][] volumes = new double[data.size()-1][];
-		String[] dates = new String[data.size()-1];
+		volumes = new double[data.size()-1][];
+		dates = new String[data.size()-1];
 		String[] line = null;
 
 		for(int idx1=1;idx1<data.size();++idx1)
@@ -49,14 +55,14 @@ public class Run{
 			dates[idx1-1] = (month + " " + line[1]);
 		}
 
-		String[] labels = new String[2];
+		labels = new String[2];
 		labels[0] = "Time";
 		labels[1] = "Volume";
 
 		String[] pars = new String[1];
 		pars[0] = "pivot";
 
-		Plot.initialize(pars,volumes,dates,categories,labels);
+		//Plot.initialize(pars,volumes,dates,categories,labels);
 	}
 
 	private static void mainError()
