@@ -9,19 +9,25 @@ public class Run {
 
 		double[][] inverseData = inverse(input.Run.volumes);
 		
-		double[] SESestimate = ExponentialSmoothing.trainSES(0.1,inverseData[0]);
-		double[] DESestimate = ExponentialSmoothing.trainDES(0.1,0.1, inverseData[0]);
+		double[] SESestimate = ExponentialSmoothing.trainSES(0.1,1,inverseData[0]);
+		double[] DESestimate = ExponentialSmoothing.trainDES(0.1,0.1,1, inverseData[0]);
+		double[] TESestimate1 = ExponentialSmoothing.trainTES("multiplicative", 0.1, 0.1, 0.1, 12, 1, inverseData[0]);
+		double[] TESestimate2 = ExponentialSmoothing.trainTES("additive", 0.1, 0.1, 0.1, 12, 1, inverseData[0]);
 		
 		double[][] allData = mergeColVectors(inverseData[0],SESestimate);
 		allData = mergeColVectors(allData,DESestimate);
+		allData = mergeColVectors(allData,TESestimate1);
+		allData = mergeColVectors(allData,TESestimate2);
 		
 		String[] mode = new String[1];
 		mode[0] = "pivot";
 		
-		String[] header = new String[3];
+		String[] header = new String[5];
 		header[0] = "Real values";
 		header[1] = "Estimated by SES";
 		header[2] = "Estimated by DES";
+		header[3] = "Estimated by multiplicative TES";
+		header[4] = "Estimated by additive TES";
 		
 		graph.Plot.initialize(mode, allData, input.Run.dates, header, input.Run.labels);
 	}
