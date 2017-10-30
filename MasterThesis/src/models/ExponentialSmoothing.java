@@ -12,18 +12,18 @@ public class ExponentialSmoothing {
 		
 		int noData = data.length;
 		double[] output = new double[noData];
-		double[] svals = new double[noData];
+		double[] avals = new double[noData];
 		
-		svals[0] = data[0];
+		avals[0] = data[0];
 		
 		for(int idx=1;idx<noData;idx++)
-			svals[idx] = alpha*data[idx] + (1-alpha)*svals[idx-1];
+			avals[idx] = alpha*data[idx] + (1-alpha)*avals[idx-1];
 		
 		for(int idx=0;idx<periods;++idx)
 			output[idx] = data[idx];
 		
 		for(int idx=periods;idx<noData;++idx)
-			output[idx] = svals[idx-periods];
+			output[idx] = avals[idx-periods];
 		
 		return output;
 	}
@@ -39,22 +39,22 @@ public class ExponentialSmoothing {
 		int noData = data.length;
 		double[] output = new double[noData];
 		double[] bvals = new double[noData];
-		double[] svals = new double[noData];
+		double[] avals = new double[noData];
 		
-		svals[1] = data[1];
+		avals[1] = data[1];
 		bvals[1] = data[1] - data[0];
 		
 		for(int idx=2;idx<noData;++idx)
 		{
-			svals[idx] = alpha * data[idx] + (1 - alpha) * (svals[idx-1] + bvals[idx-1]);
-			bvals[idx] = beta * (svals[idx] - svals[idx-1]) + (1 - beta) * bvals[idx-1];
+			avals[idx] = alpha * data[idx] + (1 - alpha) * (avals[idx-1] + bvals[idx-1]);
+			bvals[idx] = beta * (avals[idx] - avals[idx-1]) + (1 - beta) * bvals[idx-1];
 		}
 		
 		for(int idx=0;idx<Math.max(2,periods);++idx)
 			output[idx] = data[idx];
 		
 		for(int idx=Math.max(2,periods);idx<noData;++idx)
-			output[idx] = svals[idx-periods] + periods*bvals[idx-periods];
+			output[idx] = avals[idx-periods] + periods*bvals[idx-periods];
 		
 		return output;
 	}
@@ -76,9 +76,9 @@ public class ExponentialSmoothing {
 		double[] bvals = new double[noData];
 		double[] cvals = new double[noData];
 		double[] Avals = new double[noCycles];
-		double[] svals = new double[noData];
+		double[] avals = new double[noData];
 		
-		svals[0] = data[0];
+		avals[0] = data[0];
 		bvals[0] = 0;
 		
 		for(int idx1=0;idx1<L;++idx1)
@@ -108,22 +108,22 @@ public class ExponentialSmoothing {
 		{
 			for(int idx=1;idx<L;++idx)
 			{
-				svals[idx] = alpha * data[idx] / cvals[idx] + (1 - alpha) * (svals[idx-1] + bvals[idx-1]);
-				bvals[idx] = beta * (svals[idx] - svals[idx-1]) + (1 - beta) * bvals[idx-1];
+				avals[idx] = alpha * data[idx] / cvals[idx] + (1 - alpha) * (avals[idx-1] + bvals[idx-1]);
+				bvals[idx] = beta * (avals[idx] - avals[idx-1]) + (1 - beta) * bvals[idx-1];
 			}
 			
 			for(int idx=L;idx<noData;++idx)
 			{
-				svals[idx] = alpha * data[idx] / cvals[idx-L] + (1 - alpha) * (svals[idx-1] + bvals[idx-1]);
-				bvals[idx] = beta * (svals[idx] - svals[idx-1]) + (1 - beta) * bvals[idx-1];
-				cvals[idx] = gamma * data[idx] / svals[idx] + (1 - gamma) * cvals[idx-L];
+				avals[idx] = alpha * data[idx] / cvals[idx-L] + (1 - alpha) * (avals[idx-1] + bvals[idx-1]);
+				bvals[idx] = beta * (avals[idx] - avals[idx-1]) + (1 - beta) * bvals[idx-1];
+				cvals[idx] = gamma * data[idx] / avals[idx] + (1 - gamma) * cvals[idx-L];
 			}
 			
 			for(int idx=0;idx<(L+periods);++idx)
 				output[idx] = data[idx];
 			
 			for(int idx=(L+periods);idx<noData;idx++)
-				output[idx] = (svals[idx-periods] + periods*bvals[idx-periods])*cvals[idx-periods-L+1+( (periods-1) % L)];
+				output[idx] = (avals[idx-periods] + periods*bvals[idx-periods])*cvals[idx-periods-L+1+( (periods-1) % L)];
 						
 			return output;
 		}
@@ -131,22 +131,22 @@ public class ExponentialSmoothing {
 		{
 			for(int idx=1;idx<L;++idx)
 			{
-				svals[idx] = alpha * (data[idx] - cvals[idx]) + (1 - alpha) * (svals[idx-1] + bvals[idx-1]);
-				bvals[idx] = beta * (svals[idx] - svals[idx-1]) + (1 - beta) * bvals[idx-1];
+				avals[idx] = alpha * (data[idx] - cvals[idx]) + (1 - alpha) * (avals[idx-1] + bvals[idx-1]);
+				bvals[idx] = beta * (avals[idx] - avals[idx-1]) + (1 - beta) * bvals[idx-1];
 			}
 			
 			for(int idx=L;idx<noData;++idx)
 			{
-				svals[idx] = alpha * (data[idx] - cvals[idx-L]) + (1 - alpha) * (svals[idx-1] + bvals[idx-1]);
-				bvals[idx] = beta * (svals[idx] - svals[idx-1]) + (1 - beta) * bvals[idx-1];
-				cvals[idx] = gamma * (data[idx] - svals[idx-1] - bvals[idx-1]) + (1 - gamma) * cvals[idx-L];
+				avals[idx] = alpha * (data[idx] - cvals[idx-L]) + (1 - alpha) * (avals[idx-1] + bvals[idx-1]);
+				bvals[idx] = beta * (avals[idx] - avals[idx-1]) + (1 - beta) * bvals[idx-1];
+				cvals[idx] = gamma * (data[idx] - avals[idx-1] - bvals[idx-1]) + (1 - gamma) * cvals[idx-L];
 			}
 			
 			for(int idx=0;idx<(L+periods);++idx)
 				output[idx] = data[idx];
 			
 			for(int idx=(L+periods);idx<noData;idx++)
-				output[idx] = svals[idx-periods] + periods*bvals[idx-periods] + cvals[idx-periods-L+1+( (periods-1) % L)];
+				output[idx] = avals[idx-periods] + periods*bvals[idx-periods] + cvals[idx-periods-L+1+( (periods-1) % L)];
 			
 			return output;
 		}
