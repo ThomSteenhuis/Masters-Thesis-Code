@@ -11,9 +11,9 @@ public class Initialize {
 				data[idx] = td[idx];
 			
 			for(int idx=0;idx<vd.length;++idx)
-				data[td.length+idx] = td[idx];
+				data[td.length+idx] = vd[idx];
 			
-			double[] estimates = models.ExponentialSmoothing.runES(modelNo,pars,periods,data);
+			double[] estimates = models.ExponentialSmoothing.trainAndValidate(modelNo,pars,periods,data);
 			double[] estimatesVal = new double[vd.length];
 			
 			for(int idx=0;idx<vd.length;++idx)

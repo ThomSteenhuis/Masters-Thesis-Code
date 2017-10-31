@@ -1,7 +1,7 @@
 package models;
 
 public class ExponentialSmoothing {
-	public static double[] runES(int modelNo,double[] pars,int periods,double[] data)
+	public static double[] trainAndValidate(int modelNo,double[] pars,int periods,double[] data)
 	{
 		switch(modelNo){
 		case 0:{
