@@ -1,5 +1,6 @@
 package main;
 import models.ExponentialSmoothing;
+import models.Performance;
 
 public class Run {
 
@@ -11,8 +12,8 @@ public class Run {
 		
 		double[] SESestimate = ExponentialSmoothing.trainSES(0.1,1,inverseData[0]);
 		double[] DESestimate = ExponentialSmoothing.trainDES(0.1,0.1,1, inverseData[0]);
-		double[] TESestimate1 = ExponentialSmoothing.trainTES("multiplicative", 0.1, 0.1, 0.1, 12, 1, inverseData[0]);
-		double[] TESestimate2 = ExponentialSmoothing.trainTES("additive", 0.1, 0.1, 0.1, 12, 1, inverseData[0]);
+		double[] TESestimate1 = ExponentialSmoothing.trainTES("additive", 0.1, 0.1, 0.1, 12, 1, inverseData[0]);
+		double[] TESestimate2 = ExponentialSmoothing.trainTES("multiplicative", 0.1, 0.1, 0.1, 12, 1, inverseData[0]);
 		
 		double[][] allData = mergeColVectors(inverseData[0],SESestimate);
 		allData = mergeColVectors(allData,DESestimate);
@@ -25,9 +26,32 @@ public class Run {
 		String[] header = new String[5];
 		header[0] = "Real values";
 		header[1] = "Estimated by SES";
-		header[2] = "Estimated by DES";
-		header[3] = "Estimated by multiplicative TES";
-		header[4] = "Estimated by additive TES";
+		header[2] = "Estimated by Holt additive";
+		header[3] = "Estimated by Holt-Winters additive";
+		header[4] = "Estimated by Holt-Winters multiplicative";
+		
+		double[] RMSE = new double[4];
+		double[] MAPE = new double[4];
+		double[] MAE = new double[4];
+		double[] ME = new double[4];
+		String[] methods = new String[4];
+		
+		methods[0] = "SES";
+		methods[1] = "Holt additive";
+		methods[2] = "Holt-Winters additive";
+		methods[3] = "Holt-Winters multiplicative";
+		
+		double[][] inverseAllData = inverse(allData);
+		
+		for(int idx=0;idx<4;++idx)
+		{
+			RMSE[idx] = Performance.calculateRMSE(inverseAllData[0],inverseAllData[idx+1]);
+			MAPE[idx] = Performance.calculateMAPE(inverseAllData[0],inverseAllData[idx+1]);
+			MAE[idx] = Performance.calculateMAE(inverseAllData[0],inverseAllData[idx+1]);
+			ME[idx] = Performance.calculateME(inverseAllData[0],inverseAllData[idx+1]);
+		}
+		
+		Performance.printMeasures(methods,RMSE,MAPE,MAE,ME);
 		
 		graph.Plot.initialize(mode, allData, input.Run.dates, header, input.Run.labels);
 	}
@@ -119,6 +143,14 @@ public class Run {
 		for(int idx=0;idx<real.length;++idx)
 		{
 			System.out.printf("%.2f\t%.2f\n",estimates[idx],real[idx]);
+		}
+	}
+	
+	private static void print(double[] values)
+	{
+		for(int idx=0;idx<values.length;++idx)
+		{
+			System.out.printf("%.2f\n",values[idx]);
 		}
 	}
 }

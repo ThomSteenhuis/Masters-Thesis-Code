@@ -1,7 +1,7 @@
 package models;
 
 public class Performance {
-	public static double calculateRSME(double[] realData, double[] estimates)
+	public static double calculateRMSE(double[] realData, double[] estimates)
 	{
 		int N = realData.length;
 		
@@ -94,5 +94,15 @@ public class Performance {
 		output = output/N;
 		
 		return output;
+	}
+	
+	public static void printMeasures(String[] categories, double[] rmse, double[] mape, double[] mae, double[] me)
+	{
+		System.out.print("RMSE\tMAPE\tMAE\tME\tMethod\n");
+		
+		for(int idx=0;idx<categories.length;++idx)
+		{
+			System.out.printf("%.2f\t%.2f\t%.2f\t%.2f\t%s\n",rmse[idx],mape[idx],mae[idx],me[idx],categories[idx]);
+		}
 	}
 }
