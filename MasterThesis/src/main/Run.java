@@ -10,12 +10,28 @@ public class Run {
 
 		double[][] inverseData = inverse(input.Run.volumes);
 		
-		double[] SESestimate = ExponentialSmoothing.trainSES(0.1,1,inverseData[0]);
+		double[][] SESbounds = new double[1][2];
+		SESbounds[0][0] = 0.01;
+		SESbounds[0][1] = 1;
+		
+		double[] td = new double[(int) (0.7*inverseData[0].length)];
+		double[] vd = new double[(int) (0.2*inverseData[0].length)];
+		
+		for(int idx=0;idx<td.length;++idx)
+			td[idx] = inverseData[0][idx];
+		
+		for(int idx=0;idx<vd.length;++idx)
+			vd[idx] = inverseData[0][td.length+idx];
+		
+		optimization.Initialize.initializeOptimization("SES","Grid Search",SESbounds,1,0,td,vd);
+		double[] SESestimate = optimization.Initialize.estVals;
+		/*
 		double[] DESestimate = ExponentialSmoothing.trainDES(0.1,0.1,1, inverseData[0]);
 		double[] TESestimate1 = ExponentialSmoothing.trainTES("additive", 0.1, 0.1, 0.1, 12, 1, inverseData[0]);
 		double[] TESestimate2 = ExponentialSmoothing.trainTES("multiplicative", 0.1, 0.1, 0.1, 12, 1, inverseData[0]);
-		
-		double[][] allData = mergeColVectors(inverseData[0],SESestimate);
+		*/
+		double[][] allData = mergeColVectors(vd,SESestimate);
+		/*
 		allData = mergeColVectors(allData,DESestimate);
 		allData = mergeColVectors(allData,TESestimate1);
 		allData = mergeColVectors(allData,TESestimate2);
@@ -53,7 +69,7 @@ public class Run {
 		
 		Performance.printMeasures(methods,RMSE,MAPE,MAE,ME);
 		
-		graph.Plot.initialize(mode, allData, input.Run.dates, header, input.Run.labels);
+		graph.Plot.initialize(mode, allData, input.Run.dates, header, input.Run.labels);*/
 	}
 
 	private static double[][] inverse(double[][] input)

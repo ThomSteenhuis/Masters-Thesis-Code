@@ -1,7 +1,29 @@
 package models;
 
 public class Performance {
-	public static double calculateRMSE(double[] realData, double[] estimates)
+	public static double validate(int pm,double[] realData, double[] estimates)
+	{
+		switch(pm){
+		case 0:{
+			return calculateRMSE(realData,estimates);
+		}
+		case 1:{
+			return calculateMAPE(realData,estimates);
+		}
+		case 2:{
+			return calculateMAE(realData,estimates);
+		}
+		case 3:{
+			return calculateME(realData,estimates);
+		}
+		default:{
+			System.out.println("Error (validate): default case reached");
+			return -1;
+		}
+		}
+	}
+	
+	private static double calculateRMSE(double[] realData, double[] estimates)
 	{
 		int N = realData.length;
 		
@@ -24,7 +46,7 @@ public class Performance {
 		return output;
 	}
 	
-	public static double calculateMAPE(double[] realData, double[] estimates)
+	private static double calculateMAPE(double[] realData, double[] estimates)
 	{
 		int N = realData.length;
 		
@@ -52,7 +74,7 @@ public class Performance {
 		return output;
 	}
 	
-	public static double calculateMAE(double[] realData, double[] estimates)
+	private static double calculateMAE(double[] realData, double[] estimates)
 	{
 		int N = realData.length;
 		
@@ -74,7 +96,7 @@ public class Performance {
 		return output;
 	}
 	
-	public static double calculateME(double[] realData, double[] estimates)
+	private static double calculateME(double[] realData, double[] estimates)
 	{
 		int N = realData.length;
 		

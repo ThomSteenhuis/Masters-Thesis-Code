@@ -1,8 +1,29 @@
 package models;
 
 public class ExponentialSmoothing {
+	public static double[] runES(int modelNo,double[] pars,int periods,double[] data)
+	{
+		switch(modelNo){
+		case 0:{
+			return trainSES(pars[0],periods,data);
+		}
+		case 1:{
+			return trainDES(pars[0],pars[1],periods,data);
+		}
+		case 2:{
+			return trainTES("additive",pars[0],pars[1],pars[2],12,periods,data);
+		}
+		case 3:{
+			return trainTES("multiplicative",pars[0],pars[1],pars[2],12,periods,data);
+		}
+		default:{
+			System.out.println("Error (runES): default case reached");
+			return null;
+		}
+		}
+	}
 
-	public static double[] trainSES(double alpha, int periods, double[] data)
+	private static double[] trainSES(double alpha, int periods, double[] data)
 	{
 		if( (alpha < 0) || (alpha > 1) )
 			return modelError("trainSES","alpha should be between 0 and 1");
@@ -28,7 +49,7 @@ public class ExponentialSmoothing {
 		return output;
 	}
 	
-	public static double[] trainDES(double alpha, double beta, int periods, double[] data)
+	private static double[] trainDES(double alpha, double beta, int periods, double[] data)
 	{
 		if( (alpha < 0) || (alpha > 1) || (beta < 0) || (beta > 1) )
 			return modelError("trainDES","alpha and beta should be between 0 and 1");
@@ -59,7 +80,7 @@ public class ExponentialSmoothing {
 		return output;
 	}
 	
-	public static double[] trainTES(String mode,double alpha, double beta, double gamma, int L, int periods, double[] data)
+	private static double[] trainTES(String mode,double alpha, double beta, double gamma, int L, int periods, double[] data)
 	{
 		if( (alpha < 0) || (alpha > 1) || (beta < 0) || (beta > 1) || (gamma < 0) || (gamma > 1) )
 			return modelError("trainTES","alpha, beta and gamma should be between 0 and 1");
@@ -156,9 +177,6 @@ public class ExponentialSmoothing {
 			return null;
 		}
 		}
-
-		
-		
 	}
 	
 	private static double[] modelError(String model, String txt)

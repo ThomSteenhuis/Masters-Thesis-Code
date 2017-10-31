@@ -1,0 +1,5 @@
+model	class	no
+SES	0	0
+Holt additive	0	1
+Holt-Winters additive	0	2
+Holt-Winters multiplicative	0	3
