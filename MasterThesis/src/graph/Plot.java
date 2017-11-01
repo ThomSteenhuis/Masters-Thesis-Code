@@ -93,6 +93,7 @@ public class Plot extends Application{
 	    RadioMenuItem left = new RadioMenuItem("Left");
 	    RadioMenuItem hide = new RadioMenuItem("Hide");
 	    hide.setSelected(true);
+	    left.setOnAction(graph.Menu.legendAction(false,categories,drawPane));
 	    left.setToggleGroup(legendGroup);
 	    right.setToggleGroup(legendGroup);
 	    hide.setToggleGroup(legendGroup);

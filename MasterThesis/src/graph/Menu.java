@@ -2,6 +2,7 @@ package graph;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
@@ -11,18 +12,71 @@ import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class Menu {
 	private static final int defSaveWidth = 250;
 	private static final int defSaveHeight = 150;
 	
+	private static final int legendBorderMargin = 10;
+	private static final int legendLineMargin = 10;
+	private static final int legendTxtMargin = 5;
+	private static final int legendLineLength = 10;
+	private static final int legendLineWidth = 1;
+	private static final int txtSize = 12;
+	
 	public static TextField location,name;
 	
+	public static EventHandler<ActionEvent> legendAction(boolean right,final String[] categories, final Pane drawPane)
+	{
+		return new EventHandler<ActionEvent>()
+		{
+			public void handle(ActionEvent arg0)
+			{
+				ArrayList<String> lineNames = new ArrayList<String>();
+				
+				for(int idx=0;idx<graph.LineGraph.checkboxes.length;++idx)
+				{
+					if(graph.LineGraph.checkboxes[idx].isSelected())
+					{
+						lineNames.add(categories[idx]);
+					}
+				}
+					
+				Line[] lines = new Line[lineNames.size()];
+				Label[] txts = new Label[lineNames.size()];
+				
+				for(int idx=0;idx<lines.length;++idx)
+				{
+					lines[idx] = new Line();
+					lines[idx].setStroke(graph.LineGraph.colors[idx]);
+					lines[idx].setStrokeWidth(legendLineWidth);
+					lines[idx].setStartX(LineGraph.leftMargin+LineGraph.yAxisSpace+legendBorderMargin+legendLineMargin);
+					lines[idx].setEndX(lines[idx].getStartX()+legendLineLength);
+					lines[idx].setStartY(LineGraph.topMargin+legendBorderMargin+legendLineMargin+txtSize*idx);
+					lines[idx].setEndY(lines[idx].getStartY());
+					
+					txts[idx] = new Label(categories[idx]);
+					txts[idx].setFont(new Font(txtSize));
+					txts[idx].setLayoutX(lines[idx].getEndX()+legendTxtMargin);
+					txts[idx].setLayoutY(lines[idx].getStartY()-0.7*txtSize);
+
+					drawPane.getChildren().addAll(lines[idx],txts[idx]);
+				}
+				
+				Line[] border = new Line[4];
+				border[0] = new Line();
+				border[0].setStartX(legendBorderMargin);
+			}
+		};
+	}
 	
 	public static EventHandler<ActionEvent> saveAction(final Pane drawPane)
 	{

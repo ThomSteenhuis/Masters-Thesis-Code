@@ -13,17 +13,18 @@ import javafx.scene.shape.Line;
 
 public class LineGraph {
 
-	private static double topMargin = 20;
-	private static double rightMargin = 20;
-	private static double bottomMargin = 20;
-	private static double leftMargin = 20;
-	private static double xAxisSpace = 80;
-	private static double yAxisSpace = 80;
+	public static double topMargin = 20;
+	public static double rightMargin = 20;
+	public static double bottomMargin = 20;
+	public static double leftMargin = 20;
+	public static double xAxisSpace = 80;
+	public static double yAxisSpace = 80;
+	
 	private static double tickSize = 5;
 	private static double xNameMargin = 30;
 	private static double yNameMargin = 20;
 
-	private static CheckBox[] checkboxes;
+	public static CheckBox[] checkboxes;
 	private static ArrayList<double[]>[] lineCoordinates;
 
 	private static double[][] axisCoordinates;
@@ -36,7 +37,7 @@ public class LineGraph {
 	private static Label[] xLabels;
 	private static Label[] yLabels;
 
-	private static Color[] colors;
+	public static Color[] colors;
 
 	private static int xMode = 1;
 	private static int xInterval = 2;
