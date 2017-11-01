@@ -10,7 +10,7 @@ public class Run {
 	private static final double gammaLBound = 0.01;
 	private static final double gammaRBound = 1;
 
-	private static final double propTraining = 0.7;
+	private static final double propTraining = 0.6;
 	private static final double propValidation = 0.2;
 	
 	public static void main(String[] args) 

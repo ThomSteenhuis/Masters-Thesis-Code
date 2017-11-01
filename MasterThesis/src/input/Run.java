@@ -62,7 +62,7 @@ public class Run{
 		String[] pars = new String[1];
 		pars[0] = "pivot";
 
-		Plot.initialize(pars,volumes,dates,categories,labels);
+		//Plot.initialize(pars,volumes,dates,categories,labels);
 	}
 
 	private static void mainError()

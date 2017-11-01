@@ -47,21 +47,23 @@ public class Performance {
 	}
 	
 	private static double calculateMAPE(double[] realData, double[] estimates)
-	{
-		int N = realData.length;
-		
-		if( (N != estimates.length) || (N==0) )
+	{		
+		if( (realData.length != estimates.length) || (realData.length == 0) )
 		{
 			System.out.println("Error (calculateMAPE): vectors have unequal length or N=0");
 			return 0;
 		}
 		
-		double output = 0;
+		double numerator = 0;
+		double denominator = 0;
 		
-		for(int idx=0;idx<N;++idx)
+		for(int idx=0;idx<realData.length;++idx)
 		{
 			if(realData[idx] > 0)
-				output += Math.abs(estimates[idx]-realData[idx])/realData[idx];
+			{
+				numerator += Math.abs(estimates[idx]-realData[idx]);
+				denominator += realData[idx];
+			}
 			else
 			{
 				System.out.println("Error (calculateMAPE): division by zero");
@@ -69,9 +71,7 @@ public class Performance {
 			}
 		}
 		
-		output = 100*output/N;
-		
-		return output;
+		return 100*numerator/denominator;
 	}
 	
 	private static double calculateMAE(double[] realData, double[] estimates)
