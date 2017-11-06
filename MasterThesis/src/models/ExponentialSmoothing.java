@@ -1,104 +1,89 @@
 package models;
 
-import graph.Plot;
 import input.Data;
 
-public class ExponentialSmoothing {
+public class ExponentialSmoothing extends Model{
 	
-	private Data data;
-	private int noPersAhead;
+	double[] parameters;
+	
 	private boolean additive;
 	private boolean damped;
 	private int modelNo;
-	private double[] parameters;
-	
-	private boolean trainingForecasted;
-	private double[][] trainingForecast;
-	private double[][] trainingReal;
-	private String[][] trainingDates;
 	
 	public ExponentialSmoothing(String model,boolean add,boolean damp,double[] pars,int periods,Data dataset)
 	{
-		if( (periods <= 0) || periods >= (dataset.getNoObs()) || (pars.length == 0) || (pars.length > 4) )
-		{
-			throw new IllegalArgumentException();
-		}
-		else
-		{
-			try{
-				switch(model)
+		super(dataset,periods);
+
+		try{
+			switch(model)
+			{
+				case "SES":
 				{
-					case "SES":
+					if(pars.length != 1)
 					{
-						if(pars.length != 1)
-						{
-							throw new IllegalArgumentException();
-						}
-						else
-						{
-							modelNo = 0;
-							parameters = pars;
-						}
-						break;
+						throw new IllegalArgumentException();
 					}
-					case "DES":
+					else
 					{
-						if( ( (pars.length != 3) && damp ) || ( (pars.length != 2) && !damp) )
-						{
-							throw new IllegalArgumentException();
-						}
-						else
-						{
-							modelNo = 1;
-							parameters = pars;
-						}
-						break;
+						modelNo = 0;
+						parameters = pars;
 					}
-					case "TES":
+					break;
+				}
+				case "DES":
+				{
+					if( ( (pars.length != 3) && damp ) || ( (pars.length != 2) && !damp) )
 					{
-						if( ( (pars.length != 4) && damp ) || ( (pars.length != 3) && !damp) )
-						{
-							throw new IllegalArgumentException();
-						}
-						else
-						{
-							modelNo = 2;
-							parameters = pars;
-						}
-						break;
+						throw new IllegalArgumentException();
 					}
-					case "four":
+					else
 					{
-						if(pars.length != 4)
-						{
-							throw new IllegalArgumentException();
-						}
-						else
-						{
-							modelNo = 3;
-							parameters = pars;
-						}
-						break;
+						modelNo = 1;
+						parameters = pars;
 					}
-					default:
+					break;
+				}
+				case "TES":
+				{
+					if( ( (pars.length != 4) && damp ) || ( (pars.length != 3) && !damp) )
 					{
-						System.out.println("Error (ExponentialSmoothing): model not recognized");
-						return;
+						throw new IllegalArgumentException();
 					}
+					else
+					{
+						modelNo = 2;
+						parameters = pars;
+					}
+					break;
+				}
+				case "four":
+				{
+					if(pars.length != 4)
+					{
+						throw new IllegalArgumentException();
+					}
+					else
+					{
+						modelNo = 3;
+						parameters = pars;
+					}
+					break;
+				}
+				default:
+				{
+					System.out.println("Error (ExponentialSmoothing): model not recognized");
+					return;
 				}
 			}
-			catch(IllegalArgumentException e)
-			{
-				System.out.println("Error (ExponentialSmoothing): no of parameters not correct");
-				return;
-			}
-			
-			data = dataset;
-			noPersAhead = periods;
-			additive = add;
-			damped = damp;
-			trainingForecasted = false;
 		}
+		catch(IllegalArgumentException e)
+		{
+			System.out.println("Error (ExponentialSmoothing): no of parameters not correct");
+			return;
+		}
+			
+		additive = add;
+		damped = damp;
 	}
 	
 	public void train()
@@ -121,38 +106,6 @@ public class ExponentialSmoothing {
 			System.out.println("Error (runES): default case reached");
 		}
 		}
-	}
-	
-	public void plotTrainingForecast(String category)
-	{
-		if(!trainingForecasted)
-		{
-			System.out.println("Error (plotTrainingForecast): train model first");
-			return;
-		}
-		
-		int index = data.getIndexFromCat(category);
-		
-		String[] pars = new String[1];
-		pars[0] = "pivot";
-		
-		String[] cats = new String[2];
-		cats[0] = data.getCategories()[index];
-		cats[1] = "Forecast";
-		
-		double[][] vols = merge(trainingReal[index],trainingForecast[index]);
-		
-		Plot.initialize(pars,vols,trainingDates[index],cats,data.getLabels());
-	}
-	
-	public Data getData()
-	{
-		return data;
-	}
-	
-	public int noPeriodsAhead()
-	{
-		return noPersAhead;
 	}
 	
 	public boolean isAdditive()
@@ -205,16 +158,6 @@ public class ExponentialSmoothing {
 	public double[] getParameters()
 	{
 		return parameters;
-	}
-	
-	public boolean isTrainingForecasted()
-	{
-		return trainingForecasted;
-	}
-	
-	public double[][] getTrainingForecast()
-	{
-		return trainingForecast;
 	}
 
 	private void trainSES()
@@ -393,29 +336,4 @@ public class ExponentialSmoothing {
 		}
 	}
 	*/
-	
-	private static double[][] merge(double[] array1,double[] array2)
-	{
-		if(array1.length != array2.length)
-		{
-			System.out.println("Error (merge): arrays have unequal length");
-			return null;
-		}
-		
-		double[][] output = new double[array1.length][2];
-		
-		for(int idx=0;idx<array1.length;++idx)
-		{
-			output[idx][0] = array1[idx];
-			output[idx][1] = array2[idx];
-		}
-		
-		return output;
-		
-	}
-	
-	private static void modelError(String model, String txt)
-	{
-		System.out.printf("Error (%s): %s\n",model,txt);
-	}
 }
