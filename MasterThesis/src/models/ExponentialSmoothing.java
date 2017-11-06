@@ -1,13 +1,114 @@
 package models;
 
+import graph.Plot;
+import input.Data;
+
 public class ExponentialSmoothing {
-	public static double[] trainAndValidate(int modelNo,double[] pars,int periods,double[] data)
+	
+	private Data data;
+	private int noPersAhead;
+	private boolean additive;
+	private boolean damped;
+	private int modelNo;
+	private double[] parameters;
+	
+	private boolean trainingForecasted;
+	private double[][] trainingForecast;
+	private double[][] trainingReal;
+	private String[][] trainingDates;
+	
+	public ExponentialSmoothing(String model,boolean add,boolean damp,double[] pars,int periods,Data dataset)
+	{
+		if( (periods <= 0) || periods >= (dataset.getNoObs()) || (pars.length == 0) || (pars.length > 4) )
+		{
+			throw new IllegalArgumentException();
+		}
+		else
+		{
+			try{
+				switch(model)
+				{
+					case "SES":
+					{
+						if(pars.length != 1)
+						{
+							throw new IllegalArgumentException();
+						}
+						else
+						{
+							modelNo = 0;
+							parameters = pars;
+						}
+						break;
+					}
+					case "DES":
+					{
+						if( ( (pars.length != 3) && damp ) || ( (pars.length != 2) && !damp) )
+						{
+							throw new IllegalArgumentException();
+						}
+						else
+						{
+							modelNo = 1;
+							parameters = pars;
+						}
+						break;
+					}
+					case "TES":
+					{
+						if( ( (pars.length != 4) && damp ) || ( (pars.length != 3) && !damp) )
+						{
+							throw new IllegalArgumentException();
+						}
+						else
+						{
+							modelNo = 2;
+							parameters = pars;
+						}
+						break;
+					}
+					case "four":
+					{
+						if(pars.length != 4)
+						{
+							throw new IllegalArgumentException();
+						}
+						else
+						{
+							modelNo = 3;
+							parameters = pars;
+						}
+						break;
+					}
+					default:
+					{
+						System.out.println("Error (ExponentialSmoothing): model not recognized");
+						return;
+					}
+				}
+			}
+			catch(IllegalArgumentException e)
+			{
+				System.out.println("Error (ExponentialSmoothing): no of parameters not correct");
+				return;
+			}
+			
+			data = dataset;
+			noPersAhead = periods;
+			additive = add;
+			damped = damp;
+			trainingForecasted = false;
+		}
+	}
+	
+	public void train()
 	{
 		switch(modelNo){
 		case 0:{
-			return trainSES(pars[0],periods,data);
+			trainSES();
+			break;
 		}
-		case 1:{
+		/*case 1:{
 			return trainDES(pars[0],pars[1],periods,data);
 		}
 		case 2:{
@@ -15,40 +116,153 @@ public class ExponentialSmoothing {
 		}
 		case 3:{
 			return trainTES("multiplicative",pars[0],pars[1],pars[2],12,periods,data);
-		}
+		}*/
 		default:{
 			System.out.println("Error (runES): default case reached");
-			return null;
 		}
 		}
-	}
-
-	private static double[] trainSES(double alpha, int periods, double[] data)
-	{
-		if( (alpha < 0) || (alpha > 1) )
-			return modelError("trainSES","alpha should be between 0 and 1");
-		
-		if( data.length < periods)
-			return modelError("trainSES","data is of length smaller than the number of periods");
-		
-		int noData = data.length;
-		double[] output = new double[noData];
-		double[] avals = new double[noData];
-		
-		avals[0] = data[0];
-		
-		for(int idx=1;idx<noData;idx++)
-			avals[idx] = alpha*data[idx] + (1-alpha)*avals[idx-1];
-		
-		for(int idx=0;idx<periods;++idx)
-			output[idx] = data[idx];
-		
-		for(int idx=periods;idx<noData;++idx)
-			output[idx] = avals[idx-periods];
-		
-		return output;
 	}
 	
+	public void plotTrainingForecast(String category)
+	{
+		if(!trainingForecasted)
+		{
+			System.out.println("Error (plotTrainingForecast): train model first");
+			return;
+		}
+		
+		int index = data.getIndexFromCat(category);
+		
+		String[] pars = new String[1];
+		pars[0] = "pivot";
+		
+		String[] cats = new String[2];
+		cats[0] = data.getCategories()[index];
+		cats[1] = "Forecast";
+		
+		double[][] vols = merge(trainingReal[index],trainingForecast[index]);
+		
+		Plot.initialize(pars,vols,trainingDates[index],cats,data.getLabels());
+	}
+	
+	public Data getData()
+	{
+		return data;
+	}
+	
+	public int noPeriodsAhead()
+	{
+		return noPersAhead;
+	}
+	
+	public boolean isAdditive()
+	{
+		if( (modelNo == 1) || (modelNo == 2) )
+		{
+			return additive;
+		}
+		
+		return false;
+	}
+	
+	public boolean isMultiplicative()
+	{
+		if( (modelNo == 1) || (modelNo == 2) )
+		{
+			return !additive;
+		}
+		
+		return false;
+	}
+	
+	public boolean isDamped()
+	{
+		if( (modelNo == 1) || (modelNo == 2) )
+		{
+			return damped;
+		}
+		
+		return false;
+	}
+	
+	public int getModelNo()
+	{
+		return modelNo;
+	}
+	
+	public String getModel()
+	{
+		switch (modelNo)
+		{
+			case 0: return "SES";
+			case 1: return "DES";
+			case 2: return "TES";
+			case 3: return "four";
+			default: return null;
+		}
+	}
+	
+	public double[] getParameters()
+	{
+		return parameters;
+	}
+	
+	public boolean isTrainingForecasted()
+	{
+		return trainingForecasted;
+	}
+	
+	public double[][] getTrainingForecast()
+	{
+		return trainingForecast;
+	}
+
+	private void trainSES()
+	{
+		if( (parameters[0] < 0) || (parameters[0] > 1) )
+			modelError("trainSES","alpha should be between 0 and 1");
+		
+		double[][] dataset = data.getVolumes();
+		trainingForecast = new double[data.getNoCats()][];
+		trainingReal = new double[data.getNoCats()][];
+		trainingDates = new String[data.getNoCats()][];
+		
+		for(int idx1=0;idx1<data.getNoCats();++idx1)
+		{
+			if( (data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1]) < noPersAhead)
+			{
+				modelError("trainSES","data is of length smaller than the number of periods");
+				return;
+			}
+			
+			int firstIndex = data.getTrainingFirstIndex()[idx1];
+			int noData = data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1];
+			trainingForecast[idx1] = new double[noData];
+			trainingReal[idx1] = new double[noData];
+			trainingDates[idx1] = new String[noData];
+			double[] avals = new double[noData];
+			
+			avals[0] = dataset[firstIndex][idx1];
+			trainingReal[idx1][0] = dataset[firstIndex][idx1];
+			trainingDates[idx1][0] = data.getDates()[firstIndex];
+			
+			for(int idx2=1;idx2<noData;idx2++)
+			{
+				avals[idx2] = parameters[0]*dataset[firstIndex+idx2][idx1] + (1-parameters[0])*avals[idx2-1];
+				trainingReal[idx1][idx2] = dataset[firstIndex+idx2][idx1];
+				trainingDates[idx1][idx2] = data.getDates()[firstIndex+idx2];
+			}
+			
+			for(int idx2=0;idx2<noPersAhead;++idx2)
+				trainingForecast[idx1][idx2] = dataset[firstIndex+idx2][idx1];
+			
+			for(int idx2=noPersAhead;idx2<noData;++idx2)
+				trainingForecast[idx1][idx2] = avals[idx2-noPersAhead];
+		}
+		
+		trainingForecasted = true;
+	}
+	/*
 	private static double[] trainDES(double alpha, double beta, int periods, double[] data)
 	{
 		if( (alpha < 0) || (alpha > 1) || (beta < 0) || (beta > 1) )
@@ -178,10 +392,30 @@ public class ExponentialSmoothing {
 		}
 		}
 	}
+	*/
 	
-	private static double[] modelError(String model, String txt)
+	private static double[][] merge(double[] array1,double[] array2)
+	{
+		if(array1.length != array2.length)
+		{
+			System.out.println("Error (merge): arrays have unequal length");
+			return null;
+		}
+		
+		double[][] output = new double[array1.length][2];
+		
+		for(int idx=0;idx<array1.length;++idx)
+		{
+			output[idx][0] = array1[idx];
+			output[idx][1] = array2[idx];
+		}
+		
+		return output;
+		
+	}
+	
+	private static void modelError(String model, String txt)
 	{
 		System.out.printf("Error (%s): %s\n",model,txt);
-		return null;
 	}
 }

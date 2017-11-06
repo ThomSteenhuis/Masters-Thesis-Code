@@ -5,21 +5,17 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import rawdataprep.Run;
-
 public class Read {
 
 	public static ArrayList<String> readTxt(String location)
 	{
-		ArrayList<String> output = new ArrayList<String>();
+		ArrayList<String> output = new ArrayList<String> ();
 		
 		try{
 			Scanner scanner = new Scanner(new File(location));
-			Run.wholeTxtLineCnt = 0;
 
 			while (scanner.hasNextLine()) 
 			{
-				Run.wholeTxtLineCnt ++;
 				output.add(scanner.nextLine());
 			}
 		

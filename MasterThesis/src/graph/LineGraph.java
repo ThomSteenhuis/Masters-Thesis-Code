@@ -43,7 +43,7 @@ public class LineGraph {
 	private static int xInterval = 2;
 	private static boolean minorXTicks = true;
 	private static int yMode = 0;
-	private static int yInterval = 10;
+	private static int yInterval = 2;
 	private static boolean minorYTicks = false;
 
 	public static void plot(String[] xvals,double[][] yvals,String[] categories,String[] labels)

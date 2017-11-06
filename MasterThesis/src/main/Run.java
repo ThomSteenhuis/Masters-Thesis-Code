@@ -1,4 +1,5 @@
 package main;
+import input.Data;
 import models.ExponentialSmoothing;
 import models.Performance;
 
@@ -15,7 +16,16 @@ public class Run {
 	
 	public static void main(String[] args) 
 	{
-		input.Run.main(args);
+		Data data = new Data("src/data/prepared_data.txt");
+		data.setDataIndices(propTraining, propValidation);
+		
+		double[] pars = new double[1];
+		pars[0] = 0.1;
+		ExponentialSmoothing SES = new ExponentialSmoothing("SES",false,false,pars,1,data);
+		SES.train();
+		SES.plotTrainingForecast("TCB & Chameo");
+		
+		/*input.Run.main(args);
 
 		double[][] inverseData = inverse(input.Run.volumes);
 		
@@ -86,7 +96,7 @@ public class Run {
 		printBestPars("SES",SESBestPars);
 		Performance.printMeasures(methods,RMSE,MAPE,MAE,ME);
 		
-		graph.Plot.initialize(mode, allData, dates, header, input.Run.labels);
+		graph.Plot.initialize(mode, allData, dates, header, input.Run.labels);*/
 	}
 	
 	private static void printBestPars(String name,double[] pars)
