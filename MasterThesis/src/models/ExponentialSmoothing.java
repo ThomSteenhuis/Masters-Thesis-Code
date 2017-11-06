@@ -8,9 +8,9 @@ public class ExponentialSmoothing extends Model{
 	private boolean damped;
 	private int modelNo;
 	
-	public ExponentialSmoothing(String model,boolean add,boolean damp,double[] pars,int periods,Data dataset)
+	public ExponentialSmoothing(String model,boolean add,boolean damp,int periods,Data dataset)
 	{
-		super(dataset,pars,periods);
+		super(dataset,periods);
 		name = model;
 		
 		try{
@@ -18,54 +18,35 @@ public class ExponentialSmoothing extends Model{
 			{
 				case "SES":
 				{
-					if(pars.length != 1)
-					{
-						throw new IllegalArgumentException();
-					}
-					else
-					{
-						modelNo = 0;
-						parameters = pars;
-					}
+					modelNo = 0;
+					noParameters = 1;
 					break;
 				}
 				case "DES":
 				{
-					if( ( (pars.length != 3) && damp ) || ( (pars.length != 2) && !damp) )
-					{
-						throw new IllegalArgumentException();
-					}
+					modelNo = 1;
+					
+					if(damp)
+						noParameters = 3;
 					else
-					{
-						modelNo = 1;
-						parameters = pars;
-					}
+						noParameters = 2;
 					break;
 				}
 				case "TES":
 				{
-					if( ( (pars.length != 4) && damp ) || ( (pars.length != 3) && !damp) )
-					{
-						throw new IllegalArgumentException();
-					}
+					modelNo = 2;
+					
+					if(damp)
+						noParameters = 4;
 					else
-					{
-						modelNo = 2;
-						parameters = pars;
-					}
+						noParameters = 3;
+					
 					break;
 				}
 				case "four":
 				{
-					if(pars.length != 4)
-					{
-						throw new IllegalArgumentException();
-					}
-					else
-					{
-						modelNo = 3;
-						parameters = pars;
-					}
+					modelNo = 3;
+					noParameters = 4;
 					break;
 				}
 				default:

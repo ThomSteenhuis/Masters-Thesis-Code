@@ -1,6 +1,7 @@
 package optimization;
 
 import models.Model;
+import performance.PerformanceMeasures;
 
 public class GridSearch extends Optimization{
 
@@ -8,9 +9,9 @@ public class GridSearch extends Optimization{
 	
 	private double[][] grid;
 	
-	public GridSearch(Model mdl,double[][] parBounds,int steps)
+	public GridSearch(PerformanceMeasures pm,double[][] parBounds,int steps)
 	{
-		super(mdl,parBounds);
+		super(pm,parBounds);
 		name = "GridSearch";
 		
 		if(steps <= 1)
@@ -26,12 +27,13 @@ public class GridSearch extends Optimization{
 	
 	public void optimize()
 	{		
-		for(String idx1:model.getData().getCategories())
+		for(String idx1:measures.getModel().getData().getCategories())
 		{
 			for(int idx2=0;idx2<grid.length;++idx2)
 			{
-				model.setParameters(grid[idx2]);
-				model.train(idx1);
+				measures.getModel().setParameters(grid[idx2]);
+				measures.getModel().train(idx1);
+				measures.validate();
 				updateBest(idx1);
 			}
 		}

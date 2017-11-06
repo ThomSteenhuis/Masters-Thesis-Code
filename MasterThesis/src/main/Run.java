@@ -1,6 +1,7 @@
 package main;
 import input.Data;
 import models.ExponentialSmoothing;
+import optimization.GridSearch;
 import performance.PerformanceMeasures;
 
 public class Run {
@@ -19,21 +20,18 @@ public class Run {
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
 		
-		double[] pars = new double[1];
-		pars[0] = 0.1;
-		ExponentialSmoothing SES = new ExponentialSmoothing("SES",false,false,pars,1,data);
-		SES.train();
-		SES.plotTrainingForecast("TCB & Chameo");
-		
+		ExponentialSmoothing SES = new ExponentialSmoothing("SES",false,false,1,data);		
 		PerformanceMeasures pm = new PerformanceMeasures(SES);
-		pm.validate();
-		pm.printMeasures();
+		double[][] SESbounds = initBounds("SES");	
+		GridSearch gs = new GridSearch(pm,SESbounds,100);
+		gs.optimize();
+		gs.printBest();
 		
 		/*input.Run.main(args);
 
 		double[][] inverseData = inverse(input.Run.volumes);
 		
-		double[][] SESbounds = initBounds("alpha");		
+			
 		double[][] HoltAddbounds = initBounds("beta");
 		double[][] HoltWintersBounds = initBounds("gamma");
 		
@@ -147,18 +145,18 @@ public class Run {
 		}
 	}
 	
-	private static double[][] initBounds(String par)
+	private static double[][] initBounds(String model)
 	{
-		switch(par)
+		switch(model)
 		{
-			case "alpha":
+			case "SES":
 			{
 				double[][] output = new double[1][2];
 				output[0][0] = alphaLBound;
 				output[0][1] = alphaRBound;
 				return output;
 			}
-			case "beta":
+			case "DES":
 			{
 				double[][] output = new double[2][2];
 				output[0][0] = alphaLBound;
@@ -167,7 +165,7 @@ public class Run {
 				output[1][1] = betaRBound;
 				return output;
 			}
-			case "gamma":
+			case "TES":
 			{
 				double[][] output = new double[3][2];
 				output[0][0] = alphaLBound;

@@ -10,6 +10,7 @@ public abstract class Model {
 	protected double[] parameters;
 	
 	protected String name;
+	protected int noParameters;
 	
 	protected boolean trainingForecasted;
 	protected String category;
@@ -17,7 +18,7 @@ public abstract class Model {
 	protected double[] trainingReal;
 	protected String[] trainingDates;
 	
-	public Model(Data dataset, double[] pars, int periods)
+	public Model(Data dataset, int periods)
 	{
 		if( (periods <= 0) || periods >= (dataset.getNoObs()) )
 		{
@@ -27,7 +28,6 @@ public abstract class Model {
 		{
 			data = dataset;
 			noPersAhead = periods;
-			parameters = pars;
 			trainingForecasted = false;
 		}
 	}
@@ -56,7 +56,14 @@ public abstract class Model {
 	
 	public void setParameters(double[] newPars)
 	{
-		parameters = newPars;
+		if(newPars.length == noParameters)
+		{
+			parameters = newPars;
+		}
+		else
+		{
+			System.out.println("Error (setParameters): number of parameters inadequate");
+		}
 	}
 	
 	public Data getData()
@@ -79,9 +86,19 @@ public abstract class Model {
 		return name;
 	}
 	
+	public int getNoParameters()
+	{
+		return noParameters;
+	}
+	
 	public boolean isTrainingForecasted()
 	{
 		return trainingForecasted;
+	}
+	
+	public String getCategory()
+	{
+		return category;
 	}
 	
 	public double[] getTrainingForecast()

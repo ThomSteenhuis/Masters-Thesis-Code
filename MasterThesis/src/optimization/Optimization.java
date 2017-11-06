@@ -1,37 +1,51 @@
 package optimization;
 
-import models.Model;
+import performance.PerformanceMeasures;
 
 public abstract class Optimization {
-	protected Model model;
+	protected PerformanceMeasures measures;
 	protected double[][] bounds;
 	protected String name;
 	
-	protected boolean[] startOptimization;
-	protected double[][] optPars;
-	protected double[][] estVals;
-	protected double[] performance;
+	protected boolean startOptimization;
+	protected double[] optPars;
+	protected double performance;
 
-	public Optimization(Model mdl, double[][] parBounds)
+	public Optimization(PerformanceMeasures pm, double[][] parBounds)
 	{
-		if(parBounds.length != mdl.getParameters().length)
+		if(parBounds.length != pm.getModel().getNoParameters() )
 		{
 			optimizationError("optimization","No parameter bounds not equal to no parameters");
 		}
 		else
 		{
-			model = mdl;
+			measures = pm;
 			bounds = parBounds;
-			startOptimization = new boolean[model.getData().getNoCats()];
-			
-			for(int idx=0;idx<model.getData().getNoCats();++idx)
-				startOptimization[idx] = true;
+			startOptimization = true;
 		}
 	}
 	
-	public Model getModel()
+	public void printBest()
 	{
-		return model;
+		if(startOptimization)
+		{
+			System.out.printf("RMSE\t= %s\n",performance);
+			System.out.print("Best parameters\t= ");
+			
+			for(int idx=0;idx<optPars.length;++idx)
+				System.out.printf("%s\t",optPars[idx]);
+			
+			System.out.println();
+		}
+		else
+		{
+			System.out.println("Error (printBest): Optimization should be started first");
+		}
+	}
+	
+	public PerformanceMeasures getPerformanceMeasures()
+	{
+		return measures;
 	}
 	
 	public double[][] getBounds()
@@ -44,17 +58,30 @@ public abstract class Optimization {
 		return name;
 	}
 	
+	public boolean optimizationStarted()
+	{
+		return startOptimization;
+	}
+	
+	public double[] getOptimalParameters()
+	{
+		return optPars;
+	}
+	
+	public double getPerformance()
+	{
+		return performance;
+	}
+	
 	public abstract void optimize();
 	
 	protected void updateBest(String cat)
-	{
-		int index = model.getData().getIndexFromCat(cat);
-		
-		if( startOptimization || (performance[index] > model.) )
+	{		
+		if( startOptimization || (performance > measures.getRMSE() ) )
 		{
-			performance = perf;
-			estVals = estVals;
-			optPars = model.getParameters();
+			performance = measures.getRMSE();
+			optPars = measures.getModel().getParameters();
+			startOptimization = false;
 		}
 	}
 	
