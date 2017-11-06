@@ -24,7 +24,7 @@ public class Run {
 		PerformanceMeasures pm = new PerformanceMeasures(SES);
 		double[][] SESbounds = initBounds("SES");	
 		GridSearch gs = new GridSearch(pm,SESbounds,100);
-		gs.optimize();
+		gs.optimize("Plating");
 		gs.printBest();
 		
 		/*input.Run.main(args);
@@ -99,11 +99,6 @@ public class Run {
 		Performance.printMeasures(methods,RMSE,MAPE,MAE,ME);
 		
 		graph.Plot.initialize(mode, allData, dates, header, input.Run.labels);*/
-	}
-	
-	private static void printBestPars(String name,double[] pars)
-	{
-		
 	}
 	
 	private static double[] initData(String set,double[] data)

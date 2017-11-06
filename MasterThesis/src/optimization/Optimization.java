@@ -27,7 +27,7 @@ public abstract class Optimization {
 	
 	public void printBest()
 	{
-		if(startOptimization)
+		if(!startOptimization)
 		{
 			System.out.printf("RMSE\t= %s\n",performance);
 			System.out.print("Best parameters\t= ");
@@ -60,7 +60,7 @@ public abstract class Optimization {
 	
 	public boolean optimizationStarted()
 	{
-		return startOptimization;
+		return !startOptimization;
 	}
 	
 	public double[] getOptimalParameters()
@@ -73,7 +73,8 @@ public abstract class Optimization {
 		return performance;
 	}
 	
-	public abstract void optimize();
+	public abstract void optimizeAll();
+	public abstract void optimize(String cat);
 	
 	protected void updateBest(String cat)
 	{		

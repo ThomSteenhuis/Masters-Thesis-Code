@@ -25,7 +25,7 @@ public class GridSearch extends Optimization{
 		}
 	}
 	
-	public void optimize()
+	public void optimizeAll()
 	{		
 		for(String idx1:measures.getModel().getData().getCategories())
 		{
@@ -36,6 +36,17 @@ public class GridSearch extends Optimization{
 				measures.validate();
 				updateBest(idx1);
 			}
+		}
+	}
+	
+	public void optimize(String cat)
+	{		
+		for(int idx2=0;idx2<grid.length;++idx2)
+		{
+			measures.getModel().setParameters(grid[idx2]);
+			measures.getModel().train(cat);
+			measures.validate();
+			updateBest(cat);
 		}
 	}
 	
@@ -71,7 +82,7 @@ public class GridSearch extends Optimization{
 		int noPos = grid[0].length;		
 		int noCombinations = (int) Math.pow(noPos,noPars);
 
-		double[][] output = new double[noCombinations][3];
+		double[][] output = new double[noCombinations][noPars];
 		
 		for(int idx1=0;idx1<noCombinations;++idx1)
 		{
