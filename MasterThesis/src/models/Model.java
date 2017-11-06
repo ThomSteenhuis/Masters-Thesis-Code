@@ -8,6 +8,8 @@ public class Model {
 	protected Data data;
 	protected int noPersAhead;
 	
+	protected String name;
+	
 	protected boolean trainingForecasted;
 	protected double[][] trainingForecast;
 	protected double[][] trainingReal;
@@ -54,9 +56,14 @@ public class Model {
 		return data;
 	}
 	
-	public int noPeriodsAhead()
+	public int getNoPeriodsAhead()
 	{
 		return noPersAhead;
+	}
+	
+	public String getName()
+	{
+		return name;
 	}
 	
 	public boolean isTrainingForecasted()

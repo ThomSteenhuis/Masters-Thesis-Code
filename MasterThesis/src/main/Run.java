@@ -1,7 +1,7 @@
 package main;
 import input.Data;
 import models.ExponentialSmoothing;
-import models.Performance;
+import performance.PerformanceMeasures;
 
 public class Run {
 	private static final double alphaLBound = 0.01;
@@ -24,6 +24,10 @@ public class Run {
 		ExponentialSmoothing SES = new ExponentialSmoothing("SES",false,false,pars,1,data);
 		SES.train();
 		SES.plotTrainingForecast("TCB & Chameo");
+		
+		PerformanceMeasures pm = new PerformanceMeasures(SES);
+		pm.validate();
+		pm.printMeasures();
 		
 		/*input.Run.main(args);
 

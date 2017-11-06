@@ -158,13 +158,14 @@ public class PerformanceMeasures {
 		return output;
 	}
 	
-	public static void printMeasures(String[] categories, double[] rmse, double[] mape, double[] mae, double[] me)
+	public void printMeasures()
 	{
-		System.out.print("RMSE\tMAPE\tMAE\tME\tMethod\n");
+		System.out.printf("%s\n",model.getName());
+		System.out.print("RMSE\tMAPE\tMAE\tME\tCategory\n");
 		
-		for(int idx=0;idx<categories.length;++idx)
+		for(int idx=0;idx<model.getData().getNoCats();++idx)
 		{
-			System.out.printf("%.2f\t%.2f\t%.2f\t%.2f\t%s\n",rmse[idx],mape[idx],mae[idx],me[idx],categories[idx]);
+			System.out.printf("%.2f\t%.2f\t%.2f\t%.2f\t%s\n",RMSE[idx],MAPE[idx],MAE[idx],ME[idx],model.getData().getCategories()[idx]);
 		}
 	}
 }

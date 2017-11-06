@@ -13,6 +13,7 @@ public class ExponentialSmoothing extends Model{
 	public ExponentialSmoothing(String model,boolean add,boolean damp,double[] pars,int periods,Data dataset)
 	{
 		super(dataset,periods);
+		name = model;
 
 		try{
 			switch(model)

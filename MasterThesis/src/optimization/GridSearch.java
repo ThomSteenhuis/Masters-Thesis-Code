@@ -1,7 +1,5 @@
 package optimization;
 
-
-
 public class GridSearch {
 	private static final int noSteps = 100;
 	
