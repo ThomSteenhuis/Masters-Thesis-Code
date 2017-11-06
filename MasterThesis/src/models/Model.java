@@ -3,19 +3,21 @@ package models;
 import graph.Plot;
 import input.Data;
 
-public class Model {
+public abstract class Model {
 
 	protected Data data;
 	protected int noPersAhead;
+	protected double[] parameters;
 	
 	protected String name;
 	
 	protected boolean trainingForecasted;
-	protected double[][] trainingForecast;
-	protected double[][] trainingReal;
-	protected String[][] trainingDates;
+	protected String category;
+	protected double[] trainingForecast;
+	protected double[] trainingReal;
+	protected String[] trainingDates;
 	
-	public Model(Data dataset, int periods)
+	public Model(Data dataset, double[] pars, int periods)
 	{
 		if( (periods <= 0) || periods >= (dataset.getNoObs()) )
 		{
@@ -25,30 +27,36 @@ public class Model {
 		{
 			data = dataset;
 			noPersAhead = periods;
+			parameters = pars;
 			trainingForecasted = false;
 		}
 	}
 	
-	public void plotTrainingForecast(String category)
+	public abstract void train(String category);
+	
+	public void plotTrainingForecast()
 	{
 		if(!trainingForecasted)
 		{
 			System.out.println("Error (plotTrainingForecast): train model first");
 			return;
 		}
-		
-		int index = data.getIndexFromCat(category);
-		
+				
 		String[] pars = new String[1];
 		pars[0] = "pivot";
 		
 		String[] cats = new String[2];
-		cats[0] = data.getCategories()[index];
+		cats[0] = category;
 		cats[1] = "Forecast";
 		
-		double[][] vols = merge(trainingReal[index],trainingForecast[index]);
+		double[][] vols = merge(trainingReal,trainingForecast);
 		
-		Plot.initialize(pars,vols,trainingDates[index],cats,data.getLabels());
+		Plot.initialize(pars,vols,trainingDates,cats,data.getLabels());
+	}
+	
+	public void setParameters(double[] newPars)
+	{
+		parameters = newPars;
 	}
 	
 	public Data getData()
@@ -61,6 +69,11 @@ public class Model {
 		return noPersAhead;
 	}
 	
+	public double[] getParameters()
+	{
+		return parameters;
+	}
+	
 	public String getName()
 	{
 		return name;
@@ -71,17 +84,17 @@ public class Model {
 		return trainingForecasted;
 	}
 	
-	public double[][] getTrainingForecast()
+	public double[] getTrainingForecast()
 	{
 		return trainingForecast;
 	}
 	
-	public double[][] getTrainingReal()
+	public double[] getTrainingReal()
 	{
 		return trainingReal;
 	}
 	
-	public String[][] getTrainingDates()
+	public String[] getTrainingDates()
 	{
 		return trainingDates;
 	}

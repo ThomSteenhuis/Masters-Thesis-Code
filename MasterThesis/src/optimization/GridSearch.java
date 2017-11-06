@@ -1,19 +1,48 @@
 package optimization;
 
-public class GridSearch {
-	private static final int noSteps = 100;
+import models.Model;
+
+public class GridSearch extends Optimization{
+
+	private int noSteps;
 	
-	public static void optimize(int modelClass,int modelNo,double[][] bounds, int periods,int pm, double[] td, double[] vd)
+	private double[][] grid;
+	
+	public GridSearch(Model mdl,double[][] parBounds,int steps)
 	{
-		double[][] grid = setupGrid(bounds);
+		super(mdl,parBounds);
+		name = "GridSearch";
 		
-		for(int idx=0;idx<grid.length;++idx)
+		if(steps <= 1)
 		{
-			models.Initialize.trainAndValidate(modelClass,modelNo,grid[idx],periods,pm,td,vd);
+			optimizationError("GridSearch","no steps should be larger than 1");
+		}
+		else
+		{
+			noSteps = steps;
+			grid = setupGrid();
 		}
 	}
 	
-	private static double[][] setupGrid(double[][] bounds)
+	public void optimize()
+	{		
+		for(String idx1:model.getData().getCategories())
+		{
+			for(int idx2=0;idx2<grid.length;++idx2)
+			{
+				model.setParameters(grid[idx2]);
+				model.train(idx1);
+				updateBest(idx1);
+			}
+		}
+	}
+	
+	public int getNoSteps()
+	{
+		return noSteps;
+	}
+	
+	private double[][] setupGrid()
 	{
 		double[][] grid = new double[bounds.length][noSteps];
 		
@@ -27,9 +56,7 @@ public class GridSearch {
 			}
 		}
 		
-		double[][] combinations = findCombinations(grid);
-		
-		return combinations;
+		return findCombinations(grid);
 	}
 	
 	private static double[][] findCombinations(double[][] grid)

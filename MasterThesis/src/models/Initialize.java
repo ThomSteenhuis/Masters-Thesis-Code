@@ -31,13 +31,5 @@ public class Initialize {
 		}
 	}
 	
-	private static void updateBest(double perf,double[] estVals, double[] pars)
-	{
-		if( ( optimization.Initialize.performance < 0) || (optimization.Initialize.performance > perf) )
-		{
-			optimization.Initialize.performance = perf;
-			optimization.Initialize.estVals = estVals;
-			optimization.Initialize.optPars = pars;
-		}
-	}
+
 }
