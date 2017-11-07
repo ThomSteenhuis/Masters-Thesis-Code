@@ -15,12 +15,12 @@ public class PerformanceMeasures {
 		model = mdl;
 	}
 	
-	public void validate()
+	public void calculate()
 	{
-		RMSE = calculateRMSE(model.getTrainingReal(),model.getTrainingForecast());
-		MAPE = calculateMAPE(model.getTrainingReal(),model.getTrainingForecast());
-		MAE = calculateMAE(model.getTrainingReal(),model.getTrainingForecast());
-		ME = calculateME(model.getTrainingReal(),model.getTrainingForecast());
+		RMSE = calculateRMSE(model.getValidationReal(),model.getValidationForecast());
+		MAPE = calculateMAPE(model.getValidationReal(),model.getValidationForecast());
+		MAE = calculateMAE(model.getValidationReal(),model.getValidationForecast());
+		ME = calculateME(model.getValidationReal(),model.getValidationForecast());
 	}
 	
 	public Model getModel()

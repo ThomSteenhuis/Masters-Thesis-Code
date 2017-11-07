@@ -66,17 +66,35 @@ public class ExponentialSmoothing extends Model{
 		damped = damp;
 	}
 	
-	public void train(String category)
+	public void train()
 	{
+		if(parameters.length != noParameters)
+		{
+			{
+				modelError("trainSES","inadequate no parameters");
+				return;
+			}
+		}
+		
+		for(int idx=0;idx<noParameters;++idx)
+		{
+			if( (parameters[idx] < 0) || (parameters[idx] > 1) )
+			{
+				modelError("train","parameter should be between 0 and 1");
+				return;
+			}
+		}
+		
 		switch(modelNo){
 		case 0:{
-			trainSES(category);
+			train_val_testSES();
 			break;
 		}
-		/*case 1:{
-			return trainDES(pars[0],pars[1],periods,data);
+		case 1:{
+			train_val_testDES();
+			break;
 		}
-		case 2:{
+		/*case 2:{
 			return trainTES("additive",pars[0],pars[1],pars[2],12,periods,data);
 		}
 		case 3:{
@@ -87,6 +105,9 @@ public class ExponentialSmoothing extends Model{
 		}
 		}
 	}
+	
+	public void validate(){}
+	public void test(){}
 	
 	public boolean isAdditive()
 	{
@@ -135,15 +156,9 @@ public class ExponentialSmoothing extends Model{
 		}
 	}
 
-	private void trainSES(String cat)
-	{
-		if( (parameters[0] < 0) || (parameters[0] > 1) )
-		{
-			modelError("trainSES","alpha should be between 0 and 1");
-			return;
-		}
-		
-		int idx1 = data.getIndexFromCat(cat);
+	private void train_val_testSES()
+	{			
+		int idx1 = data.getIndexFromCat(category);
 		
 		if( (data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1]) < noPersAhead)
 		{
@@ -152,36 +167,137 @@ public class ExponentialSmoothing extends Model{
 		}
 		
 		double[][] dataset = data.getVolumes();
-		trainingForecast = new double[data.getNoCats()];
-		trainingReal = new double[data.getNoCats()];
-		trainingDates = new String[data.getNoCats()];
-		category = cat;
 		
 		int firstIndex = data.getTrainingFirstIndex()[idx1];
-		int noData = data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1];
-		trainingForecast = new double[noData];
-		trainingReal = new double[noData];
-		trainingDates = new String[noData];
-		double[] avals = new double[noData];
+		int noData1 = data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1];
+		int noData2 = data.getTestingFirstIndex()[idx1] - data.getValidationFirstIndex()[idx1];
+		int noData3 = data.getNoObs() - data.getTestingFirstIndex()[idx1] - 1;
+		
+		initializeSets(noData1,noData2,noData3);
+		
+		double[] avals = new double[noData1+noData2+noData3];
 		
 		avals[0] = dataset[firstIndex][idx1];
 		trainingReal[0] = dataset[firstIndex][idx1];
 		trainingDates[0] = data.getDates()[firstIndex];
 		
-		for(int idx2=1;idx2<noData;idx2++)
+		for(int idx2=1;idx2<noData1;idx2++)
 		{
 			avals[idx2] = parameters[0]*dataset[firstIndex+idx2][idx1] + (1-parameters[0])*avals[idx2-1];
 			trainingReal[idx2] = dataset[firstIndex+idx2][idx1];
 			trainingDates[idx2] = data.getDates()[firstIndex+idx2];
 		}
 		
+		for(int idx2=0;idx2<noData2;idx2++)
+		{
+			avals[noData1+idx2] = parameters[0]*dataset[firstIndex+noData1+idx2][idx1] + (1-parameters[0])*avals[idx2+noData1-1];
+			validationReal[idx2] = dataset[firstIndex+noData1+idx2][idx1];
+			validationDates[idx2] = data.getDates()[firstIndex+noData1+idx2];
+		}
+		
+		for(int idx2=0;idx2<noData3;idx2++)
+		{
+			avals[noData1+noData2+idx2] = parameters[0]*dataset[firstIndex+noData1+noData2+idx2][idx1] + (1-parameters[0])*avals[idx2+noData1+noData2-1];
+			validationReal[idx2] = dataset[firstIndex+noData1+noData2+idx2][idx1];
+			validationDates[idx2] = data.getDates()[firstIndex+noData1+noData2+idx2];
+		}
+		
 		for(int idx2=0;idx2<noPersAhead;++idx2)
 			trainingForecast[idx2] = dataset[firstIndex+idx2][idx1];
 		
-		for(int idx2=noPersAhead;idx2<noData;++idx2)
+		for(int idx2=noPersAhead;idx2<noData1;++idx2)
 			trainingForecast[idx2] = avals[idx2-noPersAhead];
 		
+		for(int idx2=0;idx2<noData2;++idx2)
+			validationForecast[idx2] = avals[idx2+noData1-noPersAhead];
+		
+		for(int idx2=0;idx2<noData3;++idx2)
+			testingForecast[idx2] = avals[idx2+noData1+noData3-noPersAhead];
+		
 		trainingForecasted = true;
+		validationForecasted = true;
+		testingForecasted = true;
+	}
+	
+	private void train_val_testDES()
+	{		
+		int idx1 = data.getIndexFromCat(category);
+		
+		if( (data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1]) < noPersAhead)
+		{
+			modelError("trainDES","data is of length smaller than the number of periods");
+			return;
+		}
+		
+		double[][] dataset = data.getVolumes();
+		
+		int firstIndex = data.getTrainingFirstIndex()[idx1];
+		int noData1 = data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1];
+		int noData2 = data.getTestingFirstIndex()[idx1] - data.getValidationFirstIndex()[idx1];
+		int noData3 = data.getNoObs() - data.getTestingFirstIndex()[idx1] - 1;
+		
+		initializeSets(noData1,noData2,noData3);
+		
+		double[] avals = new double[noData1+noData2+noData3];
+		double[] bvals = new double[noData1+noData2+noData3];
+		
+		avals[1] = dataset[firstIndex][idx1+1];
+		bvals[1] = dataset[firstIndex][idx1+1] - dataset[firstIndex][idx1];
+		trainingReal[0] = dataset[firstIndex][idx1];
+		trainingDates[0] = data.getDates()[firstIndex];
+		
+		for(int idx2=2;idx2<noData1;idx2++)
+		{
+			avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * (avals[idx2-1] + bvals[idx2-1]);
+			bvals[idx2] = parameters[1] * (avals[idx2] - avals[idx2-1]) + (1 - parameters[1]) * bvals[idx2-1];
+			trainingReal[idx2] = dataset[firstIndex+idx2][idx1];
+			trainingDates[idx2] = data.getDates()[firstIndex+idx2];
+		}
+		
+		for(int idx2=0;idx2<noData2;idx2++)
+		{
+			avals[noData1+idx2] = parameters[0]*dataset[firstIndex+noData1+idx2][idx1] + (1-parameters[0])*avals[idx2+noData1-1];
+			validationReal[idx2] = dataset[firstIndex+noData1+idx2][idx1];
+			validationDates[idx2] = data.getDates()[firstIndex+noData1+idx2];
+		}
+		
+		for(int idx2=0;idx2<noData3;idx2++)
+		{
+			avals[noData1+noData2+idx2] = parameters[0]*dataset[firstIndex+noData1+noData2+idx2][idx1] + (1-parameters[0])*avals[idx2+noData1+noData2-1];
+			validationReal[idx2] = dataset[firstIndex+noData1+noData2+idx2][idx1];
+			validationDates[idx2] = data.getDates()[firstIndex+noData1+noData2+idx2];
+		}
+		
+		for(int idx2=0;idx2<noPersAhead;++idx2)
+			trainingForecast[idx2] = dataset[firstIndex+idx2][idx1];
+		
+		for(int idx2=noPersAhead;idx2<noData1;++idx2)
+			trainingForecast[idx2] = avals[idx2-noPersAhead];
+		
+		for(int idx2=0;idx2<noData2;++idx2)
+			validationForecast[idx2] = avals[idx2+noData1-noPersAhead];
+		
+		for(int idx2=0;idx2<noData3;++idx2)
+			testingForecast[idx2] = avals[idx2+noData1+noData3-noPersAhead];
+		
+		trainingForecasted = true;
+		validationForecasted = true;
+		testingForecasted = true;
+	}
+	
+	private void initializeSets(int noData1,int noData2,int noData3)
+	{
+		trainingForecast = new double[noData1];
+		trainingReal = new double[noData1];
+		trainingDates = new String[noData1];
+		
+		validationForecast = new double[noData2];
+		validationReal = new double[noData2];
+		validationDates = new String[noData2];
+		
+		testingForecast = new double[noData3];
+		testingReal = new double[noData3];
+		testingDates = new String[noData3];
 	}
 	/*
 	private static double[] trainDES(double alpha, double beta, int periods, double[] data)

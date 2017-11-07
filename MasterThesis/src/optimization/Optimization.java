@@ -76,7 +76,7 @@ public abstract class Optimization {
 	public abstract void optimizeAll();
 	public abstract void optimize(String cat);
 	
-	protected void updateBest(String cat)
+	protected void updateBest()
 	{		
 		if( startOptimization || (performance > measures.getRMSE() ) )
 		{

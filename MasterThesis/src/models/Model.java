@@ -12,11 +12,22 @@ public abstract class Model {
 	protected String name;
 	protected int noParameters;
 	
-	protected boolean trainingForecasted;
 	protected String category;
+	
+	protected boolean trainingForecasted;
 	protected double[] trainingForecast;
 	protected double[] trainingReal;
 	protected String[] trainingDates;
+	
+	protected boolean validationForecasted;
+	protected double[] validationForecast;
+	protected double[] validationReal;
+	protected String[] validationDates;
+	
+	protected boolean testingForecasted;
+	protected double[] testingForecast;
+	protected double[] testingReal;
+	protected String[] testingDates;
 	
 	public Model(Data dataset, int periods)
 	{
@@ -32,16 +43,17 @@ public abstract class Model {
 		}
 	}
 	
-	public abstract void train(String category);
-	
-	public void plotTrainingForecast()
+	public void setCategory(String cat)
 	{
-		if(!trainingForecasted)
-		{
-			System.out.println("Error (plotTrainingForecast): train model first");
-			return;
-		}
-				
+		category = cat;
+	}
+	
+	public abstract void train();
+	public abstract void validate();
+	public abstract void test();
+	
+	public void plotForecast(String mode)
+	{
 		String[] pars = new String[1];
 		pars[0] = "pivot";
 		
@@ -49,9 +61,52 @@ public abstract class Model {
 		cats[0] = category;
 		cats[1] = "Forecast";
 		
-		double[][] vols = merge(trainingReal,trainingForecast);
-		
-		Plot.initialize(pars,vols,trainingDates,cats,data.getLabels());
+		switch (mode)
+		{
+			case "training":
+			{
+				if(!trainingForecasted)
+				{
+					modelError("plotForecast","train model first");
+					return;
+				}
+				
+				double[][] vols = merge(trainingReal,trainingForecast);
+				
+				Plot.initialize(pars,vols,trainingDates,cats,data.getLabels());
+				break;
+			}
+			case "validation":
+			{
+				if(!validationForecasted)
+				{
+					modelError("plotForecast","validate model first");
+					return;
+				}
+				
+				double[][] vols = merge(validationReal,validationForecast);
+				
+				Plot.initialize(pars,vols,validationDates,cats,data.getLabels());
+				break;
+			}
+			case "testing":
+			{
+				if(!testingForecasted)
+				{
+					modelError("plotForecast","test model first");
+					return;
+				}
+				
+				double[][] vols = merge(testingReal,testingForecast);
+				
+				Plot.initialize(pars,vols,testingDates,cats,data.getLabels());
+				break;
+			}
+			default:
+			{
+				modelError("plotForecast","default case reached");
+			}
+		}
 	}
 	
 	public void setParameters(double[] newPars)
@@ -116,6 +171,16 @@ public abstract class Model {
 		return trainingDates;
 	}
 	
+	public double[] getValidationForecast()
+	{
+		return validationForecast;
+	}
+	
+	public double[] getValidationReal()
+	{
+		return validationReal;
+	}
+	
 	protected static void modelError(String model, String txt)
 	{
 		System.out.printf("Error (%s): %s\n",model,txt);
@@ -138,6 +203,5 @@ public abstract class Model {
 		}
 		
 		return output;
-		
 	}
 }

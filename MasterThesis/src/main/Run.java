@@ -24,8 +24,16 @@ public class Run {
 		PerformanceMeasures pm = new PerformanceMeasures(SES);
 		double[][] SESbounds = initBounds("SES");	
 		GridSearch gs = new GridSearch(pm,SESbounds,100);
-		gs.optimize("Plating");
+		gs.optimize("2200EVO");
 		gs.printBest();
+		
+		double[] pars = new double[1];
+		pars[0] = 0.8;
+		SES.setParameters(pars);
+		SES.train();
+		pm.calculate();
+		pm.printMeasures();
+		SES.plotForecast("validation");
 		
 		/*input.Run.main(args);
 

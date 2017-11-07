@@ -26,26 +26,32 @@ public class GridSearch extends Optimization{
 	
 	public void optimizeAll()
 	{		
-		for(String idx1:measures.getModel().getData().getCategories())
+		for(String cat:measures.getModel().getData().getCategories())
 		{
+			measures.getModel().setCategory(cat);
+			
 			for(int idx2=0;idx2<grid.length;++idx2)
 			{
 				measures.getModel().setParameters(grid[idx2]);
-				measures.getModel().train(idx1);
-				measures.validate();
-				updateBest(idx1);
+				measures.getModel().train();
+				measures.getModel().validate();
+				measures.calculate();
+				updateBest();
 			}
 		}
 	}
 	
 	public void optimize(String cat)
 	{		
+		measures.getModel().setCategory(cat);
+		
 		for(int idx2=0;idx2<grid.length;++idx2)
 		{
 			measures.getModel().setParameters(grid[idx2]);
-			measures.getModel().train(cat);
-			measures.validate();
-			updateBest(cat);
+			measures.getModel().train();
+			measures.getModel().validate();
+			measures.calculate();
+			updateBest();
 		}
 	}
 	
