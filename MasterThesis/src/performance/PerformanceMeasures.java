@@ -15,7 +15,7 @@ public class PerformanceMeasures {
 		model = mdl;
 	}
 	
-	public void calculate()
+	public void calculateMeasures()
 	{
 		RMSE = calculateRMSE(model.getValidationReal(),model.getValidationForecast());
 		MAPE = calculateMAPE(model.getValidationReal(),model.getValidationForecast());

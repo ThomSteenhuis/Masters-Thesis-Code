@@ -35,7 +35,7 @@ public class GridSearch extends Optimization{
 				measures.getModel().setParameters(grid[idx2]);
 				measures.getModel().train();
 				measures.getModel().validate();
-				measures.calculate();
+				measures.calculateMeasures();
 				updateBest();
 			}
 		}
@@ -50,7 +50,7 @@ public class GridSearch extends Optimization{
 			measures.getModel().setParameters(grid[idx2]);
 			measures.getModel().train();
 			measures.getModel().validate();
-			measures.calculate();
+			measures.calculateMeasures();
 			updateBest();
 		}
 	}

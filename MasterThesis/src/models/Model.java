@@ -48,7 +48,7 @@ public abstract class Model {
 	public void setCategory(String cat)
 	{
 		try{
-			int index = data.getIndexFromCat(cat);
+			data.getIndexFromCat(cat);
 		}
 		catch(NullPointerException e)
 		{
