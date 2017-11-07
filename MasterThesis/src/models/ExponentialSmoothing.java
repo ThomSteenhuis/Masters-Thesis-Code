@@ -255,13 +255,29 @@ public class ExponentialSmoothing extends Model{
 		{
 			if(additive)
 			{
-				avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * (avals[idx2-1] + bvals[idx2-1]);
-				bvals[idx2] = parameters[1] * (avals[idx2] - avals[idx2-1]) + (1 - parameters[1]) * bvals[idx2-1];
+				if(damped)
+				{
+					avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * (avals[idx2-1] + parameters[2] * bvals[idx2-1]);
+					bvals[idx2] = parameters[1] * (avals[idx2] - avals[idx2-1]) + (1 - parameters[1]) * parameters[2] * bvals[idx2-1];
+				}
+				else
+				{
+					avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * (avals[idx2-1] + bvals[idx2-1]);
+					bvals[idx2] = parameters[1] * (avals[idx2] - avals[idx2-1]) + (1 - parameters[1]) * bvals[idx2-1];
+				}
 			}
 			else
 			{
-				avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * avals[idx2-1] * bvals[idx2-1];
-				bvals[idx2] = parameters[1] * avals[idx2] / avals[idx2-1] + (1 - parameters[1]) * bvals[idx2-1];
+				if(damped)
+				{
+					avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * avals[idx2-1] * Math.pow(bvals[idx2-1] , parameters[2]);
+					bvals[idx2] = parameters[1] * avals[idx2] / avals[idx2-1] + (1 - parameters[1]) * Math.pow(bvals[idx2-1] , parameters[2]);
+				}
+				else
+				{
+					avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * avals[idx2-1] * bvals[idx2-1];
+					bvals[idx2] = parameters[1] * avals[idx2] / avals[idx2-1] + (1 - parameters[1]) * bvals[idx2-1];
+				}
 			}
 				
 			trainingReal[idx2] = dataset[firstIndex+idx2][idx1];
@@ -272,13 +288,29 @@ public class ExponentialSmoothing extends Model{
 		{
 			if(additive)
 			{
-				avals[noData1+idx2] = parameters[0] * dataset[firstIndex+noData1+idx2][idx1] + (1 - parameters[0]) * (avals[noData1+idx2-1] + bvals[noData1+idx2-1]);
-				bvals[noData1+idx2] = parameters[1] * (avals[noData1+idx2] - avals[noData1+idx2-1]) + (1 - parameters[1]) * bvals[noData1+idx2-1];
+				if(damped)
+				{
+					avals[noData1+idx2] = parameters[0] * dataset[firstIndex+noData1+idx2][idx1] + (1 - parameters[0]) * (avals[noData1+idx2-1] + parameters[2] * bvals[noData1+idx2-1]);
+					bvals[noData1+idx2] = parameters[1] * (avals[noData1+idx2] - avals[noData1+idx2-1]) + (1 - parameters[1]) * parameters[2] * bvals[noData1+idx2-1];
+				}
+				else
+				{
+					avals[noData1+idx2] = parameters[0] * dataset[firstIndex+noData1+idx2][idx1] + (1 - parameters[0]) * (avals[noData1+idx2-1] + bvals[noData1+idx2-1]);
+					bvals[noData1+idx2] = parameters[1] * (avals[noData1+idx2] - avals[noData1+idx2-1]) + (1 - parameters[1]) * bvals[noData1+idx2-1];
+				}
 			}
 			else
 			{
-				avals[noData1+idx2] = parameters[0] * dataset[firstIndex+noData1+idx2][idx1] + (1 - parameters[0]) * avals[noData1+idx2-1] * bvals[noData1+idx2-1];
-				bvals[noData1+idx2] = parameters[1] * avals[noData1+idx2] / avals[noData1+idx2-1] + (1 - parameters[1]) * bvals[noData1+idx2-1];
+				if(damped)
+				{
+					avals[noData1+idx2] = parameters[0] * dataset[firstIndex+noData1+idx2][idx1] + (1 - parameters[0]) * avals[noData1+idx2-1] * Math.pow(bvals[noData1+idx2-1] , parameters[2]);
+					bvals[noData1+idx2] = parameters[1] * avals[noData1+idx2] / avals[noData1+idx2-1] + (1 - parameters[1]) * Math.pow(bvals[noData1+idx2-1] , parameters[2]);
+				}
+				else
+				{
+					avals[noData1+idx2] = parameters[0] * dataset[firstIndex+noData1+idx2][idx1] + (1 - parameters[0]) * avals[noData1+idx2-1] * bvals[noData1+idx2-1];
+					bvals[noData1+idx2] = parameters[1] * avals[noData1+idx2] / avals[noData1+idx2-1] + (1 - parameters[1]) * bvals[noData1+idx2-1];
+				}
 			}
 			
 			validationReal[idx2] = dataset[firstIndex+noData1+idx2][idx1];
@@ -289,13 +321,29 @@ public class ExponentialSmoothing extends Model{
 		{
 			if(additive)
 			{
-				avals[noData1+noData2+idx2] = parameters[0] * dataset[firstIndex+noData1+noData2+idx2][idx1] + (1 - parameters[0]) * (avals[idx2+noData1+noData2-1] + bvals[idx2+noData1+noData2-1]);
-				bvals[noData1+noData2+idx2] = parameters[1] * (avals[noData1+noData2+idx2] - avals[noData1+noData2+idx2-1]) + (1 - parameters[1]) * bvals[noData1+noData2+idx2-1];
+				if(damped)
+				{
+					avals[noData1+noData2+idx2] = parameters[0] * dataset[firstIndex+noData1+noData2+idx2][idx1] + (1 - parameters[0]) * (avals[idx2+noData1+noData2-1] + parameters[2] * bvals[idx2+noData1+noData2-1]);
+					bvals[noData1+noData2+idx2] = parameters[1] * (avals[noData1+noData2+idx2] - avals[noData1+noData2+idx2-1]) + (1 - parameters[1]) * parameters[2] * bvals[noData1+noData2+idx2-1];
+				}
+				else
+				{
+					avals[noData1+noData2+idx2] = parameters[0] * dataset[firstIndex+noData1+noData2+idx2][idx1] + (1 - parameters[0]) * (avals[idx2+noData1+noData2-1] + bvals[idx2+noData1+noData2-1]);
+					bvals[noData1+noData2+idx2] = parameters[1] * (avals[noData1+noData2+idx2] - avals[noData1+noData2+idx2-1]) + (1 - parameters[1]) * bvals[noData1+noData2+idx2-1];
+				}
 			}
 			else
 			{
-				avals[noData1+noData2+idx2] = parameters[0] * dataset[firstIndex+noData1+noData2+idx2][idx1] + (1 - parameters[0]) * avals[idx2+noData1+noData2-1] * bvals[idx2+noData1+noData2-1];
-				bvals[noData1+noData2+idx2] = parameters[1] * avals[noData1+noData2+idx2] / avals[noData1+noData2+idx2-1] + (1 - parameters[1]) * bvals[noData1+noData2+idx2-1];
+				if(damped)
+				{
+					avals[noData1+noData2+idx2] = parameters[0] * dataset[firstIndex+noData1+noData2+idx2][idx1] + (1 - parameters[0]) * avals[idx2+noData1+noData2-1] * Math.pow(bvals[idx2+noData1+noData2-1] , parameters[2]);
+					bvals[noData1+noData2+idx2] = parameters[1] * avals[noData1+noData2+idx2] / avals[noData1+noData2+idx2-1] + (1 - parameters[1]) * Math.pow(bvals[idx2+noData1+noData2-1] , parameters[2]);
+				}
+				else
+				{
+					avals[noData1+noData2+idx2] = parameters[0] * dataset[firstIndex+noData1+noData2+idx2][idx1] + (1 - parameters[0]) * avals[idx2+noData1+noData2-1] * bvals[idx2+noData1+noData2-1];
+					bvals[noData1+noData2+idx2] = parameters[1] * avals[noData1+noData2+idx2] / avals[noData1+noData2+idx2-1] + (1 - parameters[1]) * bvals[noData1+noData2+idx2-1];
+				}
 			}
 			
 			validationReal[idx2] = dataset[firstIndex+noData1+noData2+idx2][idx1];
@@ -305,14 +353,67 @@ public class ExponentialSmoothing extends Model{
 		for(int idx2=0;idx2<Math.max(2,noPersAhead);++idx2)
 			trainingForecast[idx2] = dataset[firstIndex+idx2][idx1];
 		
+		double dampingValue = 0;
+			
+		if(damped)
+		{
+			for(int idx=0;idx<noPersAhead;++idx)
+				dampingValue += Math.pow(parameters[2],idx+1);
+		}	
+		
 		for(int idx2=Math.max(2,noPersAhead);idx2<noData1;++idx2)
-			trainingForecast[idx2] = avals[idx2-noPersAhead] + Math.pow(bvals[idx2-noPersAhead],noPersAhead);
+		{
+			if(additive)
+			{
+				if(damped)
+					trainingForecast[idx2] = avals[idx2-noPersAhead] + dampingValue * bvals[idx2-noPersAhead];
+				else
+					trainingForecast[idx2] = avals[idx2-noPersAhead] + noPersAhead * bvals[idx2-noPersAhead];
+			}
+			else
+			{
+				if(damped)
+					trainingForecast[idx2] = avals[idx2-noPersAhead] + Math.pow(bvals[idx2-noPersAhead] , dampingValue);
+				else
+					trainingForecast[idx2] = avals[idx2-noPersAhead] + Math.pow(bvals[idx2-noPersAhead] , noPersAhead);
+			}
+		}
 		
 		for(int idx2=0;idx2<noData2;++idx2)
-			validationForecast[idx2] = avals[idx2+noData1-noPersAhead] + Math.pow(bvals[idx2+noData1-noPersAhead],noPersAhead);
+		{
+			if(additive)
+			{
+				if(damped)
+					validationForecast[idx2] = avals[idx2+noData1-noPersAhead] + dampingValue * bvals[idx2+noData1-noPersAhead];
+				else
+					validationForecast[idx2] = avals[idx2+noData1-noPersAhead] + noPersAhead * bvals[idx2+noData1-noPersAhead];
+			}
+			else
+			{
+				if(damped)
+					validationForecast[idx2] = avals[idx2+noData1-noPersAhead] + Math.pow(bvals[idx2+noData1-noPersAhead] , dampingValue);
+				else
+					validationForecast[idx2] = avals[idx2+noData1-noPersAhead] + Math.pow(bvals[idx2+noData1-noPersAhead] , noPersAhead);
+			}
+		}
 		
 		for(int idx2=0;idx2<noData3;++idx2)
-			testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead] + Math.pow(bvals[idx2+noData1+noData2-noPersAhead],noPersAhead);
+		{
+			if(additive)
+			{
+				if(damped)
+					testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead] + dampingValue * bvals[idx2+noData1+noData2-noPersAhead];
+				else
+					testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead] + noPersAhead * bvals[idx2+noData1+noData2-noPersAhead];
+			}
+			else
+			{
+				if(damped)
+					testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead] + Math.pow(bvals[idx2+noData1+noData2-noPersAhead] , dampingValue);
+				else
+					testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead] + Math.pow(bvals[idx2+noData1+noData2-noPersAhead] , noPersAhead);
+			}
+		}
 		
 		trainingForecasted = true;
 		validationForecasted = true;

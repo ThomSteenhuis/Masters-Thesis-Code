@@ -45,6 +45,14 @@ public abstract class Model {
 	
 	public void setCategory(String cat)
 	{
+		try{
+			int index = data.getIndexFromCat(cat);
+		}
+		catch(NullPointerException e)
+		{
+			System.out.println("Error (setCategory): this category does not exist");
+			return;
+		}
 		category = cat;
 	}
 	

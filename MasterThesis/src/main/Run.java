@@ -5,12 +5,8 @@ import optimization.GridSearch;
 import performance.PerformanceMeasures;
 
 public class Run {
-	private static final double alphaLBound = 0.01;
-	private static final double alphaRBound = 1;
-	private static final double betaLBound = 0.01;
-	private static final double betaRBound = 1;
-	private static final double gammaLBound = 0.01;
-	private static final double gammaRBound = 1;
+	private static final double lowerBound = 0.01;
+	private static final double upperBound = 1;
 
 	private static final double propTraining = 0.6;
 	private static final double propValidation = 0.2;
@@ -20,20 +16,23 @@ public class Run {
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
 		
-		ExponentialSmoothing SES = new ExponentialSmoothing("DES",false,false,1,data);		
-		PerformanceMeasures pm = new PerformanceMeasures(SES);
-		double[][] SESbounds = initBounds("DES");	
+		ExponentialSmoothing testModel = new ExponentialSmoothing("DES",false,true,1,data);		
+		PerformanceMeasures pm = new PerformanceMeasures(testModel);
+		double[][] SESbounds = initBounds(3);	
 		GridSearch gs = new GridSearch(pm,SESbounds,100);
 		gs.optimize("2200EVO");
 		gs.printBest();
 		
-		double[] pars = new double[1];
-		pars[0] = 0.8;
-		SES.setParameters(pars);
-		SES.train();
+		double[] pars = new double[3];
+		pars[0] = 0.05;
+		pars[1] = 0.11;
+		pars[2] = 1;
+		testModel.setParameters(pars);
+		testModel.setCategory("2200EVO");
+		testModel.train();
 		pm.calculate();
 		pm.printMeasures();
-		SES.plotForecast("validation");
+		testModel.plotForecast("validation");
 		
 		/*input.Run.main(args);
 
@@ -148,43 +147,17 @@ public class Run {
 		}
 	}
 	
-	private static double[][] initBounds(String model)
+	private static double[][] initBounds(int no)
 	{
-		switch(model)
+		double[][] output = new double[no][2];
+		
+		for(int idx=0;idx<no;++idx)
 		{
-			case "SES":
-			{
-				double[][] output = new double[1][2];
-				output[0][0] = alphaLBound;
-				output[0][1] = alphaRBound;
-				return output;
-			}
-			case "DES":
-			{
-				double[][] output = new double[2][2];
-				output[0][0] = alphaLBound;
-				output[0][1] = alphaRBound;
-				output[1][0] = betaLBound;
-				output[1][1] = betaRBound;
-				return output;
-			}
-			case "TES":
-			{
-				double[][] output = new double[3][2];
-				output[0][0] = alphaLBound;
-				output[0][1] = alphaRBound;
-				output[1][0] = betaLBound;
-				output[1][1] = betaRBound;
-				output[2][0] = gammaLBound;
-				output[2][1] = gammaRBound;
-				return output;
-			}
-			default:
-			{
-				System.out.println("Error (initBounds): default case reached");
-				return null;
-			}
+			output[idx][0] = lowerBound;
+			output[idx][1] = upperBound;
 		}
+		
+		return output;
 	}
 
 	private static double[][] inverse(double[][] input)
