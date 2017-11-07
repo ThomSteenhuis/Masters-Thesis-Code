@@ -1,6 +1,5 @@
 package optimization;
 
-import models.Model;
 import performance.PerformanceMeasures;
 
 public class GridSearch extends Optimization{
