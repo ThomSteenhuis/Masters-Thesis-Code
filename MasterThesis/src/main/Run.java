@@ -20,9 +20,9 @@ public class Run {
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
 		
-		ExponentialSmoothing SES = new ExponentialSmoothing("SES",false,false,1,data);		
+		ExponentialSmoothing SES = new ExponentialSmoothing("DES",false,false,1,data);		
 		PerformanceMeasures pm = new PerformanceMeasures(SES);
-		double[][] SESbounds = initBounds("SES");	
+		double[][] SESbounds = initBounds("DES");	
 		GridSearch gs = new GridSearch(pm,SESbounds,100);
 		gs.optimize("2200EVO");
 		gs.printBest();

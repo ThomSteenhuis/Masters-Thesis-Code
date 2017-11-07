@@ -212,7 +212,7 @@ public class ExponentialSmoothing extends Model{
 			validationForecast[idx2] = avals[idx2+noData1-noPersAhead];
 		
 		for(int idx2=0;idx2<noData3;++idx2)
-			testingForecast[idx2] = avals[idx2+noData1+noData3-noPersAhead];
+			testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead];
 		
 		trainingForecasted = true;
 		validationForecasted = true;
@@ -242,43 +242,77 @@ public class ExponentialSmoothing extends Model{
 		double[] bvals = new double[noData1+noData2+noData3];
 		
 		avals[1] = dataset[firstIndex][idx1+1];
-		bvals[1] = dataset[firstIndex][idx1+1] - dataset[firstIndex][idx1];
+		
+		if(additive)
+			bvals[1] = dataset[firstIndex][idx1+1] - dataset[firstIndex][idx1];
+		else
+			bvals[1] = dataset[firstIndex][idx1+1] / dataset[firstIndex][idx1];
+		
 		trainingReal[0] = dataset[firstIndex][idx1];
 		trainingDates[0] = data.getDates()[firstIndex];
 		
 		for(int idx2=2;idx2<noData1;idx2++)
 		{
-			avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * (avals[idx2-1] + bvals[idx2-1]);
-			bvals[idx2] = parameters[1] * (avals[idx2] - avals[idx2-1]) + (1 - parameters[1]) * bvals[idx2-1];
+			if(additive)
+			{
+				avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * (avals[idx2-1] + bvals[idx2-1]);
+				bvals[idx2] = parameters[1] * (avals[idx2] - avals[idx2-1]) + (1 - parameters[1]) * bvals[idx2-1];
+			}
+			else
+			{
+				avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * avals[idx2-1] * bvals[idx2-1];
+				bvals[idx2] = parameters[1] * avals[idx2] / avals[idx2-1] + (1 - parameters[1]) * bvals[idx2-1];
+			}
+				
 			trainingReal[idx2] = dataset[firstIndex+idx2][idx1];
 			trainingDates[idx2] = data.getDates()[firstIndex+idx2];
 		}
 		
 		for(int idx2=0;idx2<noData2;idx2++)
 		{
-			avals[noData1+idx2] = parameters[0]*dataset[firstIndex+noData1+idx2][idx1] + (1-parameters[0])*avals[idx2+noData1-1];
+			if(additive)
+			{
+				avals[noData1+idx2] = parameters[0] * dataset[firstIndex+noData1+idx2][idx1] + (1 - parameters[0]) * (avals[noData1+idx2-1] + bvals[noData1+idx2-1]);
+				bvals[noData1+idx2] = parameters[1] * (avals[noData1+idx2] - avals[noData1+idx2-1]) + (1 - parameters[1]) * bvals[noData1+idx2-1];
+			}
+			else
+			{
+				avals[noData1+idx2] = parameters[0] * dataset[firstIndex+noData1+idx2][idx1] + (1 - parameters[0]) * avals[noData1+idx2-1] * bvals[noData1+idx2-1];
+				bvals[noData1+idx2] = parameters[1] * avals[noData1+idx2] / avals[noData1+idx2-1] + (1 - parameters[1]) * bvals[noData1+idx2-1];
+			}
+			
 			validationReal[idx2] = dataset[firstIndex+noData1+idx2][idx1];
 			validationDates[idx2] = data.getDates()[firstIndex+noData1+idx2];
 		}
 		
 		for(int idx2=0;idx2<noData3;idx2++)
 		{
-			avals[noData1+noData2+idx2] = parameters[0]*dataset[firstIndex+noData1+noData2+idx2][idx1] + (1-parameters[0])*avals[idx2+noData1+noData2-1];
+			if(additive)
+			{
+				avals[noData1+noData2+idx2] = parameters[0] * dataset[firstIndex+noData1+noData2+idx2][idx1] + (1 - parameters[0]) * (avals[idx2+noData1+noData2-1] + bvals[idx2+noData1+noData2-1]);
+				bvals[noData1+noData2+idx2] = parameters[1] * (avals[noData1+noData2+idx2] - avals[noData1+noData2+idx2-1]) + (1 - parameters[1]) * bvals[noData1+noData2+idx2-1];
+			}
+			else
+			{
+				avals[noData1+noData2+idx2] = parameters[0] * dataset[firstIndex+noData1+noData2+idx2][idx1] + (1 - parameters[0]) * avals[idx2+noData1+noData2-1] * bvals[idx2+noData1+noData2-1];
+				bvals[noData1+noData2+idx2] = parameters[1] * avals[noData1+noData2+idx2] / avals[noData1+noData2+idx2-1] + (1 - parameters[1]) * bvals[noData1+noData2+idx2-1];
+			}
+			
 			validationReal[idx2] = dataset[firstIndex+noData1+noData2+idx2][idx1];
 			validationDates[idx2] = data.getDates()[firstIndex+noData1+noData2+idx2];
 		}
 		
-		for(int idx2=0;idx2<noPersAhead;++idx2)
+		for(int idx2=0;idx2<Math.max(2,noPersAhead);++idx2)
 			trainingForecast[idx2] = dataset[firstIndex+idx2][idx1];
 		
-		for(int idx2=noPersAhead;idx2<noData1;++idx2)
-			trainingForecast[idx2] = avals[idx2-noPersAhead];
+		for(int idx2=Math.max(2,noPersAhead);idx2<noData1;++idx2)
+			trainingForecast[idx2] = avals[idx2-noPersAhead] + Math.pow(bvals[idx2-noPersAhead],noPersAhead);
 		
 		for(int idx2=0;idx2<noData2;++idx2)
-			validationForecast[idx2] = avals[idx2+noData1-noPersAhead];
+			validationForecast[idx2] = avals[idx2+noData1-noPersAhead] + Math.pow(bvals[idx2+noData1-noPersAhead],noPersAhead);
 		
 		for(int idx2=0;idx2<noData3;++idx2)
-			testingForecast[idx2] = avals[idx2+noData1+noData3-noPersAhead];
+			testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead] + Math.pow(bvals[idx2+noData1+noData2-noPersAhead],noPersAhead);
 		
 		trainingForecasted = true;
 		validationForecasted = true;
