@@ -8,9 +8,11 @@ public abstract class Model {
 	protected Data data;
 	protected int noPersAhead;
 	protected double[] parameters;
+	protected double[] constants;
 	
 	protected String name;
 	protected int noParameters;
+	protected int noConstants;
 	
 	protected String category;
 	
@@ -54,6 +56,30 @@ public abstract class Model {
 			return;
 		}
 		category = cat;
+	}
+	
+	public void setParameters(double[] newParameters)
+	{
+		if(newParameters.length == noParameters)
+		{
+			parameters = newParameters;
+		}
+		else
+		{
+			System.out.println("Error (setParameters): number of constants inadequate");
+		}
+	}
+	
+	public void setConstants(double[] newConstants)
+	{
+		if(newConstants.length == noConstants)
+		{
+			constants = newConstants;
+		}
+		else
+		{
+			System.out.println("Error (setConstants): number of constants inadequate");
+		}
 	}
 	
 	public abstract void train();
@@ -114,18 +140,6 @@ public abstract class Model {
 			{
 				modelError("plotForecast","default case reached");
 			}
-		}
-	}
-	
-	public void setParameters(double[] newPars)
-	{
-		if(newPars.length == noParameters)
-		{
-			parameters = newPars;
-		}
-		else
-		{
-			System.out.println("Error (setParameters): number of parameters inadequate");
 		}
 	}
 	

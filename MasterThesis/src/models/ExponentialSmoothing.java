@@ -20,11 +20,13 @@ public class ExponentialSmoothing extends Model{
 				{
 					modelNo = 0;
 					noParameters = 1;
+					noConstants = 0;
 					break;
 				}
 				case "DES":
 				{
 					modelNo = 1;
+					noConstants = 0;
 					
 					if(damp)
 						noParameters = 3;
@@ -35,6 +37,7 @@ public class ExponentialSmoothing extends Model{
 				case "TES":
 				{
 					modelNo = 2;
+					noConstants = 1;
 					
 					if(damp)
 						noParameters = 4;
@@ -47,6 +50,7 @@ public class ExponentialSmoothing extends Model{
 				{
 					modelNo = 3;
 					noParameters = 4;
+					noConstants = 1;
 					break;
 				}
 				default:
@@ -94,10 +98,10 @@ public class ExponentialSmoothing extends Model{
 			train_val_testDES();
 			break;
 		}
-		/*case 2:{
-			return trainTES("additive",pars[0],pars[1],pars[2],12,periods,data);
+		case 2:{
+			train_val_testTES();
 		}
-		case 3:{
+		/*case 3:{
 			return trainTES("multiplicative",pars[0],pars[1],pars[2],12,periods,data);
 		}*/
 		default:{
@@ -420,6 +424,207 @@ public class ExponentialSmoothing extends Model{
 		testingForecasted = true;
 	}
 	
+	private void train_val_testTES()
+	{		
+		int idx1 = data.getIndexFromCat(category);
+		
+		if( (data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1]) < noPersAhead)
+		{
+			modelError("trainTES","data is of length smaller than the number of periods");
+			return;
+		}
+		
+		double[][] dataset = data.getVolumes();
+		
+		int firstIndex = data.getTrainingFirstIndex()[idx1];
+		int noData1 = data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1];
+		int noData2 = data.getTestingFirstIndex()[idx1] - data.getValidationFirstIndex()[idx1];
+		int noData3 = data.getNoObs() - data.getTestingFirstIndex()[idx1] - 1;
+		
+		initializeSets(noData1,noData2,noData3);
+		
+		double[] avals = new double[noData1+noData2+noData3];
+		double[] bvals = new double[noData1+noData2+noData3];
+		
+		avals[1] = dataset[firstIndex][idx1+1];
+		
+		if(additive)
+			bvals[1] = dataset[firstIndex][idx1+1] - dataset[firstIndex][idx1];
+		else
+			bvals[1] = dataset[firstIndex][idx1+1] / dataset[firstIndex][idx1];
+		
+		trainingReal[0] = dataset[firstIndex][idx1];
+		trainingDates[0] = data.getDates()[firstIndex];
+		
+		for(int idx2=2;idx2<noData1;idx2++)
+		{
+			if(additive)
+			{
+				if(damped)
+				{
+					avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * (avals[idx2-1] + parameters[2] * bvals[idx2-1]);
+					bvals[idx2] = parameters[1] * (avals[idx2] - avals[idx2-1]) + (1 - parameters[1]) * parameters[2] * bvals[idx2-1];
+				}
+				else
+				{
+					avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * (avals[idx2-1] + bvals[idx2-1]);
+					bvals[idx2] = parameters[1] * (avals[idx2] - avals[idx2-1]) + (1 - parameters[1]) * bvals[idx2-1];
+				}
+			}
+			else
+			{
+				if(damped)
+				{
+					avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * avals[idx2-1] * Math.pow(bvals[idx2-1] , parameters[2]);
+					bvals[idx2] = parameters[1] * avals[idx2] / avals[idx2-1] + (1 - parameters[1]) * Math.pow(bvals[idx2-1] , parameters[2]);
+				}
+				else
+				{
+					avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * avals[idx2-1] * bvals[idx2-1];
+					bvals[idx2] = parameters[1] * avals[idx2] / avals[idx2-1] + (1 - parameters[1]) * bvals[idx2-1];
+				}
+			}
+				
+			trainingReal[idx2] = dataset[firstIndex+idx2][idx1];
+			trainingDates[idx2] = data.getDates()[firstIndex+idx2];
+		}
+		
+		for(int idx2=0;idx2<noData2;idx2++)
+		{
+			if(additive)
+			{
+				if(damped)
+				{
+					avals[noData1+idx2] = parameters[0] * dataset[firstIndex+noData1+idx2][idx1] + (1 - parameters[0]) * (avals[noData1+idx2-1] + parameters[2] * bvals[noData1+idx2-1]);
+					bvals[noData1+idx2] = parameters[1] * (avals[noData1+idx2] - avals[noData1+idx2-1]) + (1 - parameters[1]) * parameters[2] * bvals[noData1+idx2-1];
+				}
+				else
+				{
+					avals[noData1+idx2] = parameters[0] * dataset[firstIndex+noData1+idx2][idx1] + (1 - parameters[0]) * (avals[noData1+idx2-1] + bvals[noData1+idx2-1]);
+					bvals[noData1+idx2] = parameters[1] * (avals[noData1+idx2] - avals[noData1+idx2-1]) + (1 - parameters[1]) * bvals[noData1+idx2-1];
+				}
+			}
+			else
+			{
+				if(damped)
+				{
+					avals[noData1+idx2] = parameters[0] * dataset[firstIndex+noData1+idx2][idx1] + (1 - parameters[0]) * avals[noData1+idx2-1] * Math.pow(bvals[noData1+idx2-1] , parameters[2]);
+					bvals[noData1+idx2] = parameters[1] * avals[noData1+idx2] / avals[noData1+idx2-1] + (1 - parameters[1]) * Math.pow(bvals[noData1+idx2-1] , parameters[2]);
+				}
+				else
+				{
+					avals[noData1+idx2] = parameters[0] * dataset[firstIndex+noData1+idx2][idx1] + (1 - parameters[0]) * avals[noData1+idx2-1] * bvals[noData1+idx2-1];
+					bvals[noData1+idx2] = parameters[1] * avals[noData1+idx2] / avals[noData1+idx2-1] + (1 - parameters[1]) * bvals[noData1+idx2-1];
+				}
+			}
+			
+			validationReal[idx2] = dataset[firstIndex+noData1+idx2][idx1];
+			validationDates[idx2] = data.getDates()[firstIndex+noData1+idx2];
+		}
+		
+		for(int idx2=0;idx2<noData3;idx2++)
+		{
+			if(additive)
+			{
+				if(damped)
+				{
+					avals[noData1+noData2+idx2] = parameters[0] * dataset[firstIndex+noData1+noData2+idx2][idx1] + (1 - parameters[0]) * (avals[idx2+noData1+noData2-1] + parameters[2] * bvals[idx2+noData1+noData2-1]);
+					bvals[noData1+noData2+idx2] = parameters[1] * (avals[noData1+noData2+idx2] - avals[noData1+noData2+idx2-1]) + (1 - parameters[1]) * parameters[2] * bvals[noData1+noData2+idx2-1];
+				}
+				else
+				{
+					avals[noData1+noData2+idx2] = parameters[0] * dataset[firstIndex+noData1+noData2+idx2][idx1] + (1 - parameters[0]) * (avals[idx2+noData1+noData2-1] + bvals[idx2+noData1+noData2-1]);
+					bvals[noData1+noData2+idx2] = parameters[1] * (avals[noData1+noData2+idx2] - avals[noData1+noData2+idx2-1]) + (1 - parameters[1]) * bvals[noData1+noData2+idx2-1];
+				}
+			}
+			else
+			{
+				if(damped)
+				{
+					avals[noData1+noData2+idx2] = parameters[0] * dataset[firstIndex+noData1+noData2+idx2][idx1] + (1 - parameters[0]) * avals[idx2+noData1+noData2-1] * Math.pow(bvals[idx2+noData1+noData2-1] , parameters[2]);
+					bvals[noData1+noData2+idx2] = parameters[1] * avals[noData1+noData2+idx2] / avals[noData1+noData2+idx2-1] + (1 - parameters[1]) * Math.pow(bvals[idx2+noData1+noData2-1] , parameters[2]);
+				}
+				else
+				{
+					avals[noData1+noData2+idx2] = parameters[0] * dataset[firstIndex+noData1+noData2+idx2][idx1] + (1 - parameters[0]) * avals[idx2+noData1+noData2-1] * bvals[idx2+noData1+noData2-1];
+					bvals[noData1+noData2+idx2] = parameters[1] * avals[noData1+noData2+idx2] / avals[noData1+noData2+idx2-1] + (1 - parameters[1]) * bvals[noData1+noData2+idx2-1];
+				}
+			}
+			
+			validationReal[idx2] = dataset[firstIndex+noData1+noData2+idx2][idx1];
+			validationDates[idx2] = data.getDates()[firstIndex+noData1+noData2+idx2];
+		}
+		
+		for(int idx2=0;idx2<Math.max(2,noPersAhead);++idx2)
+			trainingForecast[idx2] = dataset[firstIndex+idx2][idx1];
+		
+		double dampingValue = 0;
+			
+		if(damped)
+		{
+			for(int idx=0;idx<noPersAhead;++idx)
+				dampingValue += Math.pow(parameters[2],idx+1);
+		}	
+		
+		for(int idx2=Math.max(2,noPersAhead);idx2<noData1;++idx2)
+		{
+			if(additive)
+			{
+				if(damped)
+					trainingForecast[idx2] = avals[idx2-noPersAhead] + dampingValue * bvals[idx2-noPersAhead];
+				else
+					trainingForecast[idx2] = avals[idx2-noPersAhead] + noPersAhead * bvals[idx2-noPersAhead];
+			}
+			else
+			{
+				if(damped)
+					trainingForecast[idx2] = avals[idx2-noPersAhead] + Math.pow(bvals[idx2-noPersAhead] , dampingValue);
+				else
+					trainingForecast[idx2] = avals[idx2-noPersAhead] + Math.pow(bvals[idx2-noPersAhead] , noPersAhead);
+			}
+		}
+		
+		for(int idx2=0;idx2<noData2;++idx2)
+		{
+			if(additive)
+			{
+				if(damped)
+					validationForecast[idx2] = avals[idx2+noData1-noPersAhead] + dampingValue * bvals[idx2+noData1-noPersAhead];
+				else
+					validationForecast[idx2] = avals[idx2+noData1-noPersAhead] + noPersAhead * bvals[idx2+noData1-noPersAhead];
+			}
+			else
+			{
+				if(damped)
+					validationForecast[idx2] = avals[idx2+noData1-noPersAhead] + Math.pow(bvals[idx2+noData1-noPersAhead] , dampingValue);
+				else
+					validationForecast[idx2] = avals[idx2+noData1-noPersAhead] + Math.pow(bvals[idx2+noData1-noPersAhead] , noPersAhead);
+			}
+		}
+		
+		for(int idx2=0;idx2<noData3;++idx2)
+		{
+			if(additive)
+			{
+				if(damped)
+					testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead] + dampingValue * bvals[idx2+noData1+noData2-noPersAhead];
+				else
+					testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead] + noPersAhead * bvals[idx2+noData1+noData2-noPersAhead];
+			}
+			else
+			{
+				if(damped)
+					testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead] + Math.pow(bvals[idx2+noData1+noData2-noPersAhead] , dampingValue);
+				else
+					testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead] + Math.pow(bvals[idx2+noData1+noData2-noPersAhead] , noPersAhead);
+			}
+		}
+		
+		trainingForecasted = true;
+		validationForecasted = true;
+		testingForecasted = true;
+	}
+	
 	private void initializeSets(int noData1,int noData2,int noData3)
 	{
 		trainingForecast = new double[noData1];
@@ -434,37 +639,9 @@ public class ExponentialSmoothing extends Model{
 		testingReal = new double[noData3];
 		testingDates = new String[noData3];
 	}
+	
+	
 	/*
-	private static double[] trainDES(double alpha, double beta, int periods, double[] data)
-	{
-		if( (alpha < 0) || (alpha > 1) || (beta < 0) || (beta > 1) )
-			return modelError("trainDES","alpha and beta should be between 0 and 1");
-		
-		if( data.length < (periods + 1))
-			return modelError("trainDES","data is of length smaller than the number of periods");
-		
-		int noData = data.length;
-		double[] output = new double[noData];
-		double[] bvals = new double[noData];
-		double[] avals = new double[noData];
-		
-		avals[1] = data[1];
-		bvals[1] = data[1] - data[0];
-		
-		for(int idx=2;idx<noData;++idx)
-		{
-			avals[idx] = alpha * data[idx] + (1 - alpha) * (avals[idx-1] + bvals[idx-1]);
-			bvals[idx] = beta * (avals[idx] - avals[idx-1]) + (1 - beta) * bvals[idx-1];
-		}
-		
-		for(int idx=0;idx<Math.max(2,periods);++idx)
-			output[idx] = data[idx];
-		
-		for(int idx=Math.max(2,periods);idx<noData;++idx)
-			output[idx] = avals[idx-periods] + periods*bvals[idx-periods];
-		
-		return output;
-	}
 	
 	private static double[] trainTES(String mode,double alpha, double beta, double gamma, int L, int periods, double[] data)
 	{

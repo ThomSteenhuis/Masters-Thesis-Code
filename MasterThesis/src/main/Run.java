@@ -16,17 +16,17 @@ public class Run {
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
 		
-		ExponentialSmoothing testModel = new ExponentialSmoothing("DES",false,true,1,data);		
+		ExponentialSmoothing testModel = new ExponentialSmoothing("DES",false,false,1,data);		
 		PerformanceMeasures pm = new PerformanceMeasures(testModel);
-		double[][] SESbounds = initBounds(3);	
+		double[][] SESbounds = initBounds(2);	
 		GridSearch gs = new GridSearch(pm,SESbounds,100);
 		gs.optimize("2200EVO");
 		gs.printBest();
 		
-		double[] pars = new double[3];
-		pars[0] = 0.05;
+		double[] pars = new double[2];
+		pars[0] = 0.01;
 		pars[1] = 0.11;
-		pars[2] = 1;
+		//pars[2] = 1;
 		testModel.setParameters(pars);
 		testModel.setCategory("2200EVO");
 		testModel.train();
