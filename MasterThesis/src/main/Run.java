@@ -1,6 +1,7 @@
 package main;
 import input.Data;
 import models.ExponentialSmoothing;
+import models.SVR;
 import optimization.GridSearch;
 import performance.PerformanceMeasures;
 
@@ -16,7 +17,13 @@ public class Run {
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
 		
-		ExponentialSmoothing testModel = new ExponentialSmoothing("four",true,true,1,data);
+		SVR testModel = new SVR(data,1);
+		double[] pars = {1,1,1,3};
+		testModel.setParameters(pars);
+		testModel.setCategory("2200EVO");
+		testModel.train();
+		
+		/*ExponentialSmoothing testModel = new ExponentialSmoothing("four",true,true,1,data);
 		double[] cons = {12};
 		testModel.setConstants(cons);
 		PerformanceMeasures pm = new PerformanceMeasures(testModel);
@@ -36,7 +43,7 @@ public class Run {
 		testModel.setCategory("2200EVO");
 		testModel.train();
 		pm.calculateMeasures();
-		pm.printMeasures();
+		pm.printMeasures();*/
 		
 		/*input.Run.main(args);
 
