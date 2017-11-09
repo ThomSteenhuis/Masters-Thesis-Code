@@ -1,5 +1,6 @@
 package main;
 import input.Data;
+import math.Matrix;
 import models.ExponentialSmoothing;
 import models.SVR;
 import optimization.GridSearch;
@@ -18,17 +19,12 @@ public class Run {
 		data.setDataIndices(propTraining, propValidation);
 
 		SVR testModel = new SVR(data,1);
-		double[] pars = {1,1,1,6};
+		double[] pars = {10,1,100,6};
 		testModel.setParameters(pars);
 		testModel.setCategory("2200EVO");
-		testModel.train();
-		testModel.printLambda();
-
-		double sum = 0;
-		for(int idx=0;idx<testModel.getN();++idx)
-			sum += testModel.getLambda()[idx];
-
-		System.out.println(sum);
+		testModel.train();		
+		Matrix.print(testModel.getValidationForecast());
+		testModel.plotForecast("validation");
 
 		/*ExponentialSmoothing testModel = new ExponentialSmoothing("four",true,true,1,data);
 		double[] cons = {12};

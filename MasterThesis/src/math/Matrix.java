@@ -152,4 +152,23 @@ public class Matrix {
 
 		return output;
 	}
+	
+	public static void print(double[][] matrix)
+	{
+		for(int idx1=0;idx1<matrix.length;++idx1)
+		{
+			for(int idx2=0;idx2<matrix[idx1].length;++idx2)
+				System.out.printf("%f\t", matrix[idx1][idx2]);
+			
+			System.out.println();
+		}
+	}
+	
+	public static void print(double[] array)
+	{
+		for(int idx=0;idx<array.length;++idx)
+			System.out.printf("%f\t",array[idx]);
+
+		System.out.println();
+	}
 }
