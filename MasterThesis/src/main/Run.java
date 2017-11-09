@@ -19,11 +19,19 @@ public class Run {
 		data.setDataIndices(propTraining, propValidation);
 
 		SVR testModel = new SVR(data,1);
-		double[] pars = {10,1,100,6};
-		testModel.setParameters(pars);
+		PerformanceMeasures pm = new PerformanceMeasures(testModel);
 		testModel.setCategory("2200EVO");
-		testModel.train();		
-		Matrix.print(testModel.getValidationForecast());
+		double[][] SVRBounds = {{-10,10},{0.1,50},{-10,10},{1,3}};
+		boolean[] SVRExp = {true,false,true,false};
+		double[] SVRExpBase = {2,2,2,2};
+		int[] SVRsteps = {2,5,2,2};
+		GridSearch gs = new GridSearch(pm,SVRBounds,SVRExp,SVRExpBase,SVRsteps);
+		gs.optimize(false);
+		gs.printBest();
+		testModel.setParameters(gs.getOptimalParameters());
+		testModel.train();
+		pm.calculateMeasures();
+		pm.printMeasures();
 		testModel.plotForecast("validation");
 
 		/*ExponentialSmoothing testModel = new ExponentialSmoothing("four",true,true,1,data);

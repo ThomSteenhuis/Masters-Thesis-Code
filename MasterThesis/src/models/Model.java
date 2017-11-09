@@ -40,6 +40,7 @@ public abstract class Model {
 		else
 		{
 			data = dataset;
+			category = "";
 			noPersAhead = periods;
 			trainingForecasted = false;
 		}

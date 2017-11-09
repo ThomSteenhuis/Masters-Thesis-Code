@@ -73,8 +73,8 @@ public abstract class Optimization {
 		return performance;
 	}
 	
-	public abstract void optimizeAll();
-	public abstract void optimize(String cat);
+	public abstract void optimizeAll(boolean silent);
+	public abstract void optimize(boolean silent);
 	
 	protected void updateBest()
 	{		
