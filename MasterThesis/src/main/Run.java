@@ -1,4 +1,5 @@
 package main;
+import experiments.Experiment;
 import input.Data;
 import math.Matrix;
 import models.ExponentialSmoothing;
@@ -18,7 +19,7 @@ public class Run {
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
 
-		SVR testModel = new SVR(data,1);
+		/*SVR testModel = new SVR(data,1);
 		PerformanceMeasures pm = new PerformanceMeasures(testModel);
 		testModel.setCategory("2200EVO");
 		double[][] SVRBounds = {{-10,10},{0.1,50},{-10,10},{1,3}};
@@ -32,24 +33,31 @@ public class Run {
 		testModel.train();
 		pm.calculateMeasures();
 		pm.printMeasures();
-		testModel.plotForecast("validation");
+		testModel.plotForecast("validation");*/
 
-		/*ExponentialSmoothing testModel = new ExponentialSmoothing("four",true,true,1,data);
+		ExponentialSmoothing testModel = new ExponentialSmoothing("TES",false,true,1,data);
+		testModel.setCategory("2200EVO");
 		double[] cons = {12};
 		testModel.setConstants(cons);
 		PerformanceMeasures pm = new PerformanceMeasures(testModel);
-		double[][] SESbounds = initBounds(4);
-		GridSearch gs = new GridSearch(pm,SESbounds,40);
-		gs.optimize("2200EVO");
-		gs.printBest();
+		double[][] SESbounds = {{0.01,1},{0.01,1},{0.01,1},{0.01,1}};
+		boolean[] SESExp = {false,false,false,false};
+		double[] SESExpbase = {2,2,2,2};
+		int[] SESnoSteps = {40,40,40,40};
+		GridSearch gs = new GridSearch(pm,SESbounds,SESExp,SESExpbase,SESnoSteps);
+		Experiment ex = new Experiment();
+		ex.addInstance(gs);
+		ex.run(false);
+		Matrix.print(ex.getRunTimes());
+		/*gs.printBest();
 		testModel.setParameters(gs.getOptimalParameters());
 		testModel.train();
 		pm.calculateMeasures();
 		pm.printMeasures();
-		testModel.plotForecast("validation");
+		testModel.plotForecast("testing");*/
 
 
-		double[] pars = {0.01,0.21,0.01,0.01};
+		/*double[] pars = {0.01,0.21,0.01,0.01};
 		testModel.setParameters(pars);
 		testModel.setCategory("2200EVO");
 		testModel.train();
@@ -167,19 +175,6 @@ public class Run {
 				return null;
 			}
 		}
-	}
-
-	private static double[][] initBounds(int no)
-	{
-		double[][] output = new double[no][2];
-
-		for(int idx=0;idx<no;++idx)
-		{
-			output[idx][0] = lowerBound;
-			output[idx][1] = upperBound;
-		}
-
-		return output;
 	}
 
 	private static double[][] inverse(double[][] input)

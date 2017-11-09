@@ -64,15 +64,22 @@ public class GridSearch extends Optimization{
 			return;
 		}
 		
-		for(int idx2=0;idx2<grid.length;++idx2)
+		for(int idx=0;idx<grid.length;++idx)
 		{
-			measures.getModel().setParameters(grid[idx2]);
+			measures.getModel().setParameters(grid[idx]);
 			measures.getModel().train();
 			measures.getModel().validate();
 			measures.calculateMeasures();
 			updateBest();
+			
 			if(!silent)
-				System.out.printf("Completed model %d of %d\n",idx2,grid.length);
+			{
+				if( ( (idx % (grid.length/100) ) == 0) && (idx >= (grid.length/100) ) && ((idx / (grid.length/100) < 100 ) ) )
+				{
+					System.out.printf("Completed %d%% of %d models\n",idx / (grid.length/100),grid.length);
+				}
+			}
+				
 		}
 	}
 	
