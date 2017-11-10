@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 
 import experiments.Experiment;
 import input.Data;
+import math.*;
 import math.Matrix;
 import models.ExponentialSmoothing;
 import models.SVR;
@@ -19,7 +20,7 @@ public class Run {
 	{
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
-		Experiment e = new Experiment(data,"src/data/experiment.txt");
+		/*Experiment e = new Experiment(data,"src/data/experiment.txt");
 		
 		try 
 		{
@@ -30,9 +31,28 @@ public class Run {
 		catch (FileNotFoundException e1) 
 		{
 			e1.printStackTrace();
+		}*/
+		
+		double[] timeseries = new double[data.getNoObs()];
+		
+		for(int idx=0;idx<data.getNoObs();++idx)
+			timeseries[idx] = data.getVolumes()[idx][0];
+		
+		LLAR1Function logLikelihood = new LLAR1Function(timeseries);
+		
+		double[] input = {5,0.5,2};
+	
+		System.out.println(logLikelihood.evaluate(input));
+		
+		try{
+			Matrix.print(logLikelihood.derivative(input));
+			Matrix.print(logLikelihood.hessian(input));
+		}
+		catch(ArrayIndexOutOfBoundsException e)
+		{
+			System.out.println("Array index out of bounds");
 		}
 		
-
 
 		/*SVR testModel = new SVR(data,1);
 		PerformanceMeasures pm = new PerformanceMeasures(testModel);
