@@ -169,6 +169,11 @@ public abstract class Model {
 		return noParameters;
 	}
 	
+	public int getNoConstants()
+	{
+		return noConstants;
+	}
+	
 	public boolean isTrainingForecasted()
 	{
 		return trainingForecasted;
@@ -202,6 +207,26 @@ public abstract class Model {
 	public double[] getValidationReal()
 	{
 		return validationReal;
+	}
+	
+	public String[] getValidationDates()
+	{
+		return validationDates;
+	}
+	
+	public double[] getTestingForecast()
+	{
+		return testingForecast;
+	}
+	
+	public double[] getTestingReal()
+	{
+		return testingReal;
+	}
+	
+	public String[] getTestingDates()
+	{
+		return testingDates;
 	}
 	
 	protected static void modelError(String model, String txt)

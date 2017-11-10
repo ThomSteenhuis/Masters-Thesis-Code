@@ -8,7 +8,7 @@ public class ExponentialSmoothing extends Model{
 	private boolean damped;
 	private int modelNo;
 	
-	public ExponentialSmoothing(String model,boolean add,boolean damp,int periods,Data dataset)
+	public ExponentialSmoothing(String model,int periods,Data dataset)
 	{
 		super(dataset,periods);
 		name = model;
@@ -23,27 +23,76 @@ public class ExponentialSmoothing extends Model{
 					noConstants = 0;
 					break;
 				}
-				case "DES":
+				case "aDES":
 				{
 					modelNo = 1;
 					noConstants = 0;
-					
-					if(damp)
-						noParameters = 3;
-					else
-						noParameters = 2;
+					noParameters = 2;
+					additive = true;
+					damped = false;
 					break;
 				}
-				case "TES":
+				case "mDES":
+				{
+					modelNo = 1;
+					noConstants = 0;
+					noParameters = 2;
+					additive = false;
+					damped = false;
+					break;
+				}
+				case "aDESd":
+				{
+					modelNo = 1;
+					noConstants = 0;
+					noParameters = 3;
+					additive = true;
+					damped = true;
+					break;
+				}
+				case "mDESd":
+				{
+					modelNo = 1;
+					noConstants = 0;
+					noParameters = 3;
+					additive = false;
+					damped = true;
+					break;
+				}
+				case "aTES":
 				{
 					modelNo = 2;
 					noConstants = 1;
-					
-					if(damp)
-						noParameters = 4;
-					else
-						noParameters = 3;
-					
+					noParameters = 3;
+					additive = true;
+					damped = false;
+					break;
+				}
+				case "mTES":
+				{
+					modelNo = 2;
+					noConstants = 1;
+					noParameters = 3;
+					additive = false;
+					damped = false;
+					break;
+				}
+				case "aTESd":
+				{
+					modelNo = 2;
+					noConstants = 1;
+					noParameters = 4;
+					additive = true;
+					damped = true;
+					break;
+				}
+				case "mTESd":
+				{
+					modelNo = 2;
+					noConstants = 1;
+					noParameters = 4;
+					additive = false;
+					damped = true;
 					break;
 				}
 				case "four":
@@ -51,6 +100,8 @@ public class ExponentialSmoothing extends Model{
 					modelNo = 3;
 					noParameters = 4;
 					noConstants = 1;
+					additive = false;
+					damped = false;
 					break;
 				}
 				default:
@@ -65,9 +116,6 @@ public class ExponentialSmoothing extends Model{
 			System.out.println("Error (ExponentialSmoothing): no of parameters not correct");
 			return;
 		}
-			
-		additive = add;
-		damped = damp;
 	}
 	
 	public void train()
@@ -204,8 +252,8 @@ public class ExponentialSmoothing extends Model{
 		for(int idx2=0;idx2<noData3;idx2++)
 		{
 			avals[noData1+noData2+idx2] = parameters[0]*dataset[firstIndex+noData1+noData2+idx2][idx1] + (1-parameters[0])*avals[idx2+noData1+noData2-1];
-			validationReal[idx2] = dataset[firstIndex+noData1+noData2+idx2][idx1];
-			validationDates[idx2] = data.getDates()[firstIndex+noData1+noData2+idx2];
+			testingReal[idx2] = dataset[firstIndex+noData1+noData2+idx2][idx1];
+			testingDates[idx2] = data.getDates()[firstIndex+noData1+noData2+idx2];
 		}
 		
 		for(int idx2=0;idx2<noPersAhead;++idx2)

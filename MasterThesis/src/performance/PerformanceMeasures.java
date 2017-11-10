@@ -15,12 +15,42 @@ public class PerformanceMeasures {
 		model = mdl;
 	}
 	
-	public void calculateMeasures()
+	public void calculateMeasures(String mode)
 	{
-		RMSE = calculateRMSE(model.getValidationReal(),model.getValidationForecast());
-		MAPE = calculateMAPE(model.getValidationReal(),model.getValidationForecast());
-		MAE = calculateMAE(model.getValidationReal(),model.getValidationForecast());
-		ME = calculateME(model.getValidationReal(),model.getValidationForecast());
+		double[] real;
+		double[] forecast;
+		
+		switch (mode)
+		{
+		case "training":
+		{
+			real = model.getTrainingReal();
+			forecast = model.getTrainingForecast();
+			break;
+		}
+		case "validation":
+		{
+			real = model.getValidationReal();
+			forecast = model.getValidationForecast();
+			break;
+		}
+		case "testing":
+		{
+			real = model.getTestingReal();
+			forecast = model.getTestingForecast();
+			break;
+		}
+		default:
+			real = new double[0];
+			forecast = new double[0];
+			System.out.println("Error (calculateMeasures): default case reached");
+			return;
+		}
+		
+		RMSE = calculateRMSE(real,forecast);
+		MAPE = calculateMAPE(real,forecast);
+		MAE = calculateMAE(real,forecast);
+		ME = calculateME(real,forecast);
 	}
 	
 	public Model getModel()
@@ -38,7 +68,7 @@ public class PerformanceMeasures {
 		return MAPE;
 	}
 	
-	public double getMEA()
+	public double getMAE()
 	{
 		return MAE;
 	}

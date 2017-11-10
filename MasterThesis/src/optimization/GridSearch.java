@@ -50,7 +50,7 @@ public class GridSearch extends Optimization{
 				measures.getModel().setParameters(grid[idx2]);
 				measures.getModel().train();
 				measures.getModel().validate();
-				measures.calculateMeasures();
+				measures.calculateMeasures("validation");
 				updateBest();
 			}
 		}
@@ -69,14 +69,14 @@ public class GridSearch extends Optimization{
 			measures.getModel().setParameters(grid[idx]);
 			measures.getModel().train();
 			measures.getModel().validate();
-			measures.calculateMeasures();
+			measures.calculateMeasures("validation");
 			updateBest();
 			
 			if(!silent)
 			{
-				if( ( (idx % (grid.length/100) ) == 0) && (idx >= (grid.length/100) ) && ((idx / (grid.length/100) < 100 ) ) )
+				if( ( (idx % (grid.length/100+1) ) == 0) && (idx >= (grid.length/100+1) ) && ((idx / (grid.length/100+1) < 100 ) ) )
 				{
-					System.out.printf("Completed %d%% of %d models\n",idx / (grid.length/100),grid.length);
+					System.out.printf("Completed %d%% of %d models\n",idx / (grid.length/100+1),grid.length);
 				}
 			}
 				

@@ -1,4 +1,7 @@
 package main;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+
 import experiments.Experiment;
 import input.Data;
 import math.Matrix;
@@ -8,9 +11,7 @@ import optimization.GridSearch;
 import performance.PerformanceMeasures;
 
 public class Run {
-	private static final double lowerBound = 0.01;
-	private static final double upperBound = 1;
-
+	
 	private static final double propTraining = 0.6;
 	private static final double propValidation = 0.2;
 
@@ -18,6 +19,20 @@ public class Run {
 	{
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
+		Experiment e = new Experiment(data,"src/data/experiment.txt");
+		
+		try 
+		{
+			PrintWriter p = new PrintWriter("src/data/outcomes.txt");
+			e.run(false);
+			e.writeOutcomes(p);
+		} 
+		catch (FileNotFoundException e1) 
+		{
+			e1.printStackTrace();
+		}
+		
+
 
 		/*SVR testModel = new SVR(data,1);
 		PerformanceMeasures pm = new PerformanceMeasures(testModel);
@@ -35,7 +50,7 @@ public class Run {
 		pm.printMeasures();
 		testModel.plotForecast("validation");*/
 
-		ExponentialSmoothing testModel = new ExponentialSmoothing("TES",false,true,1,data);
+		/*ExponentialSmoothing testModel = new ExponentialSmoothing("TES",false,true,1,data);
 		testModel.setCategory("2200EVO");
 		double[] cons = {12};
 		testModel.setConstants(cons);
@@ -48,7 +63,8 @@ public class Run {
 		Experiment ex = new Experiment();
 		ex.addInstance(gs);
 		ex.run(false);
-		Matrix.print(ex.getRunTimes());
+		Matrix.print(ex.getRunTimes());*/
+		
 		/*gs.printBest();
 		testModel.setParameters(gs.getOptimalParameters());
 		testModel.train();
