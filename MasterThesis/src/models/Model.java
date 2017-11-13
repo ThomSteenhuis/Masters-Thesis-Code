@@ -159,6 +159,11 @@ public abstract class Model {
 		return parameters;
 	}
 	
+	public double[] getConstants()
+	{
+		return constants;
+	}
+	
 	public String getName()
 	{
 		return name;

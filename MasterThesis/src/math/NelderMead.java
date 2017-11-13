@@ -92,6 +92,7 @@ public class NelderMead extends FunctionOptimization {
 			}
 			
 			double[] outputs = new double[dimension+1];
+			
 			for(int idx=0;idx<outputs.length;++idx)
 				outputs[idx] = function.evaluate(xVectors[idx]);
 			
@@ -161,7 +162,7 @@ public class NelderMead extends FunctionOptimization {
 					
 					Matrix.print(xVectors);
 					
-					determineWorstVector();
+					determineOrder();
 					
 					System.out.printf("%f\t%f\t%f\n", bestValue,secondWorstValue,worstValue);
 					System.out.printf("%d\t%d\t%d\n", bestVector,secondWorstVector,worstVector);

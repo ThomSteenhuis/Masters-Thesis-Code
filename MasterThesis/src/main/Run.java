@@ -6,6 +6,7 @@ import experiments.Experiment;
 import input.Data;
 import math.*;
 import math.Matrix;
+import models.ARIMA;
 import models.ExponentialSmoothing;
 import models.SVR;
 import optimization.GridSearch;
@@ -33,26 +34,43 @@ public class Run {
 			e1.printStackTrace();
 		}*/
 		
-		double[] timeseries = new double[data.getNoObs()];
+		ARIMA ar1 = new ARIMA(data,1);
+		ar1.setCategory("2200EVO");
+		ar1.train();
+		Matrix.print(ar1.getConstants());
 		
-		for(int idx=0;idx<data.getNoObs();++idx)
-			timeseries[idx] = data.getVolumes()[idx][0];
 		
-		LLAR1Function logLikelihood = new LLAR1Function(timeseries);
+		/*LLAR1Function logLikelihood = new LLAR1Function(timeseries);
+		NelderMead nm = new NelderMead(logLikelihood);
 		
-		double[] input = {5,0.5,2};
-	
+		double[] input = {0.012370,1.073079,0.428425};
 		System.out.println(logLikelihood.evaluate(input));
 		
-		try{
-			Matrix.print(logLikelihood.derivative(input));
-			Matrix.print(logLikelihood.hessian(input));
-		}
-		catch(ArrayIndexOutOfBoundsException e)
-		{
-			System.out.println("Array index out of bounds");
-		}
+		nm.optimize(10);
+		double[] output = nm.getOptimalIntput();
+		output[2] = Math.pow(output[2], 2);
+		Matrix.print(output);
 		
+		double[] target = new double[3];
+		target[0] = timeseries[0] + timeseries[timeseries.length-1];
+		for(int idx=1;idx<(timeseries.length-1);++idx)
+			target[0] += (1-output[1])*timeseries[idx];
+		
+		target[0] = target[0]/(2+(timeseries.length-1)*(1-output[1]));
+		
+		target[1] = output[1]*( (Math.pow(timeseries[0]-output[0],2) - output[2]/(1-Math.pow(output[1],2) ) ) );
+		
+		for(int idx=1;idx<timeseries.length;++idx)
+			target[1] += ( (timeseries[idx] - output[0] - output[1]*(timeseries[idx-1] - output[0]) ) * (timeseries[idx-1] - output[0]) );
+		
+		target[2] = Math.pow(timeseries[0]-output[0], 2)*(1-Math.pow(output[1],2) );
+		
+		for(int idx=1;idx<timeseries.length;++idx)
+			target[2] += Math.pow(timeseries[idx] - output[0] - output[1]*(timeseries[idx-1] - output[0]), 2);
+		
+		target[2] = target[2]/timeseries.length;
+		
+		System.out.printf("%f\t%f\t%f\n",target[0],target[1],target[2]);*/
 
 		/*SVR testModel = new SVR(data,1);
 		PerformanceMeasures pm = new PerformanceMeasures(testModel);
