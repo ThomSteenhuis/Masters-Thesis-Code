@@ -18,7 +18,7 @@ public class TestFunction extends Function {
 		double[] vec = {1,1,2};
 		System.out.println(f.evaluate(vec) );
 		NelderMead  nm = new NelderMead(f);
-		nm.optimize(100);
+		nm.optimize();
 		nm.printSummary();
 	}
 

@@ -51,26 +51,7 @@ public class Run {
 		output[2] = Math.pow(output[2], 2);
 		Matrix.print(output);
 		
-		double[] target = new double[3];
-		target[0] = timeseries[0] + timeseries[timeseries.length-1];
-		for(int idx=1;idx<(timeseries.length-1);++idx)
-			target[0] += (1-output[1])*timeseries[idx];
-		
-		target[0] = target[0]/(2+(timeseries.length-1)*(1-output[1]));
-		
-		target[1] = output[1]*( (Math.pow(timeseries[0]-output[0],2) - output[2]/(1-Math.pow(output[1],2) ) ) );
-		
-		for(int idx=1;idx<timeseries.length;++idx)
-			target[1] += ( (timeseries[idx] - output[0] - output[1]*(timeseries[idx-1] - output[0]) ) * (timeseries[idx-1] - output[0]) );
-		
-		target[2] = Math.pow(timeseries[0]-output[0], 2)*(1-Math.pow(output[1],2) );
-		
-		for(int idx=1;idx<timeseries.length;++idx)
-			target[2] += Math.pow(timeseries[idx] - output[0] - output[1]*(timeseries[idx-1] - output[0]), 2);
-		
-		target[2] = target[2]/timeseries.length;
-		
-		System.out.printf("%f\t%f\t%f\n",target[0],target[1],target[2]);*/
+		*/
 
 		/*SVR testModel = new SVR(data,1);
 		PerformanceMeasures pm = new PerformanceMeasures(testModel);

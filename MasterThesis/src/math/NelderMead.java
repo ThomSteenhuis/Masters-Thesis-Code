@@ -9,9 +9,8 @@ public class NelderMead extends FunctionOptimization {
 		super(f);
 	}
 	
-	public void optimize(int maxNoIters) 
+	public void optimize() 
 	{
-		maxNoIterations = maxNoIters;
 		Simplex S = new Simplex(function.getNoInputs() );
 		S.initialize();
 		

@@ -4,19 +4,19 @@ public abstract class FunctionOptimization {
 
 	protected Function function;
 	
-	protected int maxNoIterations;
-	
 	protected double[] optimalInput;
 	protected double optimalValue;
 	protected int noIterations;
 	protected boolean converged;
+	
+	protected final int maxNoIterations = 10000;
 	
 	public FunctionOptimization(Function f)
 	{
 		function = f;
 	}
 	
-	public abstract void optimize(int maxNoIters);
+	public abstract void optimize();
 	
 	public Function getFunction()
 	{
