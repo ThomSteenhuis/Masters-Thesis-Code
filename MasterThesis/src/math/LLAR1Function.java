@@ -6,12 +6,21 @@ public class LLAR1Function extends Function {
 	
 	public LLAR1Function(double[] ts)
 	{
-		super();
+		super(3);
 		timeseries = ts;
 	}
 	
 	public double evaluate(double[] input) throws ArrayIndexOutOfBoundsException 
 	{
+		try{
+			checkInput(input);
+		}
+		catch(IllegalArgumentException e)
+		{
+			e.printStackTrace();
+			return 0;
+		}
+		
 		double constant1 = -0.5*Math.log(2*Math.PI);
 		double constant2 = -0.5*(double)(timeseries.length-1)*Math.log(2*Math.PI);
 		double variable1 = -0.5*Math.log(Math.pow(input[2],2)/(1-Math.pow(input[1],2)));

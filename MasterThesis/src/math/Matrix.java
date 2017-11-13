@@ -121,6 +121,26 @@ public class Matrix {
 
 		return output;
 	}
+	
+	public static double infinityNorm(double[] array)
+	{
+		if(array.length == 0)
+		{
+			System.out.println("Error (infinityNorm): array has zero length");
+			return 0;
+		}
+		
+		double output = Math.abs(array[0]);
+		
+		for(int idx=1;idx<array.length;++idx)
+		{
+			double temp = Math.abs(array[idx]);
+			if(temp > output)
+				output = temp;
+		}
+		
+		return output;
+	}
 
 	public static double[] scalarMultiplication(double scalar, double[] array)
 	{

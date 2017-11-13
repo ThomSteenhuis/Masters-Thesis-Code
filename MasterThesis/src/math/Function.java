@@ -2,9 +2,14 @@ package math;
 
 public abstract class Function {
 		
+	protected int noInputs;
+	
 	private final double h = 0.00001;
 	
-	public Function() {}
+	public Function(int no) 
+	{
+		noInputs = no;
+	}
 	
 	public double[] derivative(double[] input) throws ArrayIndexOutOfBoundsException
 	{
@@ -18,6 +23,15 @@ public abstract class Function {
 	
 	public double partialDerivative(int inputNo,double[] input) throws ArrayIndexOutOfBoundsException
 	{
+		try{
+			checkInput(input);
+		}
+		catch(IllegalArgumentException e)
+		{
+			e.printStackTrace();
+			return 0;
+		}
+		
 		double[] vector = new double[input.length];
 		
 		for(int idx=0;idx<input.length;++idx)
@@ -43,6 +57,15 @@ public abstract class Function {
 	
 	public double partialSecondDerivative(int inputNo1,int inputNo2,double[] input) throws ArrayIndexOutOfBoundsException
 	{
+		try{
+			checkInput(input);
+		}
+		catch(IllegalArgumentException e)
+		{
+			e.printStackTrace();
+			return 0;
+		}
+		
 		double[] vector1 = new double[input.length];
 		double[] vector2 = new double[input.length];
 		double[] vector3 = new double[input.length];
@@ -63,4 +86,15 @@ public abstract class Function {
 	}
 	
 	public abstract double evaluate(double[] input) throws ArrayIndexOutOfBoundsException;
+	
+	public int getNoInputs()
+	{
+		return noInputs;
+	}
+	
+	protected void checkInput(double[] input) throws IllegalArgumentException
+	{
+		if(input.length != noInputs)
+			throw new IllegalArgumentException("Inappropriate number of arguments");
+	}
 }
