@@ -34,6 +34,19 @@ public class NelderMead extends FunctionOptimization {
 		optimalInput =  S.getBestVector();
 	}
 	
+	public void printSummary()
+	{
+		System.out.printf("Converged: %b\n",converged);
+		System.out.printf("Iterations: %d\n", noIterations);
+		System.out.printf("Optimal value: %f\n", optimalValue);
+		
+		System.out.print("Optimal input: ");
+		for(int idx=0;idx<function.getNoInputs();++idx)
+			System.out.printf("%f\t", optimalInput[idx]);
+		
+		System.out.println();
+	}
+	
 	private class Simplex{
 		
 		private int dimension;
@@ -42,15 +55,15 @@ public class NelderMead extends FunctionOptimization {
 		
 		private int bestVector;
 		private double bestValue;
-		private int secondBestVector;
-		private double secondBestValue;
+		private int secondWorstVector;
+		private double secondWorstValue;
 		private int worstVector;
 		private double worstValue;
 		
 		private final double alpha = -1;
 		private final double beta = 0.5;
 		private final double gamma = -2;
-		private final double error = 0.001;
+		private final double error = 0.000001;
 		
 		public Simplex(int dim)
 		{
@@ -78,6 +91,10 @@ public class NelderMead extends FunctionOptimization {
 				xVectors[idx1+1][idx1] = xVectors[idx1][idx1] + eta;
 			}
 			
+			double[] outputs = new double[dimension+1];
+			for(int idx=0;idx<outputs.length;++idx)
+				outputs[idx] = function.evaluate(xVectors[idx]);
+			
 			determineOrder();
 		}
 		
@@ -96,13 +113,21 @@ public class NelderMead extends FunctionOptimization {
 				centroid[idx1] = centroid[idx1] / dimension;
 			}
 			
+			Matrix.print(centroid);
+			
 			double[] newVector = new double[dimension];
 			
 			for(int idx=0;idx<dimension;++idx)
 				newVector[idx] = (1-alpha)*centroid[idx] + alpha*xVectors[worstVector][idx];
 			
+			Matrix.print(newVector);
+			
 			double tempValue = function.evaluate(newVector);
+			
+			System.out.printf("Value = %f\n", tempValue);
 			int mode = compareVector(tempValue);
+			
+			System.out.printf("Mode = %d\n", mode);
 			
 			switch (mode)
 			{
@@ -113,25 +138,33 @@ public class NelderMead extends FunctionOptimization {
 					for(int idx=0;idx<dimension;++idx)
 						newVector2[idx] = (1-gamma)*centroid[idx] + gamma*xVectors[worstVector][idx];
 					
-					tempValue = function.evaluate(newVector2);
+					Matrix.print(newVector2);
+					double tempValue2 = function.evaluate(newVector2);
+					System.out.printf("Value = %f\n",tempValue2);
 					
-					if(tempValue < bestValue)
+					if(tempValue2 < bestValue)
 					{
 						for(int idx=0;idx<dimension;++idx)
 							xVectors[worstVector][idx] = newVector2[idx];
+						
+						bestValue = tempValue2;
+						bestVector = worstVector;
 					}
 					else
 					{
 						for(int idx=0;idx<dimension;++idx)
 							xVectors[worstVector][idx] = newVector[idx];
+						
+						bestValue = tempValue;
+						bestVector = worstVector;
 					}
 					
-					secondBestValue = bestValue;
-					secondBestVector = bestVector;
-					bestValue = tempValue;
-					bestVector = worstVector;
+					Matrix.print(xVectors);
 					
 					determineWorstVector();
+					
+					System.out.printf("%f\t%f\t%f\n", bestValue,secondWorstValue,worstValue);
+					System.out.printf("%d\t%d\t%d\n", bestVector,secondWorstVector,worstVector);
 					
 					return checkStoppingCriterium();
 				}
@@ -139,11 +172,12 @@ public class NelderMead extends FunctionOptimization {
 				{										
 					for(int idx=0;idx<dimension;++idx)
 						xVectors[worstVector][idx] = newVector[idx];
-				
-					secondBestValue = tempValue;
-					secondBestVector = worstVector;
 					
-					determineWorstVector();
+					determineOrder();
+					
+					Matrix.print(xVectors);
+					System.out.printf("%f\t%f\t%f\n", bestValue,secondWorstValue,worstValue);
+					System.out.printf("%d\t%d\t%d\n", bestVector,secondWorstVector,worstVector);
 					
 					return checkStoppingCriterium();
 				}
@@ -163,16 +197,21 @@ public class NelderMead extends FunctionOptimization {
 							for(int idx2=0;idx2<=dimension;++idx2)
 								xVectors[idx2][idx1] = 0.5*(xVectors[idx2][idx1] + xVectors[bestVector][idx1]);
 						}
-						
-						determineOrder();
 					}
 					else
 					{
 						for(int idx=0;idx<dimension;++idx)
 							xVectors[worstVector][idx] = newVector2[idx];
-						
-						determineWorstVector();
 					}
+					
+					determineOrder();
+					
+					Matrix.print(newVector2);
+					System.out.printf("Value = %f\n", tempValue);
+					Matrix.print(xVectors);
+					System.out.printf("%f\t%f\t%f\n", bestValue,secondWorstValue,worstValue);
+					System.out.printf("%d\t%d\t%d\n", bestVector,secondWorstVector,worstVector);
+					
 					return checkStoppingCriterium();
 				}
 				case 3:
@@ -191,16 +230,21 @@ public class NelderMead extends FunctionOptimization {
 							for(int idx2=0;idx2<=dimension;++idx2)
 								xVectors[idx2][idx1] = 0.5*(xVectors[idx2][idx1] + xVectors[bestVector][idx1]);
 						}
-						
-						determineOrder();
 					}
 					else
 					{
 						for(int idx=0;idx<dimension;++idx)
 							xVectors[worstVector][idx] = newVector2[idx];
-						
-						determineWorstVector();
 					}
+					
+					determineOrder();
+					
+					Matrix.print(newVector2);
+					System.out.printf("Value = %f\n", tempValue);
+					Matrix.print(xVectors);
+					System.out.printf("%f\t%f\t%f\n", bestValue,secondWorstValue,worstValue);
+					System.out.printf("%d\t%d\t%d\n", bestVector,secondWorstVector,worstVector);
+					
 					return checkStoppingCriterium();
 				}
 				default:
@@ -243,46 +287,46 @@ public class NelderMead extends FunctionOptimization {
 		
 		private void determineOrder()
 		{
-			bestVector = 0;
-			bestValue = function.evaluate(xVectors[0]);
+			worstVector = 0;
+			worstValue = function.evaluate(xVectors[0]);
 			
 			double tempValue =  function.evaluate(xVectors[1]);
 			
-			if(tempValue < bestValue)
+			if(tempValue > worstValue)
 			{
-				secondBestValue = bestValue;
-				secondBestVector = 0;
-				bestValue = tempValue;
-				bestVector = 1;
+				secondWorstValue = worstValue;
+				secondWorstVector = 0;
+				worstValue = tempValue;
+				worstVector = 1;
 			}
 			else
 			{
-				secondBestValue = tempValue;
-				secondBestVector = 1;
+				secondWorstValue = tempValue;
+				secondWorstVector = 1;
 			}
 			
 			tempValue = function.evaluate(xVectors[2]);
 			
-			if(tempValue < bestValue)
+			if(tempValue > worstValue)
 			{
-				worstValue = secondBestValue;
-				worstVector = secondBestVector;
-				secondBestValue = bestValue;
-				secondBestVector = bestVector;
-				bestValue = tempValue;
-				bestVector = 2;
+				bestValue = secondWorstValue;
+				bestVector = secondWorstVector;
+				secondWorstValue = worstValue;
+				secondWorstVector = worstVector;
+				worstValue = tempValue;
+				worstVector = 2;
 			}
-			else if(tempValue < secondBestValue)
+			else if(tempValue > secondWorstValue)
 			{
-				worstValue = secondBestValue;
-				worstVector = secondBestVector;
-				secondBestValue = tempValue;
-				secondBestVector = 2;
+				bestValue = secondWorstValue;
+				bestVector = secondWorstVector;
+				secondWorstValue = tempValue;
+				secondWorstVector = 2;
 			}
 			else
 			{
-				worstValue = tempValue;
-				worstVector = 2;
+				bestValue = tempValue;
+				bestVector = 2;
 			}
 			
 			for(int idx=3;idx<=dimension;++idx)
@@ -293,24 +337,21 @@ public class NelderMead extends FunctionOptimization {
 		{
 			if(vectorVal < bestValue)
 			{
-				worstValue = secondBestValue;
-				worstVector = secondBestVector;
-				secondBestValue = bestValue;
-				secondBestVector = bestVector;
 				bestValue = vectorVal;
 				bestVector = vectorIdx;
 			}
-			else if(vectorVal < secondBestValue)
-			{
-				worstValue = secondBestValue;
-				worstVector = secondBestVector;
-				secondBestValue = vectorVal;
-				secondBestVector = vectorIdx;
-			}
 			else if(vectorVal > worstValue)
 			{
+				secondWorstValue = worstValue;
+				secondWorstVector = worstVector;
 				worstValue = vectorVal;
 				worstVector = vectorIdx;
+				
+			}
+			else if(vectorVal > secondWorstValue)
+			{
+				secondWorstValue = vectorVal;
+				secondWorstVector = vectorIdx;
 			}
 		}
 		
@@ -318,12 +359,12 @@ public class NelderMead extends FunctionOptimization {
 		{
 			if(vectorValue < bestValue)
 				return 0;
-			else if(vectorValue < secondBestValue)
-				return 1;
 			else if(vectorValue > worstValue)
 				return 2;
-			else
+			else if(vectorValue > secondWorstValue)
 				return 3;
+			else
+				return 1;
 		}
 		
 		private boolean checkStoppingCriterium()
@@ -335,7 +376,7 @@ public class NelderMead extends FunctionOptimization {
 				double temp = Matrix.infinityNorm(Matrix.difference(xVectors[idx],xVectors[bestVector]));
 				
 				if(temp > stop)
-					temp = stop;
+					stop = temp;
 			}
 			
 			if(stop <= error)
