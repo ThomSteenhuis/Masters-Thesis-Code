@@ -113,21 +113,13 @@ public class NelderMead extends FunctionOptimization {
 				centroid[idx1] = centroid[idx1] / dimension;
 			}
 			
-			Matrix.print(centroid);
-			
 			double[] newVector = new double[dimension];
 			
 			for(int idx=0;idx<dimension;++idx)
 				newVector[idx] = (1-alpha)*centroid[idx] + alpha*xVectors[worstVector][idx];
 			
-			Matrix.print(newVector);
-			
 			double tempValue = function.evaluate(newVector);
-			
-			System.out.printf("Value = %f\n", tempValue);
 			int mode = compareVector(tempValue);
-			
-			System.out.printf("Mode = %d\n", mode);
 			
 			switch (mode)
 			{
@@ -138,9 +130,7 @@ public class NelderMead extends FunctionOptimization {
 					for(int idx=0;idx<dimension;++idx)
 						newVector2[idx] = (1-gamma)*centroid[idx] + gamma*xVectors[worstVector][idx];
 					
-					Matrix.print(newVector2);
 					double tempValue2 = function.evaluate(newVector2);
-					System.out.printf("Value = %f\n",tempValue2);
 					
 					if(tempValue2 < bestValue)
 					{
@@ -159,12 +149,7 @@ public class NelderMead extends FunctionOptimization {
 						bestVector = worstVector;
 					}
 					
-					Matrix.print(xVectors);
-					
 					determineOrder();
-					
-					System.out.printf("%f\t%f\t%f\n", bestValue,secondWorstValue,worstValue);
-					System.out.printf("%d\t%d\t%d\n", bestVector,secondWorstVector,worstVector);
 					
 					return checkStoppingCriterium();
 				}
@@ -174,10 +159,6 @@ public class NelderMead extends FunctionOptimization {
 						xVectors[worstVector][idx] = newVector[idx];
 					
 					determineOrder();
-					
-					Matrix.print(xVectors);
-					System.out.printf("%f\t%f\t%f\n", bestValue,secondWorstValue,worstValue);
-					System.out.printf("%d\t%d\t%d\n", bestVector,secondWorstVector,worstVector);
 					
 					return checkStoppingCriterium();
 				}
@@ -206,12 +187,6 @@ public class NelderMead extends FunctionOptimization {
 					
 					determineOrder();
 					
-					Matrix.print(newVector2);
-					System.out.printf("Value = %f\n", tempValue);
-					Matrix.print(xVectors);
-					System.out.printf("%f\t%f\t%f\n", bestValue,secondWorstValue,worstValue);
-					System.out.printf("%d\t%d\t%d\n", bestVector,secondWorstVector,worstVector);
-					
 					return checkStoppingCriterium();
 				}
 				case 3:
@@ -238,12 +213,6 @@ public class NelderMead extends FunctionOptimization {
 					}
 					
 					determineOrder();
-					
-					Matrix.print(newVector2);
-					System.out.printf("Value = %f\n", tempValue);
-					Matrix.print(xVectors);
-					System.out.printf("%f\t%f\t%f\n", bestValue,secondWorstValue,worstValue);
-					System.out.printf("%d\t%d\t%d\n", bestVector,secondWorstVector,worstVector);
 					
 					return checkStoppingCriterium();
 				}

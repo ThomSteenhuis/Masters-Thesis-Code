@@ -35,10 +35,16 @@ public class Run {
 		}*/
 		
 		ARIMA ar1 = new ARIMA(data,1);
-		ar1.setCategory("2200EVO");
+		ar1.setCategory("TCB & Chameo");
 		ar1.train();
-		Matrix.print(ar1.getConstants());
 		
+		double[] timeseries = new double[data.getNoObs()-data.getTrainingFirstIndex()[data.getIndexFromCat("TCB & Chameo")]];
+		
+		for(int idx=0;idx<timeseries.length;++idx)
+			timeseries[idx] = data.getVolumes()[data.getTrainingFirstIndex()[data.getIndexFromCat("TCB & Chameo")]+idx][data.getIndexFromCat("TCB & Chameo")];
+		
+		LLAR1Function ll = new LLAR1Function(timeseries);
+		double[] input = {1.713806,0.121010,4.507092};
 		
 		/*LLAR1Function logLikelihood = new LLAR1Function(timeseries);
 		NelderMead nm = new NelderMead(logLikelihood);
