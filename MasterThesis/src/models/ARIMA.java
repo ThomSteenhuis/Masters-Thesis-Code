@@ -9,6 +9,11 @@ public class ARIMA extends Model {
 	
 	private double[] timeSeries;
 	
+	private double[] coefficients;
+	private double logLikelihood;
+	private double AIC;
+	private double BIC;
+	
 	public ARIMA(Data data,int periods)
 	{
 		super(data,periods);
@@ -24,23 +29,44 @@ public class ARIMA extends Model {
 		LLAR1Function f = new LLAR1Function(timeSeries);
 		NelderMead nm = new NelderMead(f);
 		nm.optimize();
+		coefficients = nm.getOptimalIntput();
+		
+		for(int idx=1;idx<(coefficients.length-1);++idx)
+			coefficients[idx] = Math.tanh(coefficients[idx]);
+		
+		coefficients[coefficients.length-1] = Math.abs(coefficients[coefficients.length-1]);
+		
+		logLikelihood = -nm.getOptimalValue();
+		calculateInformationCriteria();
 	}
 
-	@Override
-	public void validate() {
-		// TODO Auto-generated method stub
+	public void validate() {}
 
-	}
-
-	@Override
-	public void test() {
-		// TODO Auto-generated method stub
-
-	}
+	public void test() {}
 	
 	public double[] getTimeSeries()
 	{
 		return timeSeries;
+	}
+	
+	public double[] getCoefficients()
+	{
+		return coefficients;
+	}
+	
+	public double getLogLikelihoods()
+	{
+		return logLikelihood;
+	}
+	
+	public double getAIC()
+	{
+		return AIC;
+	}
+	
+	public double getBIC()
+	{
+		return BIC;
 	}
 	
 	private void determineNoDifferences()
@@ -101,6 +127,12 @@ public class ARIMA extends Model {
 			return true;
 		else 
 			return false;
+	}
+	
+	private void calculateInformationCriteria()
+	{
+		AIC = 2*noParameters - 2*logLikelihood;
+		BIC = 2*Math.log(timeSeries.length)*noParameters - 2*logLikelihood;
 	}
 
 }
