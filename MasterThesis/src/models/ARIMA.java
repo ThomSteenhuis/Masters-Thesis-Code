@@ -1,14 +1,13 @@
 package models;
 
 import input.Data;
-import math.LLAR1Function;
+import math.LLARMAFunction;
 import math.Matrix;
 import math.NelderMead;
 
 public class ARIMA extends Model {
 	
 	private double[] timeSeries;
-	
 	private double[] coefficients;
 	private double logLikelihood;
 	private double AIC;
@@ -24,9 +23,26 @@ public class ARIMA extends Model {
 
 	public void train() 
 	{
+		if(parameters.length != noParameters)
+		{
+			{
+				modelError("trainSES","inadequate no parameters");
+				return;
+			}
+		}
+		
+		for(int idx=0;idx<noParameters;++idx)
+		{
+			if(parameters[idx] < 0)
+			{
+				modelError("train","parameter should be at least 0");
+				return;
+			}
+		}
+		
 		determineNoDifferences();
 		
-		LLAR1Function f = new LLAR1Function(timeSeries);
+		LLARMAFunction f = new LLARMAFunction(timeSeries,(int)parameters[0],(int)parameters[1]);
 		NelderMead nm = new NelderMead(f);
 		nm.optimize();
 		coefficients = nm.getOptimalIntput();
@@ -38,6 +54,24 @@ public class ARIMA extends Model {
 		
 		logLikelihood = -nm.getOptimalValue();
 		calculateInformationCriteria();
+		
+		int index = data.getIndexFromCat(category);
+		int firstIndex = data.getTrainingFirstIndex()[index];
+		int noData1 = data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index];
+		int noData2 = data.getTestingFirstIndex()[index] - data.getValidationFirstIndex()[index];
+		int noData3 = data.getNoObs() - data.getTestingFirstIndex()[index] - 1;
+		
+		initializeSets(noData1,noData2,noData3);
+		
+		for(int idx=0;idx<noData1;++idx)
+		{
+			trainingReal[idx] = data.getVolumes()[firstIndex+idx][index];
+			trainingDates[idx] = data.getDates()[firstIndex+idx];
+		}
+		
+		forecast("training");
+		
+		trainingForecasted = true;
 	}
 
 	public void validate() {}
@@ -54,7 +88,7 @@ public class ARIMA extends Model {
 		return coefficients;
 	}
 	
-	public double getLogLikelihoods()
+	public double getLogLikelihood()
 	{
 		return logLikelihood;
 	}
@@ -72,7 +106,7 @@ public class ARIMA extends Model {
 	private void determineNoDifferences()
 	{
 		int index = data.getIndexFromCat(category);
-		double[] ts = new double[data.getNoObs()-data.getTrainingFirstIndex()[index]];
+		double[] ts = new double[data.getValidationFirstIndex()[index]-data.getTrainingFirstIndex()[index]];
 		double[] temp = new double[ts.length];
 				
 		for(int idx=0;idx<ts.length;++idx)
@@ -131,8 +165,28 @@ public class ARIMA extends Model {
 	
 	private void calculateInformationCriteria()
 	{
-		AIC = 2*noParameters - 2*logLikelihood;
-		BIC = 2*Math.log(timeSeries.length)*noParameters - 2*logLikelihood;
+		AIC = 2*(1+parameters[0]+parameters[1]) - 2*logLikelihood;
+		BIC = 2*Math.log(timeSeries.length-parameters[0])*(1+parameters[0]+parameters[1]) - 2*logLikelihood;
+	}
+	
+	private void forecast(String mode)
+	{
+		switch(mode)
+		{
+		case "training":
+		{
+			double[] forecast = new double[timeSeries.length];
+			
+			for(int idx=0;idx<parameters[0];++idx)
+			{
+				
+			}
+		}
+		default:
+		{
+			System.out.println("Error (forecast): default case reached");
+		}
+		}
 	}
 
 }

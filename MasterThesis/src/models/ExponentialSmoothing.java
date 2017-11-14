@@ -480,21 +480,6 @@ public class ExponentialSmoothing extends Model{
 		testingForecasted = true;
 	}
 	
-	private void initializeSets(int noData1,int noData2,int noData3)
-	{
-		trainingForecast = new double[noData1];
-		trainingReal = new double[noData1];
-		trainingDates = new String[noData1];
-		
-		validationForecast = new double[noData2];
-		validationReal = new double[noData2];
-		validationDates = new String[noData2];
-		
-		testingForecast = new double[noData3];
-		testingReal = new double[noData3];
-		testingDates = new String[noData3];
-	}
-	
 	private void train_val_testFour(double[][] dataset,int index,int firstIndex,double[] avals,double[] bvals,double[] cvals,int L,int noData1,int noData2,int noData3)
 	{
 		for(int idx=1;idx<L;++idx)

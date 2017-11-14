@@ -9,7 +9,7 @@ public abstract class FunctionOptimization {
 	protected int noIterations;
 	protected boolean converged;
 	
-	protected final int maxNoIterations = 10000;
+	protected final int maxNoIterations = 50000;
 	
 	public FunctionOptimization(Function f)
 	{

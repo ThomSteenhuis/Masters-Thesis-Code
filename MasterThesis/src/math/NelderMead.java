@@ -21,6 +21,9 @@ public class NelderMead extends FunctionOptimization {
 		{
 			stop = S.iterate();
 			iter ++;
+			
+			System.out.printf("Iter: %d. Optimal value = %f\n", iter,S.getBestValue());
+			Matrix.print(S.getBestVector());
 		}
 		
 		if(stop)
@@ -62,7 +65,7 @@ public class NelderMead extends FunctionOptimization {
 		private final double alpha = -1;
 		private final double beta = 0.5;
 		private final double gamma = -2;
-		private final double error = 0.000001;
+		private final double error = 0.0001;
 		
 		public Simplex(int dim)
 		{
@@ -347,7 +350,7 @@ public class NelderMead extends FunctionOptimization {
 				if(temp > stop)
 					stop = temp;
 			}
-			
+			System.out.println(stop);
 			if(stop <= error)
 				return true;
 			else 

@@ -43,6 +43,8 @@ public abstract class Model {
 			category = "";
 			noPersAhead = periods;
 			trainingForecasted = false;
+			validationForecasted = false;
+			testingForecasted = false;
 		}
 	}
 	
@@ -232,6 +234,21 @@ public abstract class Model {
 	public String[] getTestingDates()
 	{
 		return testingDates;
+	}
+	
+	protected void initializeSets(int noData1,int noData2,int noData3)
+	{
+		trainingForecast = new double[noData1];
+		trainingReal = new double[noData1];
+		trainingDates = new String[noData1];
+		
+		validationForecast = new double[noData2];
+		validationReal = new double[noData2];
+		validationDates = new String[noData2];
+		
+		testingForecast = new double[noData3];
+		testingReal = new double[noData3];
+		testingDates = new String[noData3];
 	}
 	
 	protected static void modelError(String model, String txt)

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import input.Data;
-import math.Matrix;
+import models.ARIMA;
 import models.ExponentialSmoothing;
 import models.Model;
 import optimization.GridSearch;
@@ -37,23 +37,34 @@ public class Experiment {
 			{
 				String line = s.nextLine();
 				String[] splittedLine = line.split("\t");
+				Model model;
 				
 				if(splittedLine.length < 4)
 				{
-					throw new FileNotFoundException("Fewer than 4 inputs in a line");
+					System.out.println("Error (Experiment): fewer than 4 arguments");
+					continue;
 				}
 				
 				if(isExponentialSmoothing(splittedLine[0]))
+					model = initializeES(splittedLine,data);
+				else if(isARIMA(splittedLine[0]))
+					model = initializeARIMA(splittedLine,data);
+				else
 				{
-					Model model = initializeES(splittedLine,data);
-					model.setCategory(splittedLine[1]);
+					System.out.println("Error (Experiment): model not recognized");
+					continue;
+				}
+				
+				if(splittedLine[2].equals("GridSearch") )
+				{
 					PerformanceMeasures pm = new PerformanceMeasures(model);
-					
-					if(splittedLine[2].equals("GridSearch") )
-					{
-						Optimization opt = initializeGS(splittedLine,pm);
-						instances.add(opt);
-					}
+					Optimization opt = initializeGS(splittedLine,pm);
+					instances.add(opt);
+				}
+				else
+				{
+					System.out.println("Error (Experiment): optimization algorithm not recognized");
+					continue;
 				}
 			}
 			
@@ -147,6 +158,14 @@ public class Experiment {
 		return es;
 	}
 	
+	private static Model initializeARIMA(String[] line,Data data) throws NumberFormatException
+	{		
+		ARIMA arma = new ARIMA(data,Integer.parseInt(line[3]));
+		arma.setCategory(line[1]);
+			
+		return arma;
+	}
+	
 	private static Optimization initializeGS(String[] line,PerformanceMeasures pm) throws FileNotFoundException,NumberFormatException
 	{
 		if( ( ( (line.length-4-pm.getModel().getNoConstants()) % 5) != 0) || ( ( (line.length-4-pm.getModel().getNoConstants()) / 5) != pm.getModel().getNoParameters() ) )
@@ -174,7 +193,7 @@ public class Experiment {
 		return new GridSearch(pm,parBounds,expBounds,expBase,noSteps);
 	}
 	
-	private boolean isExponentialSmoothing(String modelName)
+	private static boolean isExponentialSmoothing(String modelName)
 	{
 		switch (modelName)
 		{
@@ -190,6 +209,14 @@ public class Experiment {
 			case "four": return true;
 			default: return false;
 		}
+	}
+	
+	private static boolean isARIMA(String modelName)
+	{
+		if(modelName.equals("ARMA"))
+			return true;
+		else
+			return false;
 	}
 	
 	private void createOutcomes()

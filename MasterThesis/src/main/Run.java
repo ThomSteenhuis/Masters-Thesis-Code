@@ -21,7 +21,7 @@ public class Run {
 	{
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
-		/*Experiment e = new Experiment(data,"src/data/experiment.txt");
+		Experiment e = new Experiment(data,"src/data/experiment.txt");
 		
 		try 
 		{
@@ -32,32 +32,25 @@ public class Run {
 		catch (FileNotFoundException e1) 
 		{
 			e1.printStackTrace();
-		}*/
+		}
 		
-		ARIMA ar1 = new ARIMA(data,1);
-		ar1.setCategory("TCB & Chameo");
-		ar1.train();
+		/*ARIMA arma11 = new ARIMA(data,1);
+		double[] parameters = {1,1};
+		arma11.setParameters(parameters);
+		arma11.setCategory("TCB & Chameo");
+		arma11.train();
+		Matrix.print(arma11.getCoefficients());
+		System.out.println(arma11.getLogLikelihood());
 		
 		double[] timeseries = new double[data.getNoObs()-data.getTrainingFirstIndex()[data.getIndexFromCat("TCB & Chameo")]];
 		
 		for(int idx=0;idx<timeseries.length;++idx)
 			timeseries[idx] = data.getVolumes()[data.getTrainingFirstIndex()[data.getIndexFromCat("TCB & Chameo")]+idx][data.getIndexFromCat("TCB & Chameo")];
 		
-		LLAR1Function ll = new LLAR1Function(timeseries);
-		double[] input = {1.713806,0.121010,4.507092};
-		
-		/*LLAR1Function logLikelihood = new LLAR1Function(timeseries);
-		NelderMead nm = new NelderMead(logLikelihood);
-		
-		double[] input = {0.012370,1.073079,0.428425};
-		System.out.println(logLikelihood.evaluate(input));
-		
-		nm.optimize(10);
-		double[] output = nm.getOptimalIntput();
-		output[2] = Math.pow(output[2], 2);
-		Matrix.print(output);
-		
-		*/
+		LLARMAFunction ll = new LLARMAFunction(timeseries,1,1);
+		double[] vec = {3.244834,-0.830291,1.578291,4.179848};
+		System.out.println(ll.evaluate(vec));
+		Matrix.print(ll.derivative(vec));*/
 
 		/*SVR testModel = new SVR(data,1);
 		PerformanceMeasures pm = new PerformanceMeasures(testModel);
