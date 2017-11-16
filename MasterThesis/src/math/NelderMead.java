@@ -21,10 +21,6 @@ public class NelderMead extends FunctionOptimization {
 		{
 			stop = S.iterate();
 			iter ++;
-			
-			System.out.printf("Iter: %d. Optimal value = %f\n", iter,S.getBestValue());
-			Matrix.print(S.getBestVector());
-			Matrix.print(S.xVectors);
 		}
 		
 		if(stop)
@@ -312,7 +308,7 @@ public class NelderMead extends FunctionOptimization {
 		{
 			if(vectorValue < bestValue)
 				return 0;
-			else if(vectorValue > worstValue)
+			else if(vectorValue >= worstValue)
 				return 2;
 			else if(vectorValue > secondWorstValue)
 				return 3;
