@@ -1,5 +1,7 @@
 package models;
 
+import java.util.Random;
+
 import input.Data;
 import math.LLARMAFunction;
 import math.Matrix;
@@ -7,18 +9,21 @@ import math.NelderMead;
 
 public class ARIMA extends Model {
 	
+	private int seed;
+	
 	private double[] timeSeries;
 	private double[] coefficients;
 	private double logLikelihood;
 	private double AIC;
 	private double BIC;
 	
-	public ARIMA(Data data,int periods)
+	public ARIMA(Data data,int periods,int s)
 	{
 		super(data,periods);
 		noParameters = 2;
 		noConstants = 1;
 		name = "ARIMA";
+		seed = s;
 	}
 
 	public void train() 
@@ -69,9 +74,11 @@ public class ARIMA extends Model {
 			trainingDates[idx] = data.getDates()[firstIndex+idx];
 		}
 		
-		forecast("training");
+		forecast(seed);
 		
 		trainingForecasted = true;
+		validationForecasted = true;
+		testingForecasted = true;
 	}
 
 	public void validate() {}
@@ -169,24 +176,120 @@ public class ARIMA extends Model {
 		BIC = 2*Math.log(timeSeries.length-parameters[0])*(1+parameters[0]+parameters[1]) - 2*logLikelihood;
 	}
 	
-	private void forecast(String mode)
+	private void forecast(int seed)
 	{
-		switch(mode)
+		double[] realConverted = convertRealData();
+		double[] forecastConverted = new double[realConverted.length];
+		double[] errors = new double[realConverted.length];
+		Random r = new Random(seed);
+		
+		for(int idx=0;idx<realConverted.length;++idx)
+			errors[idx] = r.nextGaussian()*Math.sqrt(coefficients[coefficients.length-1]);
+		
+		for(int idx=0;idx<(int)parameters[0];++idx)
+			forecastConverted[idx] = realConverted[idx];
+		
+		for(int idx1=(int)parameters[0];idx1<realConverted.length;++idx1)
 		{
-		case "training":
-		{
-			double[] forecast = new double[timeSeries.length];
+			forecastConverted[idx1] = coefficients[0];
 			
-			for(int idx=0;idx<parameters[0];++idx)
-			{
-				
-			}
+			for(int idx2=(idx1-(int)parameters[0]);idx2<idx1;++idx2)
+				forecastConverted[idx1] += coefficients[idx1-idx2]*realConverted[idx2];
+			
+			for(int idx2=Math.max(0,idx1-(int)parameters[1]);idx2<idx1;++idx2)
+				forecastConverted[idx1] += coefficients[idx1-idx2+(int)parameters[0]]*errors[idx2];
 		}
-		default:
+		
+		double[] real = deriveData(realConverted);
+		double[] forecast = deriveData(forecastConverted);
+		int index = data.getIndexFromCat(category);
+		
+		for(int idx=0;idx<trainingReal.length;++idx)
 		{
-			System.out.println("Error (forecast): default case reached");
+			trainingReal[idx] = real[idx];
+			trainingForecast[idx] = forecast[idx];
+			trainingDates[idx] = data.getDates()[data.getTrainingFirstIndex()[index]+idx];
 		}
+		
+		for(int idx=0;idx<validationReal.length;++idx)
+		{
+			validationReal[idx] = real[trainingReal.length+idx];
+			validationForecast[idx] = forecast[trainingReal.length+idx];
+			validationDates[idx] = data.getDates()[data.getTrainingFirstIndex()[index]+trainingReal.length+idx];
+		}
+		
+		for(int idx=0;idx<testingReal.length;++idx)
+		{
+			testingReal[idx] = real[trainingReal.length+validationReal.length+idx];
+			testingForecast[idx] = forecast[trainingReal.length+validationReal.length+idx];
+			testingDates[idx] = data.getDates()[data.getTrainingFirstIndex()[index]+trainingReal.length+validationReal.length+idx];
+		}
+	}
+	
+	private double[] deriveData(double[] array)
+	{
+		if((int)constants[0] == 0)
+		{
+			return array;
+		}
+		else
+		{
+			int index = data.getIndexFromCat(category);
+			
+			double[][] ts = new double[(int)constants[0]][];
+			
+			ts[0] = new double[data.getNoObs()-data.getTrainingFirstIndex()[index]];
+			
+			for(int idx2=0;idx2<(int)constants[0];++idx2)
+				ts[0][idx2] = data.getVolumes()[data.getTrainingFirstIndex()[index]+idx2][index];
+					
+			for(int idx1=1;idx1<(int)constants[0];++idx1)
+			{
+				ts[idx1] = new double[data.getNoObs()-data.getTrainingFirstIndex()[index]-idx1];
+				
+				for(int idx2=0;idx2<((int)constants[0]-idx1);++idx2)
+					ts[idx1][idx2] = ts[idx1-1][idx2] - ts[idx1-1][idx2+1];
+			}
+			
+			for(int idx2=0;idx2<array.length;++idx2)
+				ts[(int)constants[0]-1][idx2+1] = ts[(int)constants[0]-1][idx2] + array[idx2];
+			
+			for(int idx1=((int)constants[0]-2);idx1>=0;--idx1)
+			{			
+				for(int idx2=((int)constants[0]-1-idx1);idx2<(ts[idx1].length-1);++idx2)
+					ts[idx1][idx2+1] = ts[idx1][idx2] + ts[idx1+1][idx2];
+			}
+			
+			return ts[0];
 		}
 	}
 
+	private double[] convertRealData()
+	{
+		int index = data.getIndexFromCat(category);
+		
+		double[] ts = new double[data.getNoObs()-data.getTrainingFirstIndex()[index]];
+		double[] temp = new double[ts.length];
+				
+		for(int idx=0;idx<ts.length;++idx)
+		{
+			ts[idx] = data.getVolumes()[data.getTrainingFirstIndex()[index]+idx][index];
+			temp[idx] = ts[idx];
+		}
+			
+		for(int idx1=0;idx1<(int)constants[0];++idx1)
+		{
+			temp = new double[ts.length-1];
+			
+			for(int idx2=0;idx2<temp.length;++idx2)
+				temp[idx2] = ts[idx2+1]-ts[idx2];
+			
+			ts = new double[temp.length];
+			
+			for(int idx2=0;idx2<temp.length;++idx2)
+				ts[idx2] = temp[idx2];
+		}
+		
+		return ts;
+	}
 }

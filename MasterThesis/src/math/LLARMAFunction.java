@@ -49,7 +49,7 @@ public class LLARMAFunction extends Function {
 				error[idx1] -= input1[idx1-idx2-1] * timeseries[idx2];
 			
 			for(int idx2=0;idx2<Math.min(idx1,q);++idx2)
-				error[idx1] -= input2[idx1-idx2-1] * error[idx2];
+				error[idx1] -= input2[Math.min(idx1,q)-idx2-1] * error[idx2];
 			
 			variable2 += Math.pow(error[idx1], 2);
 		}

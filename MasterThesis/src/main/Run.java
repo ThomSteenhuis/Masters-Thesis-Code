@@ -21,7 +21,7 @@ public class Run {
 	{
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
-		Experiment e = new Experiment(data,"src/data/experiment.txt");
+		/*Experiment e = new Experiment(data,"src/data/experiment.txt");
 		
 		try 
 		{
@@ -32,17 +32,23 @@ public class Run {
 		catch (FileNotFoundException e1) 
 		{
 			e1.printStackTrace();
-		}
+		}*/
 		
-		/*ARIMA arma11 = new ARIMA(data,1);
-		double[] parameters = {1,1};
-		arma11.setParameters(parameters);
-		arma11.setCategory("TCB & Chameo");
-		arma11.train();
-		Matrix.print(arma11.getCoefficients());
-		System.out.println(arma11.getLogLikelihood());
 		
-		double[] timeseries = new double[data.getNoObs()-data.getTrainingFirstIndex()[data.getIndexFromCat("TCB & Chameo")]];
+		
+		ARIMA arma = new ARIMA(data,1,3435);
+		arma.setCategory("TCB & Chameo");
+		PerformanceMeasures pm = new PerformanceMeasures(arma);
+		double[][] gsbounds = {{0,1},{0,1}};
+		boolean[] exp = {false,false};
+		double[] expbase = {2,2};
+		int[] nosteps = {1,1};
+		GridSearch gs = new GridSearch(pm,gsbounds,exp,expbase,nosteps);
+		gs.optimize(false);
+		arma.plotForecast("testing");
+		pm.printMeasures();
+		
+		/*double[] timeseries = new double[data.getNoObs()-data.getTrainingFirstIndex()[data.getIndexFromCat("TCB & Chameo")]];
 		
 		for(int idx=0;idx<timeseries.length;++idx)
 			timeseries[idx] = data.getVolumes()[data.getTrainingFirstIndex()[data.getIndexFromCat("TCB & Chameo")]+idx][data.getIndexFromCat("TCB & Chameo")];

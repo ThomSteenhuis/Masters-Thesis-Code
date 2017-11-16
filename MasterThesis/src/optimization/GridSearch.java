@@ -74,9 +74,9 @@ public class GridSearch extends Optimization{
 			
 			if(!silent)
 			{
-				if( ( (idx % (grid.length/100+1) ) == 0) && (idx >= (grid.length/100+1) ) && ((idx / (grid.length/100+1) < 100 ) ) )
+				if( ( ( (100*idx) % grid.length ) == 0) && ( (100*idx) >= grid.length ) && ( ( (100*idx) / grid.length) < 100 ) )
 				{
-					System.out.printf("Completed %d%% of %d models\n",idx / (grid.length/100+1),grid.length);
+					System.out.printf("Completed %d%% of %d models\n",(100*idx) / grid.length,grid.length);
 				}
 			}
 				

@@ -16,6 +16,7 @@ import performance.PerformanceMeasures;
 
 public class Experiment {
 
+	private final static int seed = 34304903;
 	private ArrayList<Optimization> instances;
 	
 	private double[] runTimes;
@@ -160,7 +161,7 @@ public class Experiment {
 	
 	private static Model initializeARIMA(String[] line,Data data) throws NumberFormatException
 	{		
-		ARIMA arma = new ARIMA(data,Integer.parseInt(line[3]));
+		ARIMA arma = new ARIMA(data,Integer.parseInt(line[3]),seed);
 		arma.setCategory(line[1]);
 			
 		return arma;
