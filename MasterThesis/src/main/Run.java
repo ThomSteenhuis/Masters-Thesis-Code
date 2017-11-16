@@ -37,15 +37,16 @@ public class Run {
 		
 		
 		ARIMA arma = new ARIMA(data,1,3435);
-		arma.setCategory("TCB & Chameo");
+		arma.setCategory("2200EVO");
 		PerformanceMeasures pm = new PerformanceMeasures(arma);
-		double[][] gsbounds = {{0,1},{0,1}};
+		double[][] gsbounds = {{0,3},{0,3}};
 		boolean[] exp = {false,false};
 		double[] expbase = {2,2};
-		int[] nosteps = {1,1};
+		int[] nosteps = {3,3};
 		GridSearch gs = new GridSearch(pm,gsbounds,exp,expbase,nosteps);
 		gs.optimize(false);
-		arma.plotForecast("testing");
+		gs.printBest();
+		arma.plotForecast("training");
 		pm.printMeasures();
 		
 		/*double[] timeseries = new double[data.getNoObs()-data.getTrainingFirstIndex()[data.getIndexFromCat("TCB & Chameo")]];

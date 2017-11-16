@@ -1,3 +1,3 @@
-ARMA	2200EVO	GridSearch	1	0	0	1	1	linear	2	0	1	1	linear	2
+ARMA	2200EVO	GridSearch	1	0	0	12	12	linear	2	0	12	12	linear	2
 SES	2200EVO	GridSearch	1	0.01	1	40	linear	2
 aDES	2200EVO	GridSearch	1	0.01	1	40	linear	2	0.01	1	40	linear	2
