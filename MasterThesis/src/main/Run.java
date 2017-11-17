@@ -35,11 +35,21 @@ public class Run {
 		}*/
 		
 		
-		
+		System.out.println(data.getTrainingFirstIndex()[data.getIndexFromCat("TCB & Chameo")]);
+		System.out.println(data.getValidationFirstIndex()[data.getIndexFromCat("TCB & Chameo")]);
 		ARIMA arma = new ARIMA(data,1,3435);
-		arma.setCategory("2200EVO");
+		arma.setCategory("TCB & Chameo");
+		double[] pars = {1,1};
+		arma.setParameters(pars);
+		arma.train();
 		PerformanceMeasures pm = new PerformanceMeasures(arma);
-		double[][] gsbounds = {{0,3},{0,3}};
+		pm.calculateMeasures("training");
+		pm.printMeasures();
+		Matrix.print(arma.getCoefficients());
+		System.out.println(arma.getLogLikelihood());
+		System.out.println(arma.getAIC());
+		
+		/*double[][] gsbounds = {{0,3},{0,3}};
 		boolean[] exp = {false,false};
 		double[] expbase = {2,2};
 		int[] nosteps = {3,3};
@@ -47,7 +57,7 @@ public class Run {
 		gs.optimize(false);
 		gs.printBest();
 		arma.plotForecast("training");
-		pm.printMeasures();
+		pm.printMeasures();*/
 		
 		/*double[] timeseries = new double[data.getNoObs()-data.getTrainingFirstIndex()[data.getIndexFromCat("TCB & Chameo")]];
 		

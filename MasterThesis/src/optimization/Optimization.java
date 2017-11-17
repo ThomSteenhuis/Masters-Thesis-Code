@@ -78,11 +78,23 @@ public abstract class Optimization {
 	
 	protected void updateBest()
 	{		
-		if( startOptimization || (performance > measures.getRMSE() ) )
+		if(measures.getModel().getName().equals("ARIMA"))
 		{
-			performance = measures.getRMSE();
-			optPars = measures.getModel().getParameters();
-			startOptimization = false;
+			if( startOptimization || (performance > measures.getModel().getAIC() ) )
+			{
+				performance = measures.getModel().getAIC();
+				optPars = measures.getModel().getParameters();
+				startOptimization = false;
+			}
+		}
+		else
+		{
+			if( startOptimization || (performance > measures.getRMSE() ) )
+			{
+				performance = measures.getRMSE();
+				optPars = measures.getModel().getParameters();
+				startOptimization = false;
+			}
 		}
 	}
 	

@@ -40,26 +40,13 @@ public class LLARMAFunction extends Function {
 		double variable1 = 0.5*(double)(timeseries.length-p)*Math.log(input3);
 		double variable2 = 0;
 		double[] error = new double[timeseries.length];
-		
-		for(int idx1=0;idx1<p;++idx1)
-		{
-			error[idx1] = timeseries[idx1] - input[0];
-			
-			for(int idx2=0;idx2<idx1;++idx2)
-				error[idx1] -= input1[idx1-idx2-1] * timeseries[idx2];
-			
-			for(int idx2=0;idx2<Math.min(idx1,q);++idx2)
-				error[idx1] -= input2[Math.min(idx1,q)-idx2-1] * error[idx2];
-			
-			variable2 += Math.pow(error[idx1], 2);
-		}
 
 		for(int idx1=p;idx1<timeseries.length;++idx1)
 		{
 			error[idx1] = timeseries[idx1] - input[0];
 			
 			for(int idx2=(idx1-p);idx2<idx1;++idx2)
-				error[idx1] -= input1[idx1-idx2-1] * timeseries[idx2];
+				error[idx1] -= input1[idx1-idx2-1] * (timeseries[idx2] - input[0]);
 			
 			for(int idx2=Math.max(idx1-q,0);idx2<idx1;++idx2)
 				error[idx1] -= input2[idx1-idx2-1] * error[idx2];

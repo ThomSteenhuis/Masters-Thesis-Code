@@ -13,9 +13,6 @@ public class ARIMA extends Model {
 	
 	private double[] timeSeries;
 	private double[] coefficients;
-	private double logLikelihood;
-	private double AIC;
-	private double BIC;
 	
 	public ARIMA(Data data,int periods,int s)
 	{
@@ -95,21 +92,6 @@ public class ARIMA extends Model {
 		return coefficients;
 	}
 	
-	public double getLogLikelihood()
-	{
-		return logLikelihood;
-	}
-	
-	public double getAIC()
-	{
-		return AIC;
-	}
-	
-	public double getBIC()
-	{
-		return BIC;
-	}
-	
 	private void determineNoDifferences()
 	{
 		int index = data.getIndexFromCat(category);
@@ -172,8 +154,8 @@ public class ARIMA extends Model {
 	
 	private void calculateInformationCriteria()
 	{
-		AIC = 2*(1+parameters[0]+parameters[1]) - 2*logLikelihood;
-		BIC = 2*Math.log(timeSeries.length-parameters[0])*(1+parameters[0]+parameters[1]) - 2*logLikelihood;
+		AIC = 2*(2+parameters[0]+parameters[1]) - 2*logLikelihood;
+		BIC = 2*Math.log(timeSeries.length-parameters[0])*(2+parameters[0]+parameters[1]) - 2*logLikelihood;
 	}
 	
 	private void forecast(int seed)

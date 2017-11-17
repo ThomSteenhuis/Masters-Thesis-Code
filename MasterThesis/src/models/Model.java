@@ -16,6 +16,10 @@ public abstract class Model {
 	
 	protected String category;
 	
+	protected double logLikelihood;
+	protected double AIC;
+	protected double BIC;
+	
 	protected boolean trainingForecasted;
 	protected double[] trainingForecast;
 	protected double[] trainingReal;
@@ -189,6 +193,21 @@ public abstract class Model {
 	public String getCategory()
 	{
 		return category;
+	}	
+	
+	public double getLogLikelihood()
+	{
+		return logLikelihood;
+	}
+	
+	public double getAIC()
+	{
+		return AIC;
+	}
+	
+	public double getBIC()
+	{
+		return BIC;
 	}
 	
 	public double[] getTrainingForecast()
