@@ -13,6 +13,7 @@ public class ARIMA extends Model {
 	
 	private double[] timeSeries;
 	private double[] coefficients;
+	private double[] residuals;
 	
 	public ARIMA(Data data,int periods,int s)
 	{
@@ -44,17 +45,20 @@ public class ARIMA extends Model {
 		
 		determineNoDifferences();
 		
-		LLARMAFunction f = new LLARMAFunction(timeSeries,(int)parameters[0],(int)parameters[1]);
+		LLARMAFunction f = new LLARMAFunction(this,(int)parameters[0],(int)parameters[1]);
+		
 		NelderMead nm = new NelderMead(f);
 		nm.optimize();
-		coefficients = nm.getOptimalIntput();
-		
+		coefficients = new double[2+(int)parameters[0]+(int)parameters[1]];
+			
+		coefficients[0] = nm.getOptimalIntput()[0];
+			
 		for(int idx=1;idx<(coefficients.length-1);++idx)
-			coefficients[idx] = Math.tanh(coefficients[idx]);
-		
-		coefficients[coefficients.length-1] = Math.abs(coefficients[coefficients.length-1]);
-		
-		logLikelihood = -nm.getOptimalValue();
+			coefficients[idx] = Math.tanh(nm.getOptimalIntput()[idx]);
+			
+		coefficients[coefficients.length-1] = Math.abs(nm.getOptimalIntput()[coefficients.length-1]);
+		calculateResiduals(coefficients);
+		logLikelihood = -f.evaluate(coefficients);
 		calculateInformationCriteria();
 		
 		int index = data.getIndexFromCat(category);
@@ -90,6 +94,45 @@ public class ARIMA extends Model {
 	public double[] getCoefficients()
 	{
 		return coefficients;
+	}
+	
+	public double[] getResiduals()
+	{
+		return residuals;
+	}
+	
+	private void calculateResiduals(double[] coefficients)
+	{
+		residuals = new double[timeSeries.length];
+		
+		for(int idx1=(int)parameters[0];idx1<timeSeries.length;++idx1)
+		{
+			residuals[idx1] = timeSeries[idx1] - coefficients[0];
+			
+			for(int idx2=(idx1-(int)parameters[0]);idx2<idx1;++idx2)
+				residuals[idx1] -= coefficients[idx1-idx2] * (timeSeries[idx2] - coefficients[0]);
+			
+			for(int idx2=Math.max(idx1-(int)parameters[1],0);idx2<idx1;++idx2)
+				residuals[idx1] -= coefficients[idx1-idx2+(int)parameters[0]] * residuals[idx2];
+		}
+	}
+	
+	public double[] calculateErrors(double mu, double[] phi, double[] theta)
+	{
+		double[] error = new double[timeSeries.length];
+		
+		for(int idx1=(int)parameters[0];idx1<timeSeries.length;++idx1)
+		{
+			error[idx1] = timeSeries[idx1] - mu;
+			
+			for(int idx2=(idx1-(int)parameters[0]);idx2<idx1;++idx2)
+				error[idx1] -= phi[idx1-idx2-1] * (timeSeries[idx2] - mu);
+			
+			for(int idx2=Math.max(idx1-(int)parameters[1],0);idx2<idx1;++idx2)
+				error[idx1] -= theta[idx1-idx2-1] * error[idx2];
+		}
+		
+		return error;
 	}
 	
 	private void determineNoDifferences()
@@ -176,7 +219,7 @@ public class ARIMA extends Model {
 			forecastConverted[idx1] = coefficients[0];
 			
 			for(int idx2=(idx1-(int)parameters[0]);idx2<idx1;++idx2)
-				forecastConverted[idx1] += coefficients[idx1-idx2]*realConverted[idx2];
+				forecastConverted[idx1] += coefficients[idx1-idx2]*(realConverted[idx2]-coefficients[0]);
 			
 			for(int idx2=Math.max(0,idx1-(int)parameters[1]);idx2<idx1;++idx2)
 				forecastConverted[idx1] += coefficients[idx1-idx2+(int)parameters[0]]*errors[idx2];

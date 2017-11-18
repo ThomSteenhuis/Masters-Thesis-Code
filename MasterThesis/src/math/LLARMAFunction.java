@@ -1,17 +1,19 @@
 package math;
 
+import models.ARIMA;
+
 public class LLARMAFunction extends Function {
 	
-	private double[] timeseries;
+	private ARIMA arima;
 	private double constant;
 	private int p;
 	private int q;
 
-	public LLARMAFunction(double[] ts,int P,int Q)
+	public LLARMAFunction(ARIMA a,int P,int Q)
 	{
 		super(2+P+Q);
-		timeseries = ts;
-		constant = 0.5*(double)(ts.length-P)*Math.log(2*Math.PI);
+		arima = a;
+		constant = 0.5*(double)(arima.getTimeSeries().length-P)*Math.log(2*Math.PI);
 		p = P;
 		q = Q;
 	}
@@ -37,31 +39,21 @@ public class LLARMAFunction extends Function {
 			input2[idx] = Math.tanh(input[idx+1+p]);
 		
 		double input3 = Math.abs(input[1+p+q]);
-		double variable1 = 0.5*(double)(timeseries.length-p)*Math.log(input3);
+		double variable1 = 0.5*(double)(arima.getTimeSeries().length-p)*Math.log(input3);
 		double variable2 = 0;
-		double[] error = new double[timeseries.length];
+		double[] error = arima.calculateErrors(input[0],input1,input2);
 
-		for(int idx1=p;idx1<timeseries.length;++idx1)
-		{
-			error[idx1] = timeseries[idx1] - input[0];
-			
-			for(int idx2=(idx1-p);idx2<idx1;++idx2)
-				error[idx1] -= input1[idx1-idx2-1] * (timeseries[idx2] - input[0]);
-			
-			for(int idx2=Math.max(idx1-q,0);idx2<idx1;++idx2)
-				error[idx1] -= input2[idx1-idx2-1] * error[idx2];
-			
+		for(int idx1=p;idx1<error.length;++idx1)
 			variable2 += Math.pow(error[idx1], 2);
-		}
 
 		variable2 = 0.5 * variable2 / input3;
 
 		return constant + variable1 + variable2;
 	}
 	
-	public double[] getTimeSeries()
+	public ARIMA getArima()
 	{
-		return timeseries;
+		return arima;
 	}
 	
 	public double getConstant()

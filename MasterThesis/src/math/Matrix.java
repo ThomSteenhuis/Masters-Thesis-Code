@@ -105,7 +105,7 @@ public class Matrix {
 	{
 		if( (matrix1.length != matrix2.length) || (matrix1.length == 0) )
 		{
-			System.out.println("Error (difference): matrixs have unequal length or 0 length");
+			System.out.println("Error (difference): matrices have unequal length or 0 length");
 			return null;
 		}
 
@@ -120,6 +120,22 @@ public class Matrix {
 		}
 
 		return output;
+	}
+	
+	public static double average(double[] array)
+	{
+		if(array.length == 0)
+		{
+			System.out.println("Error (average): array has 0 length");
+			return 0;
+		}
+		
+		double output = 0;
+		
+		for(int idx=0;idx<array.length;++idx)
+			output += array[idx];
+		
+		return output/array.length;
 	}
 	
 	public static double infinityNorm(double[] array)

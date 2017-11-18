@@ -35,10 +35,10 @@ public class Run {
 		}*/
 		
 		
-		System.out.println(data.getTrainingFirstIndex()[data.getIndexFromCat("TCB & Chameo")]);
-		System.out.println(data.getValidationFirstIndex()[data.getIndexFromCat("TCB & Chameo")]);
+		System.out.println(data.getTrainingFirstIndex()[data.getIndexFromCat("2200EVO")]);
+		System.out.println(data.getValidationFirstIndex()[data.getIndexFromCat("2200EVO")]);
 		ARIMA arma = new ARIMA(data,1,3435);
-		arma.setCategory("TCB & Chameo");
+		arma.setCategory("2200EVO");
 		double[] pars = {1,1};
 		arma.setParameters(pars);
 		arma.train();
@@ -46,8 +46,10 @@ public class Run {
 		pm.calculateMeasures("training");
 		pm.printMeasures();
 		Matrix.print(arma.getCoefficients());
+		System.out.println(arma.getConstants()[0]);
 		System.out.println(arma.getLogLikelihood());
 		System.out.println(arma.getAIC());
+		Matrix.print(arma.getResiduals());
 		
 		/*double[][] gsbounds = {{0,3},{0,3}};
 		boolean[] exp = {false,false};
