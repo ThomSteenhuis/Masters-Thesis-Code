@@ -118,6 +118,24 @@ public class Matrix {
 		return output;
 	}
 
+	public static double[] addition(double[] array1, double[] array2)
+	{
+		if(array1.length != array2.length)
+		{
+			System.out.println("Error (difference): arrays have unequal length");
+			return null;
+		}
+
+		double[] output = new double[array1.length];
+
+		for(int idx=0;idx<array1.length;++idx)
+		{
+			output[idx] = array1[idx] + array2[idx];
+		}
+
+		return output;
+	}
+
 	public static double[] difference(double[] array1, double[] array2)
 	{
 		if(array1.length != array2.length)
@@ -191,6 +209,24 @@ public class Matrix {
 		}
 
 		return output;
+	}
+
+	public static double twoNorm(double[] array)
+	{
+		if(array.length == 0)
+		{
+			System.out.println("Error (twoNorm): array has zero length");
+			return 0;
+		}
+
+		double output = 0;
+
+		for(int idx=0;idx<array.length;++idx)
+		{
+			output += Math.pow(array[idx],2);
+		}
+
+		return Math.sqrt(output);
 	}
 
 	public static double[] tanh(double[] array)

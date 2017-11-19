@@ -7,6 +7,7 @@ import experiments.Experiment;
 import input.Data;
 import math.*;
 import math.Matrix;
+import models.ANN;
 import models.ARIMA;
 import models.ExponentialSmoothing;
 import models.SVR;
@@ -39,8 +40,67 @@ public class Run {
 			e1.printStackTrace();
 		}*/
 
-
 		System.out.println(data.getTrainingFirstIndex()[data.getIndexFromCat("2200EVO")]);
+		System.out.println(data.getValidationFirstIndex()[data.getIndexFromCat("2200EVO")]);
+		ANN ann = new ANN(data,1);
+		ann.setCategory("2200EVO");
+		double[] pars = {6,10,0.0001,1000};
+		double[] cons = {0.00001,0.95};
+		ann.setParameters(pars);
+		ann.setConstants(cons);
+		
+		ann.train();
+		Matrix.print(ann.getTrainingForecast());
+		Matrix.print(ann.getLowerWeights());
+		Matrix.print(ann.getLowerBias());
+		Matrix.print(ann.getUpperWeights());
+		System.out.println(ann.getUpperBias());
+		ann.plotForecast("training");
+		double[] x = new double[6];
+		int index = data.getIndexFromCat("2200EVO");
+		
+		for(int idx=3;idx<9;++idx)
+			x[idx-3] = data.getVolumes()[idx][index];
+		
+		System.out.println(ann.predict(x));
+
+	/*	ann.noTrainingEpochs = (int)ann.getParameters()[3];
+		ann.alr = ann.getParameters()[2];
+
+		ann.X = new double[3][2];
+		ann.X[0][0] = 1;
+		ann.X[1][0] = 1;
+		ann.X[2][0] = 1;
+		ann.X[0][1] = 2;
+		ann.X[1][1] = 2;
+		ann.X[2][1] = 2;
+		ann.Y = new double[2];
+		ann.Y[0] = 1;
+		ann.Y[1] = 2;
+		ann.N = 2;
+
+		Matrix.print(ann.Y);
+		Matrix.print(ann.X);
+
+		ann.initializeWeights();
+
+		Matrix.print(ann.getLowerWeights());
+		Matrix.print(ann.getLowerBias());
+		Matrix.print(ann.getUpperWeights());
+		System.out.println(ann.getUpperBias());
+
+		ann.train();
+
+		Matrix.print(ann.getWTX());
+		Matrix.print(ann.getZ());
+		Matrix.print(ann.getLowerWeights());
+		Matrix.print(ann.getLowerBias());
+		Matrix.print(ann.getUpperWeights());
+		System.out.println(ann.getUpperBias());*/
+
+		
+
+		/*System.out.println(data.getTrainingFirstIndex()[data.getIndexFromCat("2200EVO")]);
 		System.out.println(data.getValidationFirstIndex()[data.getIndexFromCat("2200EVO")]);
 		ARIMA arma = new ARIMA(data,1,3435);
 		arma.setCategory("2200EVO");
@@ -54,7 +114,7 @@ public class Run {
 		System.out.println(arma.getConstants()[0]);
 		System.out.println(arma.getLogLikelihood());
 		System.out.println(arma.getAIC());
-		Matrix.print(arma.getResiduals());
+		Matrix.print(arma.getResiduals());*/
 
 		/*double[][] gsbounds = {{0,3},{0,3}};
 		boolean[] exp = {false,false};
