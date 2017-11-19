@@ -9,32 +9,32 @@ public abstract class Model {
 	protected int noPersAhead;
 	protected double[] parameters;
 	protected double[] constants;
-	
+
 	protected String name;
 	protected int noParameters;
 	protected int noConstants;
-	
+
 	protected String category;
-	
+
 	protected double logLikelihood;
 	protected double AIC;
 	protected double BIC;
-	
+
 	protected boolean trainingForecasted;
 	protected double[] trainingForecast;
 	protected double[] trainingReal;
 	protected String[] trainingDates;
-	
+
 	protected boolean validationForecasted;
 	protected double[] validationForecast;
 	protected double[] validationReal;
 	protected String[] validationDates;
-	
+
 	protected boolean testingForecasted;
 	protected double[] testingForecast;
 	protected double[] testingReal;
 	protected String[] testingDates;
-	
+
 	public Model(Data dataset, int periods)
 	{
 		if( (periods <= 0) || periods >= (dataset.getNoObs()) )
@@ -51,7 +51,7 @@ public abstract class Model {
 			testingForecasted = false;
 		}
 	}
-	
+
 	public void setCategory(String cat)
 	{
 		try{
@@ -64,7 +64,7 @@ public abstract class Model {
 		}
 		category = cat;
 	}
-	
+
 	public void setParameters(double[] newParameters)
 	{
 		if(newParameters.length == noParameters)
@@ -76,7 +76,7 @@ public abstract class Model {
 			System.out.println("Error (setParameters): number of constants inadequate");
 		}
 	}
-	
+
 	public void setConstants(double[] newConstants)
 	{
 		if(newConstants.length == noConstants)
@@ -88,20 +88,20 @@ public abstract class Model {
 			System.out.println("Error (setConstants): number of constants inadequate");
 		}
 	}
-	
+
 	public abstract void train();
 	public abstract void validate();
 	public abstract void test();
-	
+
 	public void plotForecast(String mode)
 	{
 		String[] pars = new String[1];
 		pars[0] = "pivot";
-		
+
 		String[] cats = new String[2];
 		cats[0] = category;
 		cats[1] = "Forecast";
-		
+
 		switch (mode)
 		{
 			case "training":
@@ -111,9 +111,9 @@ public abstract class Model {
 					modelError("plotForecast","train model first");
 					return;
 				}
-				
+
 				double[][] vols = merge(trainingReal,trainingForecast);
-				
+
 				Plot.initialize(pars,vols,trainingDates,cats,data.getLabels());
 				break;
 			}
@@ -124,9 +124,9 @@ public abstract class Model {
 					modelError("plotForecast","validate model first");
 					return;
 				}
-				
+
 				double[][] vols = merge(validationReal,validationForecast);
-				
+
 				Plot.initialize(pars,vols,validationDates,cats,data.getLabels());
 				break;
 			}
@@ -137,9 +137,9 @@ public abstract class Model {
 					modelError("plotForecast","test model first");
 					return;
 				}
-				
+
 				double[][] vols = merge(testingReal,testingForecast);
-				
+
 				Plot.initialize(pars,vols,testingDates,cats,data.getLabels());
 				break;
 			}
@@ -149,132 +149,132 @@ public abstract class Model {
 			}
 		}
 	}
-	
+
 	public Data getData()
 	{
 		return data;
 	}
-	
+
 	public int getNoPeriodsAhead()
 	{
 		return noPersAhead;
 	}
-	
+
 	public double[] getParameters()
 	{
 		return parameters;
 	}
-	
+
 	public double[] getConstants()
 	{
 		return constants;
 	}
-	
+
 	public String getName()
 	{
 		return name;
 	}
-	
+
 	public int getNoParameters()
 	{
 		return noParameters;
 	}
-	
+
 	public int getNoConstants()
 	{
 		return noConstants;
 	}
-	
+
 	public boolean isTrainingForecasted()
 	{
 		return trainingForecasted;
 	}
-	
+
 	public String getCategory()
 	{
 		return category;
-	}	
-	
+	}
+
 	public double getLogLikelihood()
 	{
 		return logLikelihood;
 	}
-	
+
 	public double getAIC()
 	{
 		return AIC;
 	}
-	
+
 	public double getBIC()
 	{
 		return BIC;
 	}
-	
+
 	public double[] getTrainingForecast()
 	{
 		return trainingForecast;
 	}
-	
+
 	public double[] getTrainingReal()
 	{
 		return trainingReal;
 	}
-	
+
 	public String[] getTrainingDates()
 	{
 		return trainingDates;
 	}
-	
+
 	public double[] getValidationForecast()
 	{
 		return validationForecast;
 	}
-	
+
 	public double[] getValidationReal()
 	{
 		return validationReal;
 	}
-	
+
 	public String[] getValidationDates()
 	{
 		return validationDates;
 	}
-	
+
 	public double[] getTestingForecast()
 	{
 		return testingForecast;
 	}
-	
+
 	public double[] getTestingReal()
 	{
 		return testingReal;
 	}
-	
+
 	public String[] getTestingDates()
 	{
 		return testingDates;
 	}
-	
+
 	protected void initializeSets(int noData1,int noData2,int noData3)
 	{
 		trainingForecast = new double[noData1];
 		trainingReal = new double[noData1];
 		trainingDates = new String[noData1];
-		
+
 		validationForecast = new double[noData2];
 		validationReal = new double[noData2];
 		validationDates = new String[noData2];
-		
+
 		testingForecast = new double[noData3];
 		testingReal = new double[noData3];
 		testingDates = new String[noData3];
 	}
-	
+
 	protected static void modelError(String model, String txt)
 	{
 		System.out.printf("Error (%s): %s\n",model,txt);
 	}
-	
+
 	private static double[][] merge(double[] array1,double[] array2)
 	{
 		if(array1.length != array2.length)
@@ -282,15 +282,15 @@ public abstract class Model {
 			System.out.println("Error (merge): arrays have unequal length");
 			return null;
 		}
-		
+
 		double[][] output = new double[array1.length][2];
-		
+
 		for(int idx=0;idx<array1.length;++idx)
 		{
 			output[idx][0] = array1[idx];
 			output[idx][1] = array2[idx];
 		}
-		
+
 		return output;
 	}
 }

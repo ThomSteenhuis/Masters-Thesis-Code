@@ -68,6 +68,25 @@ public class Matrix {
 		return output;
 	}
 
+	public static double[][] transpose(double[][] matrix)
+	{
+		if(matrix.length == 0)
+		{
+			System.out.println("Error (tranpose): matrix has 0 length");
+			return null;
+		}
+
+		double[][] output = new double[matrix[0].length][matrix.length];
+
+		for(int idx1=0;idx1<matrix.length;++idx1)
+		{
+			for(int idx2=0;idx2<matrix[idx1].length;++idx2)
+				output[idx2][idx1] = matrix[idx1][idx2];
+		}
+
+		return output;
+	}
+
 	public static double[][] outerProduct(double[] array1, double[] array2)
 	{
 		double[][] output = new double[array1.length][array2.length];
@@ -79,6 +98,22 @@ public class Matrix {
 				output[idx1][idx2] = array1[idx1] * array2[idx2];
 			}
 		}
+
+		return output;
+	}
+
+	public static double sum(double[] array)
+	{
+		if(array.length == 0)
+		{
+			System.out.println("Error (sum): array has 0 length");
+			return 0;
+		}
+
+		double output = 0;
+
+		for(int idx=0;idx<array.length;++idx)
+			output += array[idx];
 
 		return output;
 	}
@@ -121,7 +156,7 @@ public class Matrix {
 
 		return output;
 	}
-	
+
 	public static double average(double[] array)
 	{
 		if(array.length == 0)
@@ -129,15 +164,15 @@ public class Matrix {
 			System.out.println("Error (average): array has 0 length");
 			return 0;
 		}
-		
+
 		double output = 0;
-		
+
 		for(int idx=0;idx<array.length;++idx)
 			output += array[idx];
-		
+
 		return output/array.length;
 	}
-	
+
 	public static double infinityNorm(double[] array)
 	{
 		if(array.length == 0)
@@ -145,16 +180,64 @@ public class Matrix {
 			System.out.println("Error (infinityNorm): array has zero length");
 			return 0;
 		}
-		
+
 		double output = Math.abs(array[0]);
-		
+
 		for(int idx=1;idx<array.length;++idx)
 		{
 			double temp = Math.abs(array[idx]);
 			if(temp > output)
 				output = temp;
 		}
-		
+
+		return output;
+	}
+
+	public static double[] tanh(double[] array)
+	{
+		if(array.length == 0)
+		{
+			System.out.println("Error (tanh): array has 0 length");
+			return null;
+		}
+
+		double[] output = new double[array.length];
+
+		for(int idx=0;idx<array.length;++idx)
+			output[idx] = Math.tanh(array[idx]);
+
+		return output;
+	}
+
+	public static double[] elementwiseMultiplication(double[] array1,double[] array2)
+	{
+		if(array1.length != array2.length)
+		{
+			System.out.println("Error (elementwiseMultiplication): arrays have unequal length");
+			return null;
+		}
+
+		double[] output = new double[array1.length];
+
+		for(int idx=0;idx<output.length;++idx)
+			output[idx] = array1[idx]*array2[idx];
+
+		return output;
+	}
+
+	public static double[] elementwiseMultiplication(double[] array1,double[] array2,double[] array3)
+	{
+		if( (array1.length != array2.length) || (array1.length != array3.length) )
+		{
+			System.out.println("Error (elementwiseMultiplication): arrays have unequal length");
+			return null;
+		}
+
+		double[] output = new double[array1.length];
+
+		for(int idx=0;idx<output.length;++idx)
+			output[idx] = array1[idx]*array2[idx]*array3[idx];
+
 		return output;
 	}
 
@@ -188,18 +271,34 @@ public class Matrix {
 
 		return output;
 	}
-	
+
+	public static double[] scalarSubtraction(double scalar,double[] array)
+	{
+		if(array.length == 0)
+		{
+			System.out.println("Error (scalarSubtraction): array has 0 length");
+			return null;
+		}
+
+		double[] output = new double[array.length];
+
+		for(int idx=0;idx<output.length;++idx)
+			output[idx] = scalar - array[idx];
+
+		return output;
+	}
+
 	public static void print(double[][] matrix)
 	{
 		for(int idx1=0;idx1<matrix.length;++idx1)
 		{
 			for(int idx2=0;idx2<matrix[idx1].length;++idx2)
 				System.out.printf("%f\t", matrix[idx1][idx2]);
-			
+
 			System.out.println();
 		}
 	}
-	
+
 	public static void print(double[] array)
 	{
 		for(int idx=0;idx<array.length;++idx)

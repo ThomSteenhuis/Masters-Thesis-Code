@@ -1,6 +1,7 @@
 package main;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.Random;
 
 import experiments.Experiment;
 import input.Data;
@@ -13,28 +14,32 @@ import optimization.GridSearch;
 import performance.PerformanceMeasures;
 
 public class Run {
-	
+
+	public static Random r;
+
+	private static final int seed = 93439885;
 	private static final double propTraining = 0.6;
 	private static final double propValidation = 0.2;
 
 	public static void main(String[] args)
 	{
+		initializeRandom();
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
 		/*Experiment e = new Experiment(data,"src/data/experiment.txt");
-		
-		try 
+
+		try
 		{
 			PrintWriter p = new PrintWriter("src/data/outcomes.txt");
 			e.run(false);
 			e.writeOutcomes(p);
-		} 
-		catch (FileNotFoundException e1) 
+		}
+		catch (FileNotFoundException e1)
 		{
 			e1.printStackTrace();
 		}*/
-		
-		
+
+
 		System.out.println(data.getTrainingFirstIndex()[data.getIndexFromCat("2200EVO")]);
 		System.out.println(data.getValidationFirstIndex()[data.getIndexFromCat("2200EVO")]);
 		ARIMA arma = new ARIMA(data,1,3435);
@@ -50,7 +55,7 @@ public class Run {
 		System.out.println(arma.getLogLikelihood());
 		System.out.println(arma.getAIC());
 		Matrix.print(arma.getResiduals());
-		
+
 		/*double[][] gsbounds = {{0,3},{0,3}};
 		boolean[] exp = {false,false};
 		double[] expbase = {2,2};
@@ -60,12 +65,12 @@ public class Run {
 		gs.printBest();
 		arma.plotForecast("training");
 		pm.printMeasures();*/
-		
+
 		/*double[] timeseries = new double[data.getNoObs()-data.getTrainingFirstIndex()[data.getIndexFromCat("TCB & Chameo")]];
-		
+
 		for(int idx=0;idx<timeseries.length;++idx)
 			timeseries[idx] = data.getVolumes()[data.getTrainingFirstIndex()[data.getIndexFromCat("TCB & Chameo")]+idx][data.getIndexFromCat("TCB & Chameo")];
-		
+
 		LLARMAFunction ll = new LLARMAFunction(timeseries,1,1);
 		double[] vec = {3.244834,-0.830291,1.578291,4.179848};
 		System.out.println(ll.evaluate(vec));
@@ -101,7 +106,7 @@ public class Run {
 		ex.addInstance(gs);
 		ex.run(false);
 		Matrix.print(ex.getRunTimes());*/
-		
+
 		/*gs.printBest();
 		testModel.setParameters(gs.getOptimalParameters());
 		testModel.train();
@@ -189,6 +194,11 @@ public class Run {
 		Performance.printMeasures(methods,RMSE,MAPE,MAE,ME);
 
 		graph.Plot.initialize(mode, allData, dates, header, input.Run.labels);*/
+	}
+
+	private static void initializeRandom()
+	{
+		r = new Random(seed);
 	}
 
 	private static double[] initData(String set,double[] data)
