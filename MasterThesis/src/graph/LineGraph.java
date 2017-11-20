@@ -44,7 +44,7 @@ public class LineGraph{
 	private String[] xValues;
 	private String[] axesLabels;
 	
-	private ArrayList<double[]>[] lineCoordinates;
+	double[][][] lineCoordinates;
 
 	private double[][] axisCoordinates;
 	private String xAxisName;
@@ -56,11 +56,13 @@ public class LineGraph{
 	private Label[] yLabels;
 
 	private int xMode = 1;
-	private int xInterval = 2;
+	private int xInterval;
 	private boolean minorXTicks = true;
 	private int yMode = 0;
 	private int yInterval;
-	private int maxNoMajorYTicks = 7;
+	private int yNoIntervals;
+	private int maxNoMajorXTicks = 30;
+	private int maxNoMajorYTicks = 10;
 	private boolean minorYTicks = false;
 
 	public LineGraph(double[][] input,String[] leftLine,String[] header,String[] labels)
@@ -116,10 +118,14 @@ public class LineGraph{
 		axisCoordinates[3][0] = drawPane.getWidth() - rightMargin;
 		axisCoordinates[3][1] = topMargin;
 
-		lineCoordinates = getLineCoordinates(yValues,axisCoordinates[0],axisCoordinates[2]);
+		double[] extremes = getExtremes(yValues);
+		yAxisCategories = new String[(int) Math.ceil(extremes[1]) + 1];
 
+		for(int idx=0;idx<yAxisCategories.length;++idx)
+			yAxisCategories[idx] = Integer.toString(idx);
+		
 		drawAxes();
-
+		calculateLineCoordinates();
 		createCheckboxes(categories);
 	}
 	
@@ -198,9 +204,21 @@ public class LineGraph{
 		return rightPane;
 	}
 	
-	private void calculateYInterval()
+	private void calculateIntervals()
 	{
-		yInterval = (int)Math.ceil(Double.parseDouble(yAxisCategories[yAxisCategories.length-1])/maxNoMajorYTicks);
+		xInterval = (int)Math.ceil( ( (double)(xValues.length-1) ) / maxNoMajorXTicks );
+		
+		int guess = (int)Math.ceil(Double.parseDouble(yAxisCategories[yAxisCategories.length-1])/(maxNoMajorYTicks-1) );
+		int powerOf10 = (int) Math.floor(Math.log10(guess) );
+		
+		if( ( (double) (guess) / Math.pow(10,powerOf10) ) > 5 )
+			yInterval = (int) Math.pow(10,powerOf10+1);
+		else if( ( (double) (guess) / Math.pow(10,powerOf10) ) > 2 )
+			yInterval = (int) (5*Math.pow(10,powerOf10) );
+		else
+			yInterval = (int) (2*Math.pow(10,powerOf10) );
+		
+		yNoIntervals = (int)Math.ceil(Double.parseDouble(yAxisCategories[yAxisCategories.length-1])/yInterval);
 	}
 
 	private void drawAxes()
@@ -224,6 +242,7 @@ public class LineGraph{
 
 		drawPane.getChildren().addAll(axes);
 
+		calculateIntervals();
 		Line[] xTicks = new Line[xValues.length];
 		String[] xTickNames = new String[xValues.length];
 		xLabels = new Label[xValues.length];
@@ -253,13 +272,12 @@ public class LineGraph{
 		}
 
 		addXLabels();
-		calculateYInterval();
 		
 		Line[] yTicks = new Line[yAxisCategories.length];
 		String[] yTickNames = new String[yAxisCategories.length];
 		yLabels = new Label[yAxisCategories.length];
 
-		for(int idx=0;idx<yAxisCategories.length;++idx)
+		for(int idx=0;idx<=(yInterval*yNoIntervals);++idx)
 		{
 			yTicks[idx] = new Line();
 
@@ -278,7 +296,7 @@ public class LineGraph{
 				yTicks[idx].setEndY(yTicks[idx].getStartY());
 			}
 
-			yTickNames[idx] = yAxisCategories[(int) (idx*(yAxisCategories.length-1)/(yAxisCategories.length-1))];
+			yTickNames[idx] = Integer.toString(idx);
 
 			yLabels[idx] = new Label(yTickNames[idx]);
 		}
@@ -368,9 +386,9 @@ public class LineGraph{
 		{
 		case 0:
 		{
-			for(int idx=0;idx<yLabels.length;idx+=yInterval)
+			for(int idx=0;idx<=yNoIntervals;idx++)
 			{
-				yLabels[idx].widthProperty().addListener(new ChangeListener()
+				yLabels[idx*yInterval].widthProperty().addListener(new ChangeListener()
 				{
 					public void changed(ObservableValue arg0, Object arg1, Object arg2)
 					{
@@ -378,7 +396,7 @@ public class LineGraph{
 					}
 				});
 
-				yLabels[idx].heightProperty().addListener(new ChangeListener()
+				yLabels[idx*yInterval].heightProperty().addListener(new ChangeListener()
 				{
 					public void changed(ObservableValue arg0, Object arg1, Object arg2)
 					{
@@ -386,18 +404,18 @@ public class LineGraph{
 					}
 				});
 
-				drawPane.getChildren().add(yLabels[idx]);
+				drawPane.getChildren().add(yLabels[idx*yInterval]);
 			}
 
 			break;
 		}
 		case 1:
 		{
-			for(int idx=0;idx<yLabels.length;idx+=yInterval)
+			for(int idx=0;idx<=yNoIntervals;idx++)
 			{
-				yLabels[idx].setRotate(-90);
+				yLabels[idx*yInterval].setRotate(-90);
 
-				yLabels[idx].widthProperty().addListener(new ChangeListener()
+				yLabels[idx*yInterval].widthProperty().addListener(new ChangeListener()
 				{
 					public void changed(ObservableValue arg0, Object arg1, Object arg2)
 					{
@@ -405,7 +423,7 @@ public class LineGraph{
 					}
 				});
 
-				xLabels[idx].heightProperty().addListener(new ChangeListener()
+				yLabels[idx*yInterval].heightProperty().addListener(new ChangeListener()
 				{
 					public void changed(ObservableValue arg0, Object arg1, Object arg2)
 					{
@@ -413,7 +431,7 @@ public class LineGraph{
 					}
 				});
 
-				drawPane.getChildren().add(yLabels[idx]);
+				drawPane.getChildren().add(yLabels[idx*yInterval]);
 			}
 
 			break;
@@ -454,14 +472,14 @@ public class LineGraph{
 		{
 			if(checkboxes[idx1].isSelected())
 			{
-				for(int idx2=0;idx2<lineCoordinates[idx1].size();++idx2)
+				for(int idx2=0;idx2<lineCoordinates[idx1].length;++idx2)
 				{
 					line = new Line();
 					line.setStroke(colors[idx1]);
-					line.setStartX(lineCoordinates[idx1].get(idx2)[0]);
-					line.setStartY(lineCoordinates[idx1].get(idx2)[1]);
-					line.setEndX(lineCoordinates[idx1].get(idx2)[2]);
-					line.setEndY(lineCoordinates[idx1].get(idx2)[3]);
+					line.setStartX(lineCoordinates[idx1][idx2][0]);
+					line.setStartY(lineCoordinates[idx1][idx2][1]);
+					line.setEndX(lineCoordinates[idx1][idx2][2]);
+					line.setEndY(lineCoordinates[idx1][idx2][3]);
 					drawPane.getChildren().add(line);
 				}
 			}
@@ -533,45 +551,32 @@ public class LineGraph{
 		rightPane.getChildren().addAll(all,none);
 	}
 
-	private ArrayList<double[]>[] getLineCoordinates(double[][] table,double[] topLeft,double[] bottomRight)
+	private void calculateLineCoordinates()
 	{
-		if(table.length <1)
-			return null;
+		if(yValues.length == 0)
+			return;
 
-		ArrayList<double[]>[] output = new ArrayList[table[0].length];
-
-		for(int idx=0;idx<(table[0].length);++idx)
-			output[idx] = new ArrayList<double[]>();
-
-		double[] extremes = getExtremes(table);
-		yAxisCategories = new String[(int) (Math.ceil(extremes[1]) - Math.floor(extremes[0]) ) + 1];
-
-		for(int idx=0;idx<yAxisCategories.length;++idx)
-		{
-			yAxisCategories[idx] = Integer.toString((int) (Math.floor(extremes[0]) ) + idx);
-		}
-
+		lineCoordinates = new double[yValues[0].length][yValues.length][4];
+		
 		double[] coordinates;
-		double defWidth = bottomRight[0] - topLeft[0];
-		double defHeight = bottomRight[1] - topLeft[1];
-		double xStart = topLeft[0];
-		double yStart = topLeft[1];
-		double xStep = defWidth/( (double) (table.length - 1) );
+		double defWidth = axisCoordinates[2][0] - axisCoordinates[0][0];
+		double defHeight = axisCoordinates[2][1] - axisCoordinates[0][1];
+		double xStart = axisCoordinates[0][0];
+		double yStart = axisCoordinates[0][1];
+		double xStep = defWidth/( (double) (xValues.length - 1) );
 
-		for(int idx1=0;idx1<(table[0].length);++idx1)
+		for(int idx1=0;idx1<(yValues[0].length);++idx1)
 		{
-			for(int idx2=0;idx2<(table.length-1);idx2++)
+			for(int idx2=0;idx2<(yValues.length-1);idx2++)
 			{
 				coordinates = new double[4];
 				coordinates[0] = idx2*xStep + xStart;
 				coordinates[2] = (idx2+1)*xStep + xStart;
-				coordinates[1] = yStart + defHeight * (1 - ( (table[idx2][idx1] - extremes[0]) ) / (extremes[1] - extremes[0]) );
-				coordinates[3] = yStart + defHeight * (1 - ( (table[idx2+1][idx1] - extremes[0]) ) / (extremes[1] - extremes[0]) );
-				output[idx1].add(coordinates);
+				coordinates[1] = yStart + defHeight * (1 - (yValues[idx2][idx1] / (yNoIntervals*yInterval) ) );
+				coordinates[3] = yStart + defHeight * (1 - (yValues[idx2+1][idx1] / (yNoIntervals*yInterval) ) );
+				lineCoordinates[idx1][idx2] = coordinates;
 			}
 		}
-
-		return output;
 	}
 
 	private static double[] getExtremes(double[][] table)
