@@ -160,9 +160,6 @@ public class ExponentialSmoothing extends Model{
 		}
 	}
 	
-	public void validate(){}
-	public void test(){}
-	
 	public boolean isAdditive()
 	{
 		if( (modelNo == 1) || (modelNo == 2) )
@@ -227,34 +224,20 @@ public class ExponentialSmoothing extends Model{
 		int noData2 = data.getTestingFirstIndex()[idx1] - data.getValidationFirstIndex()[idx1];
 		int noData3 = data.getNoObs() - data.getTestingFirstIndex()[idx1] - 1;
 		
-		initializeSets(noData1,noData2,noData3);
+		initializeSets();
 		
 		double[] avals = new double[noData1+noData2+noData3];
 		
 		avals[0] = dataset[firstIndex][idx1];
-		trainingReal[0] = dataset[firstIndex][idx1];
-		trainingDates[0] = data.getDates()[firstIndex];
 		
 		for(int idx2=1;idx2<noData1;idx2++)
-		{
 			avals[idx2] = parameters[0]*dataset[firstIndex+idx2][idx1] + (1-parameters[0])*avals[idx2-1];
-			trainingReal[idx2] = dataset[firstIndex+idx2][idx1];
-			trainingDates[idx2] = data.getDates()[firstIndex+idx2];
-		}
 		
 		for(int idx2=0;idx2<noData2;idx2++)
-		{
 			avals[noData1+idx2] = parameters[0]*dataset[firstIndex+noData1+idx2][idx1] + (1-parameters[0])*avals[idx2+noData1-1];
-			validationReal[idx2] = dataset[firstIndex+noData1+idx2][idx1];
-			validationDates[idx2] = data.getDates()[firstIndex+noData1+idx2];
-		}
-		
+				
 		for(int idx2=0;idx2<noData3;idx2++)
-		{
 			avals[noData1+noData2+idx2] = parameters[0]*dataset[firstIndex+noData1+noData2+idx2][idx1] + (1-parameters[0])*avals[idx2+noData1+noData2-1];
-			testingReal[idx2] = dataset[firstIndex+noData1+noData2+idx2][idx1];
-			testingDates[idx2] = data.getDates()[firstIndex+noData1+noData2+idx2];
-		}
 		
 		for(int idx2=0;idx2<noPersAhead;++idx2)
 			trainingForecast[idx2] = dataset[firstIndex+idx2][idx1];
@@ -290,10 +273,10 @@ public class ExponentialSmoothing extends Model{
 		int noData2 = data.getTestingFirstIndex()[idx1] - data.getValidationFirstIndex()[idx1];
 		int noData3 = data.getNoObs() - data.getTestingFirstIndex()[idx1] - 1;
 		
-		initializeSets(noData1,noData2,noData3);
+		initializeSets();
 		
-		double[] avals = new double[noData1+noData2+noData3];
-		double[] bvals = new double[noData1+noData2+noData3];
+		double[] avals = new double[data.getNoObs() - data.getTrainingFirstIndex()[idx1] - 1];
+		double[] bvals = new double[avals.length];
 		
 		avals[1] = dataset[firstIndex+1][idx1];
 		
@@ -301,11 +284,8 @@ public class ExponentialSmoothing extends Model{
 			bvals[1] = dataset[firstIndex+1][idx1] - dataset[firstIndex][idx1];
 		else
 			bvals[1] = dataset[firstIndex+1][idx1] / dataset[firstIndex][idx1];
-		
-		trainingReal[0] = dataset[firstIndex][idx1];
-		trainingDates[0] = data.getDates()[firstIndex];
-		
-		for(int idx2=2;idx2<(noData1+noData2+noData3);idx2++)
+				
+		for(int idx2=2;idx2<(avals.length);idx2++)
 		{
 			if(additive)
 			{
@@ -333,24 +313,6 @@ public class ExponentialSmoothing extends Model{
 					bvals[idx2] = parameters[1] * avals[idx2] / avals[idx2-1] + (1 - parameters[1]) * bvals[idx2-1];
 				}
 			}
-		}
-		
-		for(int idx2=2;idx2<noData1;idx2++)
-		{
-			trainingReal[idx2] = dataset[firstIndex+idx2][idx1];
-			trainingDates[idx2] = data.getDates()[firstIndex+idx2];
-		}
-		
-		for(int idx2=0;idx2<noData2;idx2++)
-		{
-			validationReal[idx2] = dataset[firstIndex+noData1+idx2][idx1];
-			validationDates[idx2] = data.getDates()[firstIndex+noData1+idx2];
-		}
-		
-		for(int idx2=0;idx2<noData2;idx2++)
-		{
-			testingReal[idx2] = dataset[firstIndex+noData1+noData2+idx2][idx1];
-			testingDates[idx2] = data.getDates()[firstIndex+noData1+noData2+idx2];
 		}
 		
 		for(int idx2=0;idx2<Math.max(2,noPersAhead);++idx2)
@@ -432,11 +394,11 @@ public class ExponentialSmoothing extends Model{
 		int L = (int) constants[0];
 		int noCycles = data.getNoObs() / L;
 		
-		initializeSets(noData1,noData2,noData3);
+		initializeSets();
 		
-		double[] avals = new double[noData1+noData2+noData3];
-		double[] bvals = new double[noData1+noData2+noData3];
-		double[] cvals = new double[noData1+noData2+noData3];
+		double[] avals = new double[data.getNoObs() - data.getTrainingFirstIndex()[idx1] - 1];
+		double[] bvals = new double[avals.length];
+		double[] cvals = new double[avals.length];
 		double[] Avals = new double[noCycles];
 		
 		avals[0] = dataset[firstIndex][idx1];
@@ -496,32 +458,16 @@ public class ExponentialSmoothing extends Model{
 		}
 		
 		for(int idx=0;idx<(L+noPersAhead);++idx)
-		{
-			trainingDates[idx] = data.getDates()[firstIndex+idx];
-			trainingReal[idx] = dataset[firstIndex+idx][index];
 			trainingForecast[idx] = dataset[firstIndex+idx][index];
-		}
 		
 		for(int idx=(L+noPersAhead);idx<noData1;idx++)
-		{
-			trainingDates[idx] = data.getDates()[firstIndex+idx];
-			trainingReal[idx] = dataset[firstIndex+idx][index];
 			trainingForecast[idx] = avals[idx-noPersAhead] + noPersAhead*bvals[idx-noPersAhead] + cvals[idx-noPersAhead-L+1+( (noPersAhead-1) % L)];
-		}
-		
+				
 		for(int idx=0;idx<noData2;idx++)
-		{
-			validationDates[idx] = data.getDates()[firstIndex+noData1+idx];
-			validationReal[idx] = dataset[firstIndex+noData1+idx][index];
 			validationForecast[idx] = avals[idx+noData1-noPersAhead] + noPersAhead*bvals[idx+noData1-noPersAhead] + cvals[idx+noData1-noPersAhead-L+1+( (noPersAhead-1) % L)];
-		}
-		
+				
 		for(int idx=0;idx<noData3;idx++)
-		{
-			testingDates[idx] = data.getDates()[firstIndex+noData1+noData2+idx];
-			testingReal[idx] = dataset[firstIndex+noData1+noData2+idx][index];
 			testingForecast[idx] = avals[idx+noData1+noData2-noPersAhead] + noPersAhead*bvals[idx+noData1+noData2-noPersAhead] + cvals[idx+noData1+noData2-noPersAhead-L+1+( (noPersAhead-1) % L)];
-		}
 	}
 	
 	private void train_val_testTESadditive(double[][] dataset,int index,int firstIndex,double[] avals,double[] bvals,double[] cvals,int L,int noData1,int noData2,int noData3)
@@ -540,32 +486,16 @@ public class ExponentialSmoothing extends Model{
 		}
 		
 		for(int idx=0;idx<(L+noPersAhead);++idx)
-		{
-			trainingDates[idx] = data.getDates()[firstIndex+idx];
-			trainingReal[idx] = dataset[firstIndex+idx][index];
 			trainingForecast[idx] = dataset[firstIndex+idx][index];
-		}
-		
+				
 		for(int idx=(L+noPersAhead);idx<noData1;idx++)
-		{
-			trainingDates[idx] = data.getDates()[firstIndex+idx];
-			trainingReal[idx] = dataset[firstIndex+idx][index];
 			trainingForecast[idx] = avals[idx-noPersAhead] + noPersAhead*bvals[idx-noPersAhead] + cvals[idx-noPersAhead-L+1+( (noPersAhead-1) % L)];
-		}
-		
+				
 		for(int idx=0;idx<noData2;idx++)
-		{
-			validationDates[idx] = data.getDates()[firstIndex+noData1+idx];
-			validationReal[idx] = dataset[firstIndex+noData1+idx][index];
 			validationForecast[idx] = avals[idx+noData1-noPersAhead] + noPersAhead*bvals[idx+noData1-noPersAhead] + cvals[idx+noData1-noPersAhead-L+1+( (noPersAhead-1) % L)];
-		}
-		
+				
 		for(int idx=0;idx<noData3;idx++)
-		{
-			testingDates[idx] = data.getDates()[firstIndex+noData1+noData2+idx];
-			testingReal[idx] = dataset[firstIndex+noData1+noData2+idx][index];
 			testingForecast[idx] = avals[idx+noData1+noData2-noPersAhead] + noPersAhead*bvals[idx+noData1+noData2-noPersAhead] + cvals[idx+noData1+noData2-noPersAhead-L+1+( (noPersAhead-1) % L)];
-		}
 	}
 	
 	private void train_val_testTESmultiplicative(double[][] dataset,int index,int firstIndex,double[] avals,double[] bvals,double[] cvals,int L,int noData1,int noData2,int noData3)
@@ -584,32 +514,16 @@ public class ExponentialSmoothing extends Model{
 		}
 		
 		for(int idx=0;idx<(L+noPersAhead);++idx)
-		{
-			trainingDates[idx] = data.getDates()[firstIndex+idx];
-			trainingReal[idx] = dataset[firstIndex+idx][index];
 			trainingForecast[idx] = dataset[firstIndex+idx][index];
-		}
-		
+				
 		for(int idx=(L+noPersAhead);idx<noData1;idx++)
-		{
-			trainingDates[idx] = data.getDates()[firstIndex+idx];
-			trainingReal[idx] = dataset[firstIndex+idx][index];
 			trainingForecast[idx] = (avals[idx-noPersAhead] + noPersAhead*bvals[idx-noPersAhead]) * cvals[idx-noPersAhead-L+1+( (noPersAhead-1) % L)];
-		}
-		
+				
 		for(int idx=0;idx<noData2;idx++)
-		{
-			validationDates[idx] = data.getDates()[firstIndex+noData1+idx];
-			validationReal[idx] = dataset[firstIndex+noData1+idx][index];
 			validationForecast[idx] = (avals[idx+noData1-noPersAhead] + noPersAhead*bvals[idx+noData1-noPersAhead]) * cvals[idx+noData1-noPersAhead-L+1+( (noPersAhead-1) % L)];
-		}
-		
+				
 		for(int idx=0;idx<noData3;idx++)
-		{
-			testingDates[idx] = data.getDates()[firstIndex+noData1+noData2+idx];
-			testingReal[idx] = dataset[firstIndex+noData1+noData2+idx][index];
 			testingForecast[idx] = (avals[idx+noData1+noData2-noPersAhead] + noPersAhead*bvals[idx+noData1+noData2-noPersAhead]) * cvals[idx+noData1+noData2-noPersAhead-L+1+( (noPersAhead-1) % L)];
-		}
 	}
 	
 	private void train_val_testTESdampedAdditive(double[][] dataset,int index,int firstIndex,double[] avals,double[] bvals,double[] cvals,int L,int noData1,int noData2,int noData3)
@@ -628,37 +542,21 @@ public class ExponentialSmoothing extends Model{
 		}
 		
 		for(int idx=0;idx<(L+noPersAhead);++idx)
-		{
-			trainingDates[idx] = data.getDates()[firstIndex+idx];
-			trainingReal[idx] = dataset[firstIndex+idx][index];
 			trainingForecast[idx] = dataset[firstIndex+idx][index];
-		}
-		
+				
 		double dampingValue = 0;
 		
 		for(int idx=0;idx<noPersAhead;++idx)
 			dampingValue += Math.pow(parameters[3],idx+1);
 		
 		for(int idx=(L+noPersAhead);idx<noData1;idx++)
-		{
-			trainingDates[idx] = data.getDates()[firstIndex+idx];
-			trainingReal[idx] = dataset[firstIndex+idx][index];
 			trainingForecast[idx] = avals[idx-noPersAhead] + dampingValue*bvals[idx-noPersAhead] + cvals[idx-noPersAhead-L+1+( (noPersAhead-1) % L)];
-		}
-		
+				
 		for(int idx=0;idx<noData2;idx++)
-		{
-			validationDates[idx] = data.getDates()[firstIndex+noData1+idx];
-			validationReal[idx] = dataset[firstIndex+noData1+idx][index];
 			validationForecast[idx] = avals[idx+noData1-noPersAhead] + dampingValue*bvals[idx+noData1-noPersAhead] + cvals[idx+noData1-noPersAhead-L+1+( (noPersAhead-1) % L)];
-		}
-		
+				
 		for(int idx=0;idx<noData3;idx++)
-		{
-			testingDates[idx] = data.getDates()[firstIndex+noData1+noData2+idx];
-			testingReal[idx] = dataset[firstIndex+noData1+noData2+idx][index];
 			testingForecast[idx] = avals[idx+noData1+noData2-noPersAhead] + dampingValue*bvals[idx+noData1+noData2-noPersAhead] + cvals[idx+noData1+noData2-noPersAhead-L+1+( (noPersAhead-1) % L)];
-		}
 	}
 	
 	private void train_val_testTESdampedMultiplicative(double[][] dataset,int index,int firstIndex,double[] avals,double[] bvals,double[] cvals,int L,int noData1,int noData2,int noData3)
@@ -677,36 +575,20 @@ public class ExponentialSmoothing extends Model{
 		}
 		
 		for(int idx=0;idx<(L+noPersAhead);++idx)
-		{
-			trainingDates[idx] = data.getDates()[firstIndex+idx];
-			trainingReal[idx] = dataset[firstIndex+idx][index];
 			trainingForecast[idx] = dataset[firstIndex+idx][index];
-		}
-		
+				
 		double dampingValue = 0;
 		
 		for(int idx=0;idx<noPersAhead;++idx)
 			dampingValue += Math.pow(parameters[3],idx+1);
 		
 		for(int idx=(L+noPersAhead);idx<noData1;idx++)
-		{
-			trainingDates[idx] = data.getDates()[firstIndex+idx];
-			trainingReal[idx] = dataset[firstIndex+idx][index];
 			trainingForecast[idx] = (avals[idx-noPersAhead] + dampingValue*bvals[idx-noPersAhead]) * cvals[idx-noPersAhead-L+1+( (noPersAhead-1) % L)];
-		}
-		
+				
 		for(int idx=0;idx<noData2;idx++)
-		{
-			validationDates[idx] = data.getDates()[firstIndex+noData1+idx];
-			validationReal[idx] = dataset[firstIndex+noData1+idx][index];
 			validationForecast[idx] = (avals[idx+noData1-noPersAhead] + dampingValue*bvals[idx+noData1-noPersAhead]) * cvals[idx+noData1-noPersAhead-L+1+( (noPersAhead-1) % L)];
-		}
-		
+				
 		for(int idx=0;idx<noData3;idx++)
-		{
-			testingDates[idx] = data.getDates()[firstIndex+noData1+noData2+idx];
-			testingReal[idx] = dataset[firstIndex+noData1+noData2+idx][index];
 			testingForecast[idx] = (avals[idx+noData1+noData2-noPersAhead] + dampingValue*bvals[idx+noData1+noData2-noPersAhead]) * cvals[idx+noData1+noData2-noPersAhead-L+1+( (noPersAhead-1) % L)];
-		}
 	}
 }

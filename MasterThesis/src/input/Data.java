@@ -187,6 +187,72 @@ public class Data {
 		}
 	}
 	
+	public double[] getTrainingSet(String cat)
+	{
+		int index = getIndexFromCat(cat);
+		double[] output = new double[validationFirstIndex[index]-trainingFirstIndex[index]];
+		
+		for(int idx=0;idx<output.length;++idx)
+			output[idx] = volumes[trainingFirstIndex[index]+idx][index];
+		
+		return output;
+	}
+	
+	public double[] getValidationSet(String cat)
+	{
+		int index = getIndexFromCat(cat);
+		double[] output = new double[testingFirstIndex[index]-validationFirstIndex[index]];
+		
+		for(int idx=0;idx<output.length;++idx)
+			output[idx] = volumes[validationFirstIndex[index]+idx][index];
+		
+		return output;
+	}
+	
+	public double[] getTestingSet(String cat)
+	{
+		int index = getIndexFromCat(cat);
+		double[] output = new double[noObs-testingFirstIndex[index]-1];
+		
+		for(int idx=0;idx<output.length;++idx)
+			output[idx] = volumes[testingFirstIndex[index]+idx][index];
+		
+		return output;
+	}
+	
+	public String[] getTrainingDates(String cat)
+	{
+		int index = getIndexFromCat(cat);
+		String[] output = new String[validationFirstIndex[index]-trainingFirstIndex[index]];
+		
+		for(int idx=0;idx<output.length;++idx)
+			output[idx] = dates[trainingFirstIndex[index]+idx];
+		
+		return output;
+	}
+	
+	public String[] getValidationDates(String cat)
+	{
+		int index = getIndexFromCat(cat);
+		String[] output = new String[testingFirstIndex[index]-validationFirstIndex[index]];
+		
+		for(int idx=0;idx<output.length;++idx)
+			output[idx] = dates[validationFirstIndex[index]+idx];
+		
+		return output;
+	}
+	
+	public String[] getTestingDates(String cat)
+	{
+		int index = getIndexFromCat(cat);
+		String[] output = new String[noObs-testingFirstIndex[index]-1];
+		
+		for(int idx=0;idx<output.length;++idx)
+			output[idx] = dates[testingFirstIndex[index]+idx];
+		
+		return output;
+	}
+	
 	public String[] getHeader()
 	{
 		return header;

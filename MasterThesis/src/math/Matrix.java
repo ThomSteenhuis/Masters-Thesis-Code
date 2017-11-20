@@ -1,5 +1,7 @@
 package math;
 
+import input.Data;
+
 public class Matrix {
 
 	public static double innerProduct(double[] array1, double[] array2)
@@ -321,6 +323,41 @@ public class Matrix {
 		for(int idx=0;idx<output.length;++idx)
 			output[idx] = scalar - array[idx];
 
+		return output;
+	}
+	
+	public static double mean(double[] array)
+	{
+		if(array.length == 0)
+		{
+			System.out.println("Error (mean): array has 0 length");
+			return 0;
+		}
+		
+		double output = 0;
+		
+		for(int idx=0;idx<array.length;++idx)
+			output += array[idx];
+		
+		return (output / array.length);
+	}
+	
+	public static double max(double[] array)
+	{
+		if(array.length == 0)
+		{
+			System.out.println("Error (mean): array has 0 length");
+			return 0;
+		}
+		
+		double output = array[0];
+		
+		for(int idx=1;idx<array.length;++idx)
+		{
+			if(array[idx] > output)
+				output = array[idx];
+		}			
+		
 		return output;
 	}
 

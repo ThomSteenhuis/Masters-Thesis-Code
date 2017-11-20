@@ -41,10 +41,6 @@ public class SVR extends Model {
 		forecast();
 	}
 
-	public void validate() {}
-
-	public void test() {}
-
 	public double[][] getXtrain()
 	{
 		return x_train;
@@ -167,52 +163,30 @@ public class SVR extends Model {
 	
 	private void forecast()
 	{
-		trainingForecast = new double[y_train.length];
-		trainingReal = new double[y_train.length];
-		trainingDates = new String[y_train.length];
+		initializeSets();
 		
 		for(int idx=0;idx<N_train;++idx)
 		{
-			trainingReal[idx] = y_train[idx];
-			trainingDates[idx] = data.getDates()[idx + (int) (parameters[3]) + noPersAhead];
 			trainingForecast[idx] = bias;
 			
 			for(int idx2=0;idx2<x_train.length;++idx2)
-			{
 				trainingForecast[idx] += lambda[idx2] * kernel(x_train[idx2],x_train[idx]);
-			}
 		}
-		
-		validationForecast = new double[y_validate.length];
-		validationReal = new double[y_validate.length];
-		validationDates = new String[y_validate.length];
 		
 		for(int idx=0;idx<N_validate;++idx)
 		{
-			validationReal[idx] = y_validate[idx];
-			validationDates[idx] = data.getDates()[idx + (int) (parameters[3]) + noPersAhead + N_train];
 			validationForecast[idx] = bias;
 			
 			for(int idx2=0;idx2<x_train.length;++idx2)
-			{
 				validationForecast[idx] += lambda[idx2] * kernel(x_train[idx2],x_validate[idx]);
-			}
 		}
-		
-		testingForecast = new double[y_test.length];
-		testingReal = new double[y_test.length];
-		testingDates = new String[y_test.length];
 		
 		for(int idx=0;idx<N_test;++idx)
 		{
-			testingReal[idx] = y_test[idx];
-			testingDates[idx] = data.getDates()[idx + (int) (parameters[3]) + noPersAhead + N_train + N_validate];
 			testingForecast[idx] = bias;
 			
 			for(int idx2=0;idx2<x_train.length;++idx2)
-			{
 				testingForecast[idx] += lambda[idx2] * kernel(x_train[idx2],x_test[idx]);
-			}
 		}
 		
 		trainingForecasted = true;

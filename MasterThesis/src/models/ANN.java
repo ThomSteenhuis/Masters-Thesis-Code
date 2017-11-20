@@ -19,6 +19,8 @@ public class ANN extends Model {
 	public double[] Y;
 	public double[][] X;
 	public int N;
+	public double mean;
+	public double max;
 
 	public double alr;
 	public int noTrainingEpochs;
@@ -71,22 +73,13 @@ public class ANN extends Model {
 			Matrix.print(residuals);
 		}
 
-		int index = data.getIndexFromCat(category);
-		int noData1 = data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index];
-		int noData2 = data.getTestingFirstIndex()[index] - data.getValidationFirstIndex()[index];
-		int noData3 = data.getNoObs() - data.getTestingFirstIndex()[index] - 1;
-
-		initializeSets(noData1,noData2,noData3);
+		initializeSets();
 		forecast();
 
 		trainingForecasted = true;
 		validationForecasted = true;
 		testingForecasted = true;
 	}
-
-	public void validate() {}
-
-	public void test() {}
 
 	public double predict(double[] x)
 	{
@@ -140,43 +133,29 @@ public class ANN extends Model {
 		int index = data.getIndexFromCat(category);
 
 		for(int idx=0;idx<(X.length+noPersAhead-1);++idx)
-		{
-			trainingReal[idx] = data.getVolumes()[data.getTrainingFirstIndex()[index]+idx][index];
 			trainingForecast[idx] = trainingReal[idx];
-			trainingDates[idx] = data.getDates()[data.getTrainingFirstIndex()[index]+idx];
-		}
 
 		for(int idx=(X.length+noPersAhead-1);idx<trainingReal.length;++idx)
-		{
-			trainingReal[idx] = Y[idx-X.length-noPersAhead+1];
-			trainingForecast[idx] = Y_hat[idx-X.length-noPersAhead+1];
-			trainingDates[idx] = data.getDates()[data.getTrainingFirstIndex()[index]+idx+X.length];
-		}
+			trainingForecast[idx] = destandardize(Y_hat[idx-X.length-noPersAhead+1]);
 
 		for(int idx=0;idx<validationReal.length;++idx)
 		{
-			validationReal[idx] = data.getVolumes()[data.getValidationFirstIndex()[index]+idx][index];
-
 			double[] x = new double[(int)parameters[0]];
 
 			for(int idx2=0;idx2<x.length;++idx2)
 				x[idx2] = data.getVolumes()[data.getValidationFirstIndex()[index]+idx+idx2-x.length-noPersAhead+1][index];
 
-			validationForecast[idx] = predict(x);
-			validationDates[idx] = data.getDates()[data.getValidationFirstIndex()[index]+idx];
+			validationForecast[idx] = destandardize(predict(x));
 		}
 
 		for(int idx=0;idx<testingReal.length;++idx)
 		{
-			testingReal[idx] = data.getVolumes()[data.getTestingFirstIndex()[index]+idx][index];
-
 			double[] x = new double[(int)parameters[0]];
 
 			for(int idx2=0;idx2<x.length;++idx2)
 				x[idx2] = data.getVolumes()[data.getTestingFirstIndex()[index]+idx+idx2-x.length-noPersAhead+1][index];
 
-			testingForecast[idx] = predict(x);
-			testingDates[idx] = data.getDates()[data.getTestingFirstIndex()[index]+idx];
+			testingForecast[idx] = destandardize(predict(x));
 		}
 	}
 
@@ -238,25 +217,37 @@ public class ANN extends Model {
 
 		error = newError;
 	}
+	
+	private double standardize(double input)
+	{
+		return ( (input-mean)/(max-mean) );
+	}
+	
+	private double destandardize(double input)
+	{
+		return ((max-mean)*input+mean);
+	}
 
-	public void initializeData()
+	private void initializeData()
 	{
 		int index = data.getIndexFromCat(category);
+		mean = Matrix.mean(data.getTrainingSet(category));
+		max = Matrix.max(data.getTrainingSet(category));
 		N = data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index] - (int) (parameters[0]) - noPersAhead + 1;
 		X = new double[(int) (parameters[0])][N];
 		Y = new double[N];
 
 		for(int idx=0;idx<N;++idx)
-			Y[idx] = data.getVolumes()[idx + data.getTrainingFirstIndex()[index] + (int) (parameters[0]) + noPersAhead - 1][index];
+			Y[idx] = standardize(data.getVolumes()[idx + data.getTrainingFirstIndex()[index] + (int) (parameters[0]) + noPersAhead - 1][index]);
 
 		for(int idx1=0;idx1<Y.length;++idx1)
 		{
 			for(int idx2=0;idx2<X.length;++idx2)
-				X[idx2][idx1] =  data.getVolumes()[idx1 + idx2 + data.getTrainingFirstIndex()[index]][index];
+				X[idx2][idx1] = standardize(data.getVolumes()[idx1 + idx2 + data.getTrainingFirstIndex()[index]][index]);
 		}
 	}
 
-	public void initializeWeights()
+	private void initializeWeights()
 	{
 		upperWeights = new double[ (int)parameters[1] ];
 		lowerWeights = new double[ (int)parameters[1] ][ (int)parameters[0] ];

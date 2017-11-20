@@ -90,8 +90,6 @@ public abstract class Model {
 	}
 
 	public abstract void train();
-	public abstract void validate();
-	public abstract void test();
 
 	public void plotForecast(String mode)
 	{
@@ -255,19 +253,19 @@ public abstract class Model {
 		return testingDates;
 	}
 
-	protected void initializeSets(int noData1,int noData2,int noData3)
+	protected void initializeSets()
 	{
-		trainingForecast = new double[noData1];
-		trainingReal = new double[noData1];
-		trainingDates = new String[noData1];
+		trainingReal = data.getTrainingSet(category);
+		trainingForecast = new double[trainingReal.length];
+		trainingDates = data.getTrainingDates(category);
 
-		validationForecast = new double[noData2];
-		validationReal = new double[noData2];
-		validationDates = new String[noData2];
+		validationReal = data.getValidationSet(category);
+		validationForecast = new double[validationReal.length];
+		validationDates = data.getValidationDates(category);
 
-		testingForecast = new double[noData3];
-		testingReal = new double[noData3];
-		testingDates = new String[noData3];
+		testingReal = data.getTestingSet(category);
+		testingForecast = new double[testingReal.length];
+		testingDates = data.getTestingDates(category);
 	}
 
 	protected static void modelError(String model, String txt)

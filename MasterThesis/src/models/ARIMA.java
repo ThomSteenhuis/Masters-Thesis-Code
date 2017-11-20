@@ -61,22 +61,13 @@ public class ARIMA extends Model {
 		logLikelihood = -f.evaluate(coefficients);
 		calculateInformationCriteria();
 
-		int index = data.getIndexFromCat(category);
-		int noData1 = data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index];
-		int noData2 = data.getTestingFirstIndex()[index] - data.getValidationFirstIndex()[index];
-		int noData3 = data.getNoObs() - data.getTestingFirstIndex()[index] - 1;
-
-		initializeSets(noData1,noData2,noData3);
+		initializeSets();
 		forecast(seed);
 
 		trainingForecasted = true;
 		validationForecasted = true;
 		testingForecasted = true;
 	}
-
-	public void validate() {}
-
-	public void test() {}
 
 	public double[] getTimeSeries()
 	{
@@ -217,30 +208,16 @@ public class ARIMA extends Model {
 				forecastConverted[idx1] += coefficients[idx1-idx2+(int)parameters[0]]*errors[idx2];
 		}
 
-		double[] real = deriveData(realConverted);
 		double[] forecast = deriveData(forecastConverted);
-		int index = data.getIndexFromCat(category);
 
 		for(int idx=0;idx<trainingReal.length;++idx)
-		{
-			trainingReal[idx] = real[idx];
 			trainingForecast[idx] = forecast[idx];
-			trainingDates[idx] = data.getDates()[data.getTrainingFirstIndex()[index]+idx];
-		}
 
 		for(int idx=0;idx<validationReal.length;++idx)
-		{
-			validationReal[idx] = real[trainingReal.length+idx];
 			validationForecast[idx] = forecast[trainingReal.length+idx];
-			validationDates[idx] = data.getDates()[data.getValidationFirstIndex()[index]+idx];
-		}
 
 		for(int idx=0;idx<testingReal.length;++idx)
-		{
-			testingReal[idx] = real[trainingReal.length+validationReal.length+idx];
 			testingForecast[idx] = forecast[trainingReal.length+validationReal.length+idx];
-			testingDates[idx] = data.getDates()[data.getTestingFirstIndex()[index]+idx];
-		}
 	}
 
 	private double[] deriveData(double[] array)
