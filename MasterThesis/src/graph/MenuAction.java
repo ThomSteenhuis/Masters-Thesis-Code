@@ -21,20 +21,26 @@ import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
-public class Menu {
-	private static final int defSaveWidth = 250;
-	private static final int defSaveHeight = 150;
+public class MenuAction {
+	private final int defSaveWidth = 250;
+	private final int defSaveHeight = 150;
 	
-	private static final int legendBorderMargin = 10;
-	private static final int legendLineMargin = 10;
-	private static final int legendTxtMargin = 5;
-	private static final int legendLineLength = 10;
-	private static final int legendLineWidth = 1;
-	private static final int txtSize = 12;
+	private final int legendBorderMargin = 10;
+	private final int legendLineMargin = 10;
+	private final int legendTxtMargin = 5;
+	private final int legendLineLength = 10;
+	private final int legendLineWidth = 1;
+	private final int txtSize = 12;
 	
-	public static TextField location,name;
+	private LineGraph graph;
+	public TextField location,name;
 	
-	public static EventHandler<ActionEvent> legendAction(boolean right,final String[] categories, final Pane drawPane)
+	public MenuAction(LineGraph g)
+	{
+		graph = g;
+	}
+	
+	public EventHandler<ActionEvent> legendAction(boolean right)
 	{
 		return new EventHandler<ActionEvent>()
 		{
@@ -42,11 +48,11 @@ public class Menu {
 			{
 				ArrayList<String> lineNames = new ArrayList<String>();
 				
-				for(int idx=0;idx<graph.LineGraph.checkboxes.length;++idx)
+				for(int idx=0;idx<graph.getCheckboxes().length;++idx)
 				{
-					if(graph.LineGraph.checkboxes[idx].isSelected())
+					if(graph.getCheckboxes()[idx].isSelected())
 					{
-						lineNames.add(categories[idx]);
+						lineNames.add(graph.getCategories()[idx]);
 					}
 				}
 					
@@ -56,19 +62,19 @@ public class Menu {
 				for(int idx=0;idx<lines.length;++idx)
 				{
 					lines[idx] = new Line();
-					lines[idx].setStroke(graph.LineGraph.colors[idx]);
+					lines[idx].setStroke(graph.getColors()[idx]);
 					lines[idx].setStrokeWidth(legendLineWidth);
-					lines[idx].setStartX(LineGraph.leftMargin+LineGraph.yAxisSpace+legendBorderMargin+legendLineMargin);
+					lines[idx].setStartX(graph.getLeftMargin()+graph.getYAxisSpace()+legendBorderMargin+legendLineMargin);
 					lines[idx].setEndX(lines[idx].getStartX()+legendLineLength);
-					lines[idx].setStartY(LineGraph.topMargin+legendBorderMargin+legendLineMargin+txtSize*idx);
+					lines[idx].setStartY(graph.getTopMargin()+legendBorderMargin+legendLineMargin+txtSize*idx);
 					lines[idx].setEndY(lines[idx].getStartY());
 					
-					txts[idx] = new Label(categories[idx]);
+					txts[idx] = new Label(graph.getCategories()[idx]);
 					txts[idx].setFont(new Font(txtSize));
 					txts[idx].setLayoutX(lines[idx].getEndX()+legendTxtMargin);
 					txts[idx].setLayoutY(lines[idx].getStartY()-0.7*txtSize);
 
-					drawPane.getChildren().addAll(lines[idx],txts[idx]);
+					graph.getDrawpane().getChildren().addAll(lines[idx],txts[idx]);
 				}
 				
 				Line[] border = new Line[4];
@@ -78,7 +84,7 @@ public class Menu {
 		};
 	}
 	
-	public static EventHandler<ActionEvent> saveAction(final Pane drawPane)
+	public EventHandler<ActionEvent> saveAction()
 	{
 		return new EventHandler<ActionEvent>()
 		{
@@ -132,7 +138,7 @@ public class Menu {
 					}
 				});
 				
-				saveButton.setOnAction(saveImage(saveStage,drawPane));
+				saveButton.setOnAction(saveImage(saveStage));
 				
 				saveStage.show();
 			}
@@ -140,7 +146,12 @@ public class Menu {
 		};
 	}
 	
-	private static EventHandler<ActionEvent> saveImage(final Stage saveStage,final Pane drawPane)
+	public LineGraph getGraph()
+	{
+		return graph;
+	}
+	
+	private EventHandler<ActionEvent> saveImage(final Stage saveStage)
 	{
 		return new EventHandler<ActionEvent>(){
 				
@@ -150,7 +161,7 @@ public class Menu {
 				{
 					saveStage.close();
 					
-					WritableImage image = drawPane.snapshot(new SnapshotParameters(), null);
+					WritableImage image = graph.getDrawpane().snapshot(new SnapshotParameters(), null);
 			        File file = new File(location.getText() + "/"+ name.getText() + ".png");
 			        
 

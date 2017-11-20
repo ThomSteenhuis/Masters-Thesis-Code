@@ -3,7 +3,7 @@ package input;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import graph.Plot;
+import graph.LineGraph;
 
 public class Data {
 	
@@ -114,10 +114,8 @@ public class Data {
 	
 	public void plot()
 	{
-		String[] pars = new String[1];
-		pars[0] = "pivot";
-
-		Plot.initialize(pars,volumes,dates,categories,labels);
+		LineGraph lg = new LineGraph(volumes,dates,categories,labels);
+		lg.plot();
 	}
 	
 	public void plotSplittedSet(String set,String category)
@@ -149,7 +147,8 @@ public class Data {
 					dats[idx-trainingFirstIndex[index]] = dates[idx];
 				}
 				
-				Plot.initialize(pars,vols,dats,cats,labels);
+				LineGraph lg = new LineGraph(vols,dats,cats,labels);
+				lg.plot();
 				break;
 			}
 			case "validation":
@@ -163,7 +162,8 @@ public class Data {
 					dats[idx-validationFirstIndex[index]] = dates[idx];
 				}
 				
-				Plot.initialize(pars,vols,dats,cats,labels);
+				LineGraph lg = new LineGraph(vols,dats,cats,labels);
+				lg.plot();
 				break;
 			}
 			case "testing":
@@ -177,7 +177,8 @@ public class Data {
 					dats[idx-testingFirstIndex[index]] = dates[idx];
 				}
 				
-				Plot.initialize(pars,vols,dats,cats,labels);
+				LineGraph lg = new LineGraph(vols,dats,cats,labels);
+				lg.plot();
 				break;
 			}
 			default:

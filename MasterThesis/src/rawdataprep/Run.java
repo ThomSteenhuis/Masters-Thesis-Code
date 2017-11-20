@@ -2,7 +2,6 @@ package rawdataprep;
 
 import java.util.ArrayList;
 
-import graph.Plot;
 import input.Read;
 
 public class Run {

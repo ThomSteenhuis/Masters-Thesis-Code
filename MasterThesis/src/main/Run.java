@@ -48,7 +48,7 @@ public class Run {
 		double[] cons = {0.00001,0.95};
 		ann.setConstants(cons);
 		
-		int[] steps = {2,9,2,49};
+		int[] steps = {1,1,1,1};
 		double[][] bounds = {{1,3},{1,10},{0.001,0.003},{1,50}};
 		boolean[] exp = {false,false,false,false};
 		double[] expBase = {2,2,2,2};

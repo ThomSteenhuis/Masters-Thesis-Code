@@ -1,6 +1,6 @@
 package models;
 
-import graph.Plot;
+import graph.LineGraph;
 import input.Data;
 
 public abstract class Model {
@@ -112,7 +112,8 @@ public abstract class Model {
 
 				double[][] vols = merge(trainingReal,trainingForecast);
 
-				Plot.initialize(pars,vols,trainingDates,cats,data.getLabels());
+				LineGraph lg = new LineGraph(vols,trainingDates,cats,data.getLabels());
+				lg.plot();
 				break;
 			}
 			case "validation":
@@ -125,7 +126,8 @@ public abstract class Model {
 
 				double[][] vols = merge(validationReal,validationForecast);
 
-				Plot.initialize(pars,vols,validationDates,cats,data.getLabels());
+				LineGraph lg = new LineGraph(vols,validationDates,cats,data.getLabels());
+				lg.plot();
 				break;
 			}
 			case "testing":
@@ -138,7 +140,8 @@ public abstract class Model {
 
 				double[][] vols = merge(testingReal,testingForecast);
 
-				Plot.initialize(pars,vols,testingDates,cats,data.getLabels());
+				LineGraph lg = new LineGraph(vols,testingDates,cats,data.getLabels());
+				lg.plot();
 				break;
 			}
 			default:
