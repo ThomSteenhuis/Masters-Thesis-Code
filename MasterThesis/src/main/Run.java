@@ -45,17 +45,19 @@ public class Run {
 		System.out.println(data.getValidationFirstIndex()[data.getIndexFromCat("2200EVO")]);
 		ANN ann = new ANN(data,1);
 		ann.setCategory("2200EVO");
-		double[] pars = {6,10,0.0001,25};
 		double[] cons = {0.00001,0.95};
-		ann.setParameters(pars);
 		ann.setConstants(cons);
 		
-		ann.train();
-		Matrix.print(ann.getTrainingForecast());
-		Matrix.print(ann.getLowerWeights());
-		Matrix.print(ann.getLowerBias());
-		Matrix.print(ann.getUpperWeights());
-		System.out.println(ann.getUpperBias());
+		int[] steps = {2,9,2,49};
+		double[][] bounds = {{1,3},{1,10},{0.001,0.003},{1,50}};
+		boolean[] exp = {false,false,false,false};
+		double[] expBase = {2,2,2,2};
+		
+		PerformanceMeasures pm = new PerformanceMeasures(ann);
+		GridSearch gs = new GridSearch(pm,bounds,exp,expBase,steps);
+		gs.optimize(false);
+		gs.printBest();
+		ann.setParameters(gs.getOptimalParameters());
 		ann.plotForecast("validation");
 
 	/*	ann.noTrainingEpochs = (int)ann.getParameters()[3];

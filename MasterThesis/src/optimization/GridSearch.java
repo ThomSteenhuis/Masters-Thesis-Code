@@ -7,6 +7,10 @@ public class GridSearch extends Optimization{
 	private int[] noSteps;
 	private boolean[] exponentialSteps;
 	private double[] exponentialBasenumber;
+	
+	private int noCombinations;
+	private int noParameters;
+	
 	private double[][] grid;
 	
 	public GridSearch(PerformanceMeasures pm,double[][] parBounds,boolean[] exp,double[] expBase,int[] steps)
@@ -34,7 +38,13 @@ public class GridSearch extends Optimization{
 				noSteps = steps;
 				exponentialSteps = exp;
 				exponentialBasenumber = expBase;
-				grid = setupGrid();
+				noParameters = noSteps.length;
+				noCombinations = 1;
+				
+				for(int idx=0;idx<noSteps.length;++idx)
+					noCombinations = noCombinations*(noSteps[idx]+1);
+				
+				setupGrid();
 			}
 		}
 	}
@@ -45,9 +55,9 @@ public class GridSearch extends Optimization{
 		{
 			measures.getModel().setCategory(cat);
 			
-			for(int idx2=0;idx2<grid.length;++idx2)
+			for(int idx2=0;idx2<noCombinations;++idx2)
 			{
-				measures.getModel().setParameters(grid[idx2]);
+				measures.getModel().setParameters(getGridConfig(idx2));
 				measures.getModel().train();
 				measures.calculateMeasures("validation");
 				updateBest();
@@ -63,21 +73,20 @@ public class GridSearch extends Optimization{
 			return;
 		}
 		
-		for(int idx=0;idx<grid.length;++idx)
+		for(int idx=0;idx<noCombinations;++idx)
 		{
-			measures.getModel().setParameters(grid[idx]);
+			measures.getModel().setParameters(getGridConfig(idx));
 			measures.getModel().train();
 			measures.calculateMeasures("validation");
 			updateBest();
 			
 			if(!silent)
 			{
-				if( ( ( (100*idx) % grid.length ) == 0) && ( (100*idx) >= grid.length ) && ( ( (100*idx) / grid.length) < 100 ) )
+				if( ( ( (100*idx) % noCombinations ) < 100) && ( (100*idx) >= noCombinations ) && ( ( (100*idx) / noCombinations) < 100 ) )
 				{
-					System.out.printf("Completed %d%% of %d models\n",(100*idx) / grid.length,grid.length);
+					System.out.printf("Completed %d%% of %d models\n",(100*idx) / noCombinations,noCombinations);
 				}
-			}
-				
+			}				
 		}
 	}
 	
@@ -96,9 +105,19 @@ public class GridSearch extends Optimization{
 		return exponentialBasenumber;
 	}
 	
-	private double[][] setupGrid()
+	private double[] getGridConfig(int idx)
 	{
-		double[][] grid = new double[bounds.length][];
+		double[] output = new double[noParameters];
+		
+		for(int idx2=0;idx2<noParameters;++idx2)
+			output[idx2] = grid[idx2][ (idx / ( (int) ( Math.pow(grid[idx2].length,noParameters-1-idx2) ) ) ) % grid[idx2].length];
+		
+		return output;
+	}
+	
+	private void setupGrid()
+	{
+		grid = new double[bounds.length][];
 		
 		for(int idx1=0;idx1<bounds.length;++idx1)
 		{
@@ -116,32 +135,5 @@ public class GridSearch extends Optimization{
 					grid[idx1][idx2] = bounds[idx1][0] + idx2*stepLength;
 			}			
 		}
-		
-		return findCombinations(grid);
-	}
-	
-	private static double[][] findCombinations(double[][] grid)
-	{
-		int noPars = grid.length;
-		
-		if(noPars == 0)
-			return null;
-			
-		int noCombinations = 1;
-		
-		for(int idx=0;idx<noPars;++idx)
-			noCombinations = noCombinations * grid[idx].length;
-
-		double[][] output = new double[noCombinations][noPars];
-		
-		for(int idx1=0;idx1<noCombinations;++idx1)
-		{
-			for(int idx2=0;idx2<noPars;++idx2)
-			{
-				output[idx1][idx2] = grid[idx2][ (idx1 / ( (int) ( Math.pow(grid[idx2].length,noPars-1-idx2) ) ) ) % grid[idx2].length];
-			}
-		}
-		
-		return output;
 	}
 }
