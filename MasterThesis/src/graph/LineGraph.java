@@ -59,7 +59,8 @@ public class LineGraph{
 	private int xInterval = 2;
 	private boolean minorXTicks = true;
 	private int yMode = 0;
-	private int yInterval = 2;
+	private int yInterval;
+	private int maxNoMajorYTicks = 7;
 	private boolean minorYTicks = false;
 
 	public LineGraph(double[][] input,String[] leftLine,String[] header,String[] labels)
@@ -96,7 +97,10 @@ public class LineGraph{
 	{
 		String[] args = new String[0];
 		Plot.plot(args,this);
-		
+	}
+	
+	public void draw()
+	{
 		colors = getColors(categories.length);
 
 		xAxisName = axesLabels[0];
@@ -193,6 +197,11 @@ public class LineGraph{
 	{
 		return rightPane;
 	}
+	
+	private void calculateYInterval()
+	{
+		yInterval = (int)Math.ceil(Double.parseDouble(yAxisCategories[yAxisCategories.length-1])/maxNoMajorYTicks);
+	}
 
 	private void drawAxes()
 	{
@@ -244,7 +253,8 @@ public class LineGraph{
 		}
 
 		addXLabels();
-
+		calculateYInterval();
+		
 		Line[] yTicks = new Line[yAxisCategories.length];
 		String[] yTickNames = new String[yAxisCategories.length];
 		yLabels = new Label[yAxisCategories.length];

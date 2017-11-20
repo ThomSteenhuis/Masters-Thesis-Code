@@ -65,6 +65,7 @@ public class Plot extends Application{
 		graph.setRightPane(rightPane);
 
 		stage.show();
+		graph.draw();
 	}
 	
 }
