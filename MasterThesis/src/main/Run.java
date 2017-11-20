@@ -28,20 +28,22 @@ public class Run {
 		initializeRandom();
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
-		/*Experiment e = new Experiment(data,"src/data/experiment.txt");
+		Experiment e = new Experiment(data,"src/data/experiment.txt");
 
 		try
 		{
-			PrintWriter p = new PrintWriter("src/data/outcomes.txt");
+			PrintWriter p1 = new PrintWriter("src/data/outcomes.txt");
+			PrintWriter p2 = new PrintWriter("src/data/forecasts.txt");
 			e.run(false);
-			e.writeOutcomes(p);
+			e.writeOutcomes(p1);
+			e.writeForecasts(p2);
 		}
 		catch (FileNotFoundException e1)
 		{
 			e1.printStackTrace();
-		}*/
+		}
 		
-		System.out.println(data.getTrainingFirstIndex()[data.getIndexFromCat("2200EVO")]);
+		/*System.out.println(data.getTrainingFirstIndex()[data.getIndexFromCat("2200EVO")]);
 		System.out.println(data.getValidationFirstIndex()[data.getIndexFromCat("2200EVO")]);
 		ANN ann = new ANN(data,1);
 		ann.setCategory("2200EVO");
@@ -58,7 +60,7 @@ public class Run {
 		gs.optimize(false);
 		gs.printBest();
 		ann.setParameters(gs.getOptimalParameters());
-		ann.plotForecast("validation");
+		ann.plotForecast("validation");*/
 
 	/*	ann.noTrainingEpochs = (int)ann.getParameters()[3];
 		ann.alr = ann.getParameters()[2];

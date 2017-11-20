@@ -16,11 +16,12 @@ import performance.PerformanceMeasures;
 
 public class Experiment {
 
-	private final static int seed = 34304903;
+	private static final int seed = 34304903;
 	private ArrayList<Optimization> instances;
 	
 	private double[] runTimes;
 	private String[][] outcomes;
+	private String[][][] forecasts;
 	
 	public Experiment()
 	{
@@ -113,6 +114,7 @@ public class Experiment {
 		}
 		
 		createOutcomes();
+		createForecasts();
 	}
 	
 	public void writeOutcomes(PrintWriter p)
@@ -124,6 +126,25 @@ public class Experiment {
 				p.printf("%s\t",outcomes[idx1][idx2]);
 			}
 			p.println();
+		}
+		p.close();
+		
+	}
+	
+	public void writeForecasts(PrintWriter p)
+	{
+		for(int idx1=0;idx1<forecasts.length;++idx1)
+		{
+			p.printf("Instance %d\n",idx1);
+			
+			for(int idx2=0;idx2<forecasts[idx1].length;++idx2)
+			{
+				for(int idx3=0;idx3<forecasts[idx1][idx2].length;++idx3)
+				{
+					p.printf("%s\t",forecasts[idx1][idx2][idx3]);
+				}
+				p.println();
+			}
 		}
 		p.close();
 		
@@ -250,6 +271,50 @@ public class Experiment {
 			for(int idx2=0;idx2<noPars;++idx2)
 			{
 				outcomes[idx1+1][8+idx2] = Double.toString(instances.get(idx1).getOptimalParameters()[idx2]);
+			}
+		}
+	}
+	
+	private void createForecasts()
+	{
+		forecasts = new String[instances.size()][9][];
+		
+		for(int idx1=0;idx1<instances.size();idx1++)
+		{
+			int trainingLength = instances.get(idx1).getPerformanceMeasures().getModel().getTrainingReal().length;
+			forecasts[idx1][0] = new String[trainingLength];
+			forecasts[idx1][1] = new String[trainingLength];
+			forecasts[idx1][2] = new String[trainingLength];
+			
+			for(int idx2=0;idx2<trainingLength;idx2++)
+			{
+				forecasts[idx1][0][idx2] = instances.get(idx1).getPerformanceMeasures().getModel().getTrainingDates()[idx2];
+				forecasts[idx1][1][idx2] = Double.toString(instances.get(idx1).getPerformanceMeasures().getModel().getTrainingReal()[idx2]);
+				forecasts[idx1][2][idx2] = Double.toString(instances.get(idx1).getPerformanceMeasures().getModel().getTrainingForecast()[idx2]);
+			}
+			
+			int validationLength = instances.get(idx1).getPerformanceMeasures().getModel().getValidationReal().length;
+			forecasts[idx1][3] = new String[validationLength];
+			forecasts[idx1][4] = new String[validationLength];
+			forecasts[idx1][5] = new String[validationLength];
+			
+			for(int idx2=0;idx2<validationLength;idx2++)
+			{
+				forecasts[idx1][3][idx2] = instances.get(idx1).getPerformanceMeasures().getModel().getValidationDates()[idx2];
+				forecasts[idx1][4][idx2] = Double.toString(instances.get(idx1).getPerformanceMeasures().getModel().getValidationReal()[idx2]);
+				forecasts[idx1][5][idx2] = Double.toString(instances.get(idx1).getPerformanceMeasures().getModel().getValidationForecast()[idx2]);
+			}
+			
+			int testingLength = instances.get(idx1).getPerformanceMeasures().getModel().getTestingReal().length;
+			forecasts[idx1][6] = new String[testingLength];
+			forecasts[idx1][7] = new String[testingLength];
+			forecasts[idx1][8] = new String[testingLength];
+			
+			for(int idx2=0;idx2<testingLength;idx2++)
+			{
+				forecasts[idx1][6][idx2] = instances.get(idx1).getPerformanceMeasures().getModel().getTestingDates()[idx2];
+				forecasts[idx1][7][idx2] = Double.toString(instances.get(idx1).getPerformanceMeasures().getModel().getTestingReal()[idx2]);
+				forecasts[idx1][8][idx2] = Double.toString(instances.get(idx1).getPerformanceMeasures().getModel().getTestingForecast()[idx2]);
 			}
 		}
 	}
