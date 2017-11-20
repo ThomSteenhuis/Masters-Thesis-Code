@@ -135,7 +135,7 @@ public class Experiment {
 	{
 		for(int idx1=0;idx1<forecasts.length;++idx1)
 		{
-			p.printf("Instance %d\n",idx1);
+			p.println("Instance " +idx1);
 			
 			for(int idx2=0;idx2<forecasts[idx1].length;++idx2)
 			{
