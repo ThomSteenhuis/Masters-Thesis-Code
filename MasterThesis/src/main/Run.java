@@ -10,6 +10,7 @@ import math.Matrix;
 import models.ANN;
 import models.ARIMA;
 import models.ExponentialSmoothing;
+import models.Naive;
 import models.SVR;
 import optimization.GridSearch;
 import performance.PerformanceMeasures;
@@ -39,12 +40,12 @@ public class Run {
 		{
 			e1.printStackTrace();
 		}*/
-
+		
 		System.out.println(data.getTrainingFirstIndex()[data.getIndexFromCat("2200EVO")]);
 		System.out.println(data.getValidationFirstIndex()[data.getIndexFromCat("2200EVO")]);
 		ANN ann = new ANN(data,1);
 		ann.setCategory("2200EVO");
-		double[] pars = {6,10,0.0001,1000};
+		double[] pars = {6,10,0.0001,25};
 		double[] cons = {0.00001,0.95};
 		ann.setParameters(pars);
 		ann.setConstants(cons);
@@ -55,14 +56,7 @@ public class Run {
 		Matrix.print(ann.getLowerBias());
 		Matrix.print(ann.getUpperWeights());
 		System.out.println(ann.getUpperBias());
-		ann.plotForecast("training");
-		double[] x = new double[6];
-		int index = data.getIndexFromCat("2200EVO");
-		
-		for(int idx=3;idx<9;++idx)
-			x[idx-3] = data.getVolumes()[idx][index];
-		
-		System.out.println(ann.predict(x));
+		ann.plotForecast("validation");
 
 	/*	ann.noTrainingEpochs = (int)ann.getParameters()[3];
 		ann.alr = ann.getParameters()[2];

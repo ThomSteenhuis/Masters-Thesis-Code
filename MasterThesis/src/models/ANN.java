@@ -26,7 +26,7 @@ public class ANN extends Model {
 	public int noTrainingEpochs;
 
 	private final double maxInitBounds = 0.01;
-	private final int epochMultiplyer = 1;
+	private final int epochMultiplyer = 100;
 
 	public ANN(Data data,int noPeriods)
 	{
@@ -69,8 +69,6 @@ public class ANN extends Model {
 			updateLowerWeights(upperWeights);
 			updateUpperBias();
 			updateUpperWeights();
-			System.out.printf("Iter = %d. Error = %f\n",idx,error);
-			Matrix.print(residuals);
 		}
 
 		initializeSets();
@@ -143,7 +141,7 @@ public class ANN extends Model {
 			double[] x = new double[(int)parameters[0]];
 
 			for(int idx2=0;idx2<x.length;++idx2)
-				x[idx2] = data.getVolumes()[data.getValidationFirstIndex()[index]+idx+idx2-x.length-noPersAhead+1][index];
+				x[idx2] = standardize(data.getVolumes()[data.getValidationFirstIndex()[index]+idx+idx2-x.length-noPersAhead+1][index]);
 
 			validationForecast[idx] = destandardize(predict(x));
 		}
@@ -153,7 +151,7 @@ public class ANN extends Model {
 			double[] x = new double[(int)parameters[0]];
 
 			for(int idx2=0;idx2<x.length;++idx2)
-				x[idx2] = data.getVolumes()[data.getTestingFirstIndex()[index]+idx+idx2-x.length-noPersAhead+1][index];
+				x[idx2] = standardize(data.getVolumes()[data.getTestingFirstIndex()[index]+idx+idx2-x.length-noPersAhead+1][index]);
 
 			testingForecast[idx] = destandardize(predict(x));
 		}
