@@ -99,8 +99,8 @@ public class Data {
 				if(firstIndex > -1)
 				{
 					trainingFirstIndex[idx1] = firstIndex;
-					validationFirstIndex[idx1] = firstIndex + (int) (propTrain*(double)(noObs-firstIndex) );
-					testingFirstIndex[idx1] = firstIndex + (int) ( (propTrain+propVal)*(double)(noObs-firstIndex) );
+					validationFirstIndex[idx1] = firstIndex + (int) Math.floor(propTrain*(double)(noObs-firstIndex) );
+					testingFirstIndex[idx1] = firstIndex + (int) Math.floor( (propTrain+propVal)*(double)(noObs-firstIndex) );
 				}
 				else
 				{

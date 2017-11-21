@@ -273,9 +273,9 @@ public class LineGraph{
 
 		addXLabels();
 		
-		Line[] yTicks = new Line[yAxisCategories.length];
-		String[] yTickNames = new String[yAxisCategories.length];
-		yLabels = new Label[yAxisCategories.length];
+		Line[] yTicks = new Line[yInterval*yNoIntervals+1];
+		String[] yTickNames = new String[yInterval*yNoIntervals+1];
+		yLabels = new Label[yInterval*yNoIntervals+1];
 
 		for(int idx=0;idx<=(yInterval*yNoIntervals);++idx)
 		{
