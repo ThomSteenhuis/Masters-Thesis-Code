@@ -1,5 +1,8 @@
 package optimization;
 
+import org.rosuda.REngine.REXPMismatchException;
+import org.rosuda.REngine.Rserve.RserveException;
+
 import performance.PerformanceMeasures;
 
 public abstract class Optimization {
@@ -73,8 +76,8 @@ public abstract class Optimization {
 		return performance;
 	}
 	
-	public abstract void optimizeAll(boolean silent);
-	public abstract void optimize(boolean silent);
+	public abstract boolean optimizeAll(boolean silent);
+	public abstract boolean optimize(boolean silent);
 	
 	protected void updateBest()
 	{		

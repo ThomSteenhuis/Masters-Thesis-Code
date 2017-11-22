@@ -2,10 +2,13 @@ package models;
 
 import java.util.Random;
 
+import org.rosuda.REngine.REXP;
+import org.rosuda.REngine.REXPMismatchException;
+import org.rosuda.REngine.Rserve.RConnection;
+import org.rosuda.REngine.Rserve.RserveException;
+
 import input.Data;
-import math.LLARMAFunction;
 import math.Matrix;
-import math.NelderMead;
 
 public class ARIMA extends Model {
 
@@ -24,13 +27,13 @@ public class ARIMA extends Model {
 		seed = s;
 	}
 
-	public void train()
+	public boolean train()
 	{
 		if(parameters.length != noParameters)
 		{
 			{
 				modelError("trainSES","inadequate no parameters");
-				return;
+				return false;
 			}
 		}
 
@@ -39,13 +42,11 @@ public class ARIMA extends Model {
 			if(parameters[idx] < 0)
 			{
 				modelError("train","parameter should be at least 0");
-				return;
+				return false;
 			}
 		}
 
-		determineNoDifferences();
-
-		LLARMAFunction f = new LLARMAFunction(this,(int)parameters[0],(int)parameters[1]);
+		/*LLARMAFunction f = new LLARMAFunction(this,(int)parameters[0],(int)parameters[1]);
 
 		NelderMead nm = new NelderMead(f);
 		nm.optimize();
@@ -56,9 +57,28 @@ public class ARIMA extends Model {
 		for(int idx=1;idx<(coefficients.length-1);++idx)
 			coefficients[idx] = Math.tanh(nm.getOptimalIntput()[idx]);
 
-		coefficients[coefficients.length-1] = Math.abs(nm.getOptimalIntput()[coefficients.length-1]);
-		calculateResiduals(coefficients);
-		logLikelihood = -f.evaluate(coefficients);
+		coefficients[coefficients.length-1] = Math.abs(nm.getOptimalIntput()[coefficients.length-1]);*/
+		
+		try {
+			RConnection r = new RConnection();
+			r.eval("source(\"C:/Users/emp5220514/Desktop/Test/test_script.R\")");
+			
+			determineNoDifferences();
+			REXP outcome = r.eval("arma(\"2200EVO\",2,2,1)");
+
+			coefficients = new double[outcome.asDoubles().length-2];
+			
+			for(int idx=0;idx<coefficients.length;++idx)
+				coefficients[idx] = outcome.asDoubles()[idx];
+			
+			calculateResiduals(coefficients);
+			logLikelihood = outcome.asDoubles()[outcome.asDoubles().length-2];
+		} catch (RserveException |REXPMismatchException e) 
+		{
+			e.printStackTrace();
+			return false;
+		} 
+		
 		calculateInformationCriteria();
 
 		initializeSets();
@@ -67,6 +87,7 @@ public class ARIMA extends Model {
 		trainingForecasted = true;
 		validationForecasted = true;
 		testingForecasted = true;
+		return true;
 	}
 
 	public double[] getTimeSeries()

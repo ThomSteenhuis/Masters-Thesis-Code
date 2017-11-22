@@ -1,5 +1,8 @@
 package optimization;
 
+import org.rosuda.REngine.REXPMismatchException;
+import org.rosuda.REngine.Rserve.RserveException;
+
 import performance.PerformanceMeasures;
 
 public class GridSearch extends Optimization{
@@ -49,7 +52,7 @@ public class GridSearch extends Optimization{
 		}
 	}
 	
-	public void optimizeAll(boolean silent)
+	public boolean optimizeAll(boolean silent)
 	{		
 		for(String cat:measures.getModel().getData().getCategories())
 		{
@@ -58,27 +61,41 @@ public class GridSearch extends Optimization{
 			for(int idx2=0;idx2<noCombinations;++idx2)
 			{
 				measures.getModel().setParameters(getGridConfig(idx2));
-				measures.getModel().train();
-				measures.calculateMeasures("validation");
-				updateBest();
+				if(measures.getModel().train())
+				{
+					measures.calculateMeasures("validation");
+					updateBest();
+				}
+				else
+				{
+					return false;
+				}
 			}
 		}
+		
+		return true;
 	}
 	
-	public void optimize(boolean silent)
+	public boolean optimize(boolean silent)
 	{				
 		if(measures.getModel().getCategory().equals(""))
 		{
 			optimizationError("optimize","set category first");
-			return;
+			return false;
 		}
 		
 		for(int idx=0;idx<noCombinations;++idx)
 		{
 			measures.getModel().setParameters(getGridConfig(idx));
-			measures.getModel().train();
-			measures.calculateMeasures("validation");
-			updateBest();
+			if(measures.getModel().train())
+			{
+				measures.calculateMeasures("validation");
+				updateBest();
+			}
+			else
+			{
+				return false;
+			}
 			
 			if(!silent)
 			{
@@ -88,6 +105,8 @@ public class GridSearch extends Optimization{
 				}
 			}				
 		}
+		
+		return true;
 	}
 	
 	public int[] getNoSteps()

@@ -89,7 +89,7 @@ public abstract class Model {
 		}
 	}
 
-	public abstract void train();
+	public abstract boolean train();
 
 	public void plotForecast(String mode)
 	{

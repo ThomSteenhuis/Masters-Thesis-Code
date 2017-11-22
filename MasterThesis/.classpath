@@ -3,7 +3,7 @@
 	<classpathentry excluding="jars/" kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="jars/jfxrt.jar"/>
-	<classpathentry kind="lib" path="C:/Users/emp5220514/Desktop/git/MasterThesis/jars/REngine.jar"/>
-	<classpathentry kind="lib" path="C:/Users/emp5220514/Desktop/git/MasterThesis/jars/RserveEngine.jar"/>
+	<classpathentry kind="lib" path="jars/REngine.jar"/>
+	<classpathentry kind="lib" path="jars/RserveEngine.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

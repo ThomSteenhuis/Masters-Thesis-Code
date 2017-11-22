@@ -36,24 +36,24 @@ public class ANN extends Model {
 		name = "ANN";
 	}
 
-	public void train()
+	public boolean train()
 	{
 		if(parameters.length != noParameters)
 		{
 			System.out.println("Error (ANN): invalid no of parameters");
-			return;
+			return false;
 		}
 
 		if( ( (int)parameters[0] < 1) || ( (int)parameters[1] < 1) || (parameters[2] > 1) || (parameters[2] < 0) || ( (int)parameters[3] < 1) )
 		{
 			System.out.println("Error (ANN): parameters have invalid value");
-			return;
+			return false;
 		}
 
 		if(constants.length != noConstants)
 		{
 			System.out.println("Error (ANN): invalid no of constants");
-			return;
+			return false;
 		}
 
 		noTrainingEpochs = epochMultiplyer*(int)parameters[3];
@@ -77,6 +77,7 @@ public class ANN extends Model {
 		trainingForecasted = true;
 		validationForecasted = true;
 		testingForecasted = true;
+		return true;
 	}
 
 	public double predict(double[] x)

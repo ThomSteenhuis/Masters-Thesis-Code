@@ -12,10 +12,11 @@ public class Naive extends Model {
 		name = "Naive";
 	}
 	
-	public void train() 
+	public boolean train() 
 	{
 		initializeSets();
 		forecast();
+		return true;
 	}
 	
 	private void forecast()

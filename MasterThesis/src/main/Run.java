@@ -36,21 +36,19 @@ public class Run {
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
 		
-		try {
-			RConnection r = new RConnection();
-			r.eval("source(\"C:/Users/emp5220514/Desktop/Test/test_script.R\")");
-			double[] d = r.eval("rnorm(10)").asDoubles();
-			Matrix.print(d);
-			REXP outcome = r.eval("arma(\"TCB & Chameo\",1,1)");
-			Matrix.print(outcome.asDoubles());
-			Matrix.print(data.getTestingSet("TCB & Chameo"));
-		} catch (RserveException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (REXPMismatchException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		ARIMA arma = new ARIMA(data,1,seed);
+		arma.setCategory("2200EVO");
+		double[] pars = {2,2};
+		arma.setParameters(pars);
+		arma.train();
+		PerformanceMeasures pm = new PerformanceMeasures(arma);
+		pm.calculateMeasures("training");
+		pm.printMeasures();
+		Matrix.print(arma.getCoefficients());
+		System.out.println(arma.getConstants()[0]);
+		System.out.println(arma.getLogLikelihood());
+		System.out.println(arma.getAIC());
+		Matrix.print(arma.getTrainingForecast());		
 		
 		/*ExponentialSmoothing ses = new ExponentialSmoothing("SES",1,data);
 		ses.setCategory("2200EVO");
@@ -131,23 +129,6 @@ public class Run {
 		Matrix.print(ann.getUpperWeights());
 		System.out.println(ann.getUpperBias());*/
 
-		
-
-		/*System.out.println(data.getTrainingFirstIndex()[data.getIndexFromCat("2200EVO")]);
-		System.out.println(data.getValidationFirstIndex()[data.getIndexFromCat("2200EVO")]);
-		ARIMA arma = new ARIMA(data,1,3435);
-		arma.setCategory("2200EVO");
-		double[] pars = {1,1};
-		arma.setParameters(pars);
-		arma.train();
-		PerformanceMeasures pm = new PerformanceMeasures(arma);
-		pm.calculateMeasures("training");
-		pm.printMeasures();
-		Matrix.print(arma.getCoefficients());
-		System.out.println(arma.getConstants()[0]);
-		System.out.println(arma.getLogLikelihood());
-		System.out.println(arma.getAIC());
-		Matrix.print(arma.getResiduals());*/
 
 		/*double[][] gsbounds = {{0,3},{0,3}};
 		boolean[] exp = {false,false};

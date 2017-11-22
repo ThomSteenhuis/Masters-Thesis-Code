@@ -118,13 +118,13 @@ public class ExponentialSmoothing extends Model{
 		}
 	}
 	
-	public void train()
+	public boolean train()
 	{
 		if(parameters.length != noParameters)
 		{
 			{
 				modelError("trainSES","inadequate no parameters");
-				return;
+				return false;
 			}
 		}
 		
@@ -133,29 +133,30 @@ public class ExponentialSmoothing extends Model{
 			if( (parameters[idx] < 0) || (parameters[idx] > 1) )
 			{
 				modelError("train","parameter should be between 0 and 1");
-				return;
+				return false;
 			}
 		}
 		
 		switch(modelNo){
 		case 0:{
 			train_val_testSES();
-			break;
+			return true;
 		}
 		case 1:{
 			train_val_testDES();
-			break;
+			return true;
 		}
 		case 2:{
 			train_val_testTES();
-			break;
+			return true;
 		}
 		case 3:{
 			train_val_testTES();	
-			break;
+			return true;
 		}
 		default:{
 			System.out.println("Error (train): default case reached");
+			return false;
 		}
 		}
 	}

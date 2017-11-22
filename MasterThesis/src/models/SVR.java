@@ -33,12 +33,17 @@ public class SVR extends Model {
 		noConstants = 0;
 	}
 
-	public void train()
+	public boolean train()
 	{
 		initializeXY();
-		ellipsoidMethod();
-		calculateBias();
-		forecast();
+		if(ellipsoidMethod())
+		{
+			calculateBias();
+			forecast();
+			return true;
+		}
+		else
+			return false;		
 	}
 
 	public double[][] getXtrain()
@@ -211,7 +216,7 @@ public class SVR extends Model {
 		bias = sumErrors / N_train;
 	}
 
-	private void ellipsoidMethod()
+	private boolean ellipsoidMethod()
 	{
 		double[] center = initializeCenter();
 		double[][] ellipsMatrix = initializeEllipsMatrix(center);
@@ -283,11 +288,16 @@ public class SVR extends Model {
 		}
 
 		if(iter == maxIters)
-			System.out.println("Warning (ellipsoid method): max iterations reached");
+		{
+			System.out.println("Warning (ellipsoid method): not converged");
+			return false;
+		}
 
 		error = 1/normCoeff;
 		noIters = iter;
 		lambda = bestCenter;
+		
+		return true;
 	}
 
 	private double objective(double[] input)
