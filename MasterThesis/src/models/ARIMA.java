@@ -61,7 +61,7 @@ public class ARIMA extends Model {
 		
 		try {
 			RConnection r = new RConnection();
-			r.eval("source(\"C:/Users/emp5220514/Desktop/Test/test_script.R\")");
+			r.eval("source(\"C:/Users/emp5220514/Desktop/git/MasterThesis/src/data/arima_script.R\")");
 			
 			determineNoDifferences();
 			REXP outcome = r.eval("arma(\"2200EVO\",2,2,1)");
