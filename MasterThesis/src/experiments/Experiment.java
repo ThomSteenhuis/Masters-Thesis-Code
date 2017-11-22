@@ -2,12 +2,10 @@ package experiments;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
-
-import org.rosuda.REngine.REXPMismatchException;
-import org.rosuda.REngine.Rserve.RserveException;
 
 import input.Data;
 import models.ARIMA;
@@ -21,29 +19,48 @@ public class Experiment {
 
 	private static final int seed = 34304903;
 	private ArrayList<Optimization> instances;
+	private ArrayList<String> machines;
 	
 	private boolean[] success;
 	private double[] runTimes;
 	private String[][] outcomes;
 	private String[][][] forecasts;
 	
-	public Experiment()
-	{
-		instances = new ArrayList<Optimization>();
-	}
-	
-	public Experiment(Data data,String expFile)
+	public Experiment(String machineFile)
 	{
 		instances = new ArrayList<Optimization>();
 		
 		try{
-			Scanner s = new Scanner(new File(expFile) );
+			Scanner s = new Scanner(new File(machineFile));
+			machines = new ArrayList<String>();
 			
 			while(s.hasNextLine())
 			{
-				String line = s.nextLine();
+				String line = s.nextLine().trim();
+				machines.add(line);
+			}
+			
+			s.close();
+		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public Experiment(Data data,String expFile,String machineFile)
+	{
+		instances = new ArrayList<Optimization>();
+		
+		try{
+			Scanner s1 = new Scanner(new File(expFile) );
+			Scanner s2 = new Scanner(new File(machineFile));
+			ArrayList<String[]> experiments = new ArrayList<String[]>();
+			
+			while(s1.hasNextLine())
+			{
+				String line = s1.nextLine();
 				String[] splittedLine = line.split("\t");
-				Model model;
 				
 				if(splittedLine.length < 4)
 				{
@@ -51,30 +68,50 @@ public class Experiment {
 					continue;
 				}
 				
-				if(isExponentialSmoothing(splittedLine[0]))
-					model = initializeES(splittedLine,data);
-				else if(isARIMA(splittedLine[0]))
-					model = initializeARIMA(splittedLine,data);
-				else
-				{
-					System.out.println("Error (Experiment): model not recognized");
-					continue;
-				}
-				
-				if(splittedLine[2].equals("GridSearch") )
-				{
-					PerformanceMeasures pm = new PerformanceMeasures(model);
-					Optimization opt = initializeGS(splittedLine,pm);
-					instances.add(opt);
-				}
-				else
-				{
-					System.out.println("Error (Experiment): optimization algorithm not recognized");
-					continue;
-				}
+				experiments.add(splittedLine);
 			}
 			
-			s.close();
+			s1.close();
+			machines = new ArrayList<String>();
+			
+			while(s2.hasNextLine())
+			{
+				String line = s2.nextLine().trim();
+				machines.add(line);
+			}
+			
+			s2.close();
+				
+			for(int idx1=0;idx1<experiments.size();++idx1)
+			{
+				Model model;
+				ArrayList<String> categories = getCategories(experiments.get(idx1)[1]);
+				
+				for(String idx2:categories)
+				{
+					if(isExponentialSmoothing(experiments.get(idx1)[0]))
+						model = initializeES(experiments.get(idx1),idx2,data);
+					else if(isARIMA(experiments.get(idx1)[0]))
+						model = initializeARIMA(experiments.get(idx1),idx2,data);
+					else
+					{
+						System.out.println("Error (Experiment): model not recognized");
+						continue;
+					}
+					
+					if(experiments.get(idx1)[2].equals("GridSearch") )
+					{
+						PerformanceMeasures pm = new PerformanceMeasures(model);
+						Optimization opt = initializeGS(experiments.get(idx1),pm);
+						instances.add(opt);
+					}
+					else
+					{
+						System.out.println("Error (Experiment): optimization algorithm not recognized");
+						continue;
+					}
+				}
+			}
 		}
 		catch(FileNotFoundException e)
 		{
@@ -145,7 +182,7 @@ public class Experiment {
 		{
 			if(success[idx1])
 			{
-				p.printf("Instance &d was successfull\n",idx1);
+				p.printf("Instance %d was successfull\n",idx1);
 				
 				for(int idx2=0;idx2<forecasts[idx1].length;++idx2)
 				{
@@ -158,7 +195,7 @@ public class Experiment {
 			}
 			else
 			{
-				p.printf("Instance &d was not successfull\n",idx1);
+				p.printf("Instance %d was not successfull\n",idx1);
 			}
 		}
 		p.close();
@@ -180,10 +217,10 @@ public class Experiment {
 		return outcomes;
 	}
 	
-	private static Model initializeES(String[] line,Data data) throws NumberFormatException
+	private static Model initializeES(String[] line,String cat,Data data) throws NumberFormatException
 	{		
 		ExponentialSmoothing es = new ExponentialSmoothing(line[0],Integer.parseInt(line[3]),data);
-		es.setCategory(line[1]);
+		es.setCategory(cat);
 		
 		if(line[0].contains("TES") || line[0].equals("four") )
 		{
@@ -195,10 +232,10 @@ public class Experiment {
 		return es;
 	}
 	
-	private static Model initializeARIMA(String[] line,Data data) throws NumberFormatException
+	private static Model initializeARIMA(String[] line,String cat,Data data) throws NumberFormatException
 	{		
 		ARIMA arma = new ARIMA(data,Integer.parseInt(line[3]),seed);
-		arma.setCategory(line[1]);
+		arma.setCategory(cat);
 			
 		return arma;
 	}
@@ -254,6 +291,18 @@ public class Experiment {
 			return true;
 		else
 			return false;
+	}
+	
+	private ArrayList<String> getCategories(String input)
+	{
+		if(input.equals("all"))
+			return machines;
+		else
+		{
+			ArrayList<String> output = new ArrayList<String>();
+			output.add(input);
+			return output;
+		}
 	}
 	
 	private void createOutcomes()

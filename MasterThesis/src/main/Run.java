@@ -36,32 +36,7 @@ public class Run {
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
 		
-		ARIMA arma = new ARIMA(data,1,seed);
-		arma.setCategory("2200EVO");
-		double[] pars = {2,2};
-		arma.setParameters(pars);
-		arma.train();
-		PerformanceMeasures pm = new PerformanceMeasures(arma);
-		pm.calculateMeasures("training");
-		pm.printMeasures();
-		Matrix.print(arma.getCoefficients());
-		System.out.println(arma.getConstants()[0]);
-		System.out.println(arma.getLogLikelihood());
-		System.out.println(arma.getAIC());
-		Matrix.print(arma.getTrainingForecast());		
-		
-		/*ExponentialSmoothing ses = new ExponentialSmoothing("SES",1,data);
-		ses.setCategory("2200EVO");
-		double[] pars = new double[1];
-		pars[0] = 0.1;
-		ses.setParameters(pars);
-		ses.train();
-		Matrix.print(ses.getValidationDates());
-		Matrix.print(ses.getValidationReal());
-		Matrix.print(ses.getValidationForecast());
-		ses.plotForecast("testing");*/
-		
-		/*Experiment e = new Experiment(data,"src/data/experiment.txt");
+		Experiment e = new Experiment(data,"src/data/experiment.txt","src/data/machine_list.txt");
 
 		try
 		{
@@ -74,7 +49,34 @@ public class Run {
 		catch (FileNotFoundException e1)
 		{
 			e1.printStackTrace();
-		}*/
+		}
+		
+		/*ARIMA arma = new ARIMA(data,1,seed);
+		arma.setCategory("2200EVO");
+		double[] pars = {2,2};
+		arma.setParameters(pars);
+		arma.train();
+		PerformanceMeasures pm = new PerformanceMeasures(arma);
+		pm.calculateMeasures("training");
+		pm.printMeasures();
+		Matrix.print(arma.getCoefficients());
+		System.out.println(arma.getConstants()[0]);
+		System.out.println(arma.getLogLikelihood());
+		System.out.println(arma.getAIC());
+		Matrix.print(arma.getTrainingForecast());	*/	
+		
+		/*ExponentialSmoothing ses = new ExponentialSmoothing("SES",1,data);
+		ses.setCategory("2200EVO");
+		double[] pars = new double[1];
+		pars[0] = 0.1;
+		ses.setParameters(pars);
+		ses.train();
+		Matrix.print(ses.getValidationDates());
+		Matrix.print(ses.getValidationReal());
+		Matrix.print(ses.getValidationForecast());
+		ses.plotForecast("testing");*/
+		
+		
 		
 		/*System.out.println(data.getTrainingFirstIndex()[data.getIndexFromCat("2200EVO")]);
 		System.out.println(data.getValidationFirstIndex()[data.getIndexFromCat("2200EVO")]);

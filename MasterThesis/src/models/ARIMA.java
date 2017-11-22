@@ -2,13 +2,11 @@ package models;
 
 import java.util.Random;
 
-import org.rosuda.REngine.REXP;
-import org.rosuda.REngine.REXPMismatchException;
-import org.rosuda.REngine.Rserve.RConnection;
-import org.rosuda.REngine.Rserve.RserveException;
 
 import input.Data;
+import math.LLARMAFunction;
 import math.Matrix;
+import math.NelderMead;
 
 public class ARIMA extends Model {
 
@@ -21,8 +19,8 @@ public class ARIMA extends Model {
 	public ARIMA(Data data,int periods,int s)
 	{
 		super(data,periods);
-		noParameters = 2;
-		noConstants = 1;
+		noParameters = 3;
+		noConstants = 0;
 		name = "ARIMA";
 		seed = s;
 	}
@@ -45,8 +43,9 @@ public class ARIMA extends Model {
 				return false;
 			}
 		}
-
-		/*LLARMAFunction f = new LLARMAFunction(this,(int)parameters[0],(int)parameters[1]);
+		
+		createDifferences();
+		LLARMAFunction f = new LLARMAFunction(this,(int)parameters[0],(int)parameters[1]);
 
 		NelderMead nm = new NelderMead(f);
 		nm.optimize();
@@ -57,15 +56,22 @@ public class ARIMA extends Model {
 		for(int idx=1;idx<(coefficients.length-1);++idx)
 			coefficients[idx] = Math.tanh(nm.getOptimalIntput()[idx]);
 
-		coefficients[coefficients.length-1] = Math.abs(nm.getOptimalIntput()[coefficients.length-1]);*/
+		coefficients[coefficients.length-1] = Math.abs(nm.getOptimalIntput()[coefficients.length-1]);
+		calculateResiduals(coefficients);
+		logLikelihood = -f.evaluate(coefficients);
 		
-		try {
-			RConnection r = new RConnection();
+		/*try {
+			System.out.println("a");
+			RConnection tmp = new RConnection();
+			System.out.println("b");
 			r.eval("source(\"C:/Users/emp5220514/Desktop/git/MasterThesis/src/data/arima_script.R\")");
-			
+			r = tmp;
+			System.out.println("c");
 			determineNoDifferences();
-			REXP outcome = r.eval("arma(\"2200EVO\",2,2,1)");
-
+			System.out.println("d");
+			REXP outcome = r.eval("arma(\"2200EVO\","+parameters[0]+","+parameters[1]+","+noPersAhead+")");
+			System.out.println("e");
+			r.close();
 			coefficients = new double[outcome.asDoubles().length-2];
 			
 			for(int idx=0;idx<coefficients.length;++idx)
@@ -73,17 +79,27 @@ public class ARIMA extends Model {
 			
 			calculateResiduals(coefficients);
 			logLikelihood = outcome.asDoubles()[outcome.asDoubles().length-2];
+			
 		} catch (RserveException |REXPMismatchException e) 
 		{
 			e.printStackTrace();
 			return false;
-		} 
+		} */
 		
 		calculateInformationCriteria();
+		initializeSets();		
+		
+		double[] forecast = forecast(convertRealData(),createErrors(seed,data.getNoObs(),coefficients[coefficients.length-1]),coefficients,(int)parameters[0],(int)parameters[1],(int)parameters[2]);
 
-		initializeSets();
-		forecast(seed);
+		for(int idx=0;idx<trainingReal.length;++idx)
+			trainingForecast[idx] = forecast[idx];
 
+		for(int idx=0;idx<validationReal.length;++idx)
+			validationForecast[idx] = forecast[trainingReal.length+idx];
+
+		for(int idx=0;idx<testingReal.length;++idx)
+			testingForecast[idx] = forecast[trainingReal.length+validationReal.length+idx];
+		
 		trainingForecasted = true;
 		validationForecasted = true;
 		testingForecasted = true;
@@ -139,6 +155,38 @@ public class ARIMA extends Model {
 		return error;
 	}
 
+	private void createDifferences()
+	{
+		int index = data.getIndexFromCat(category);
+		double[] ts = new double[data.getValidationFirstIndex()[index]-data.getTrainingFirstIndex()[index]];
+		double[] temp = new double[ts.length];
+
+		for(int idx=0;idx<ts.length;++idx)
+		{
+			ts[idx] = data.getVolumes()[data.getTrainingFirstIndex()[index]+idx][index];
+			temp[idx] = ts[idx];
+		}
+		
+		if((int)parameters[2] == 0)
+			timeSeries = ts;
+		else
+		{
+			for(int idx1=0;idx1<parameters[2];++idx1)
+			{
+				temp = new double[ts.length-1];
+
+				for(int idx2=0;idx2<temp.length;++idx2)
+					temp[idx2] = ts[idx2+1]-ts[idx2];
+
+				ts = new double[temp.length];
+
+				for(int idx2=0;idx2<temp.length;++idx2)
+					ts[idx2] = temp[idx2];
+			}
+			timeSeries = ts;
+		}
+	}
+	
 	private void determineNoDifferences()
 	{
 		int index = data.getIndexFromCat(category);
@@ -172,6 +220,17 @@ public class ARIMA extends Model {
 		constants[0] = noDiffs;
 	}
 
+	private static double[] createErrors(int seed,int no,double s2)
+	{
+		double[] errors = new double[no];
+		Random r = new Random(seed);
+
+		for(int idx=0;idx<no;++idx)
+			errors[idx] = r.nextGaussian()*Math.sqrt(s2);
+		
+		return errors;
+	}
+	
 	private static boolean DickyFuller(double[] ts)
 	{
 		double[] Y1 = new double[ts.length-1];
@@ -205,45 +264,40 @@ public class ARIMA extends Model {
 		BIC = 2*Math.log(timeSeries.length-parameters[0])*(2+parameters[0]+parameters[1]) - 2*logLikelihood;
 	}
 
-	private void forecast(int seed)
+	private double[] forecast(double[] ts, double[] errors,double[] coefs,int p,int q, int noDifs)
 	{
-		double[] realConverted = convertRealData();
-		double[] forecastConverted = new double[realConverted.length];
-		double[] errors = new double[realConverted.length];
-		Random r = new Random(seed);
-
-		for(int idx=0;idx<realConverted.length;++idx)
-			errors[idx] = r.nextGaussian()*Math.sqrt(coefficients[coefficients.length-1]);
-
-		for(int idx=0;idx<(int)parameters[0];++idx)
-			forecastConverted[idx] = realConverted[idx];
-
-		for(int idx1=(int)parameters[0];idx1<realConverted.length;++idx1)
+		double[] tmp = new double[ts.length];
+		
+		for(int idx=0;idx<p;++idx)
+			tmp[idx] = ts[idx];
+		
+		for(int idx1=p;idx1<tmp.length;++idx1)
 		{
-			forecastConverted[idx1] = coefficients[0];
+			tmp[idx1] = coefs[0];
+			
+			for(int idx2=(idx1-p);idx2<idx1;++idx2)
+				tmp[idx1] += coefs[idx1-idx2]*(ts[idx2]-coefs[0]);
 
-			for(int idx2=(idx1-(int)parameters[0]);idx2<idx1;++idx2)
-				forecastConverted[idx1] += coefficients[idx1-idx2]*(realConverted[idx2]-coefficients[0]);
-
-			for(int idx2=Math.max(0,idx1-(int)parameters[1]);idx2<idx1;++idx2)
-				forecastConverted[idx1] += coefficients[idx1-idx2+(int)parameters[0]]*errors[idx2];
+			for(int idx2=Math.max(0,idx1-q);idx2<idx1;++idx2)
+				tmp[idx1] += coefs[idx1-idx2+p]*errors[idx2];
 		}
-
-		double[] forecast = deriveData(forecastConverted);
-
-		for(int idx=0;idx<trainingReal.length;++idx)
-			trainingForecast[idx] = forecast[idx];
-
-		for(int idx=0;idx<validationReal.length;++idx)
-			validationForecast[idx] = forecast[trainingReal.length+idx];
-
-		for(int idx=0;idx<testingReal.length;++idx)
-			testingForecast[idx] = forecast[trainingReal.length+validationReal.length+idx];
+		
+		if(noDifs > 0)
+		{
+			return forecast(tmp,errors,coefs,p,q,noDifs-1);
+		}
+		else
+		{			
+			for(int idx=0;idx<(parameters[0]+noPersAhead-1);++idx)
+				tmp[idx] = timeSeries[idx];
+			
+			return deriveData(tmp);
+		}		
 	}
 
 	private double[] deriveData(double[] array)
 	{
-		if((int)constants[0] == 0)
+		if((int)parameters[2] == 0)
 		{
 			return array;
 		}
@@ -251,27 +305,27 @@ public class ARIMA extends Model {
 		{
 			int index = data.getIndexFromCat(category);
 
-			double[][] ts = new double[(int)constants[0]][];
+			double[][] ts = new double[(int)parameters[2]][];
 
 			ts[0] = new double[data.getNoObs()-data.getTrainingFirstIndex()[index]];
 
-			for(int idx2=0;idx2<(int)constants[0];++idx2)
+			for(int idx2=0;idx2<(int)parameters[2];++idx2)
 				ts[0][idx2] = data.getVolumes()[data.getTrainingFirstIndex()[index]+idx2][index];
 
-			for(int idx1=1;idx1<(int)constants[0];++idx1)
+			for(int idx1=1;idx1<(int)parameters[2];++idx1)
 			{
 				ts[idx1] = new double[data.getNoObs()-data.getTrainingFirstIndex()[index]-idx1];
 
-				for(int idx2=0;idx2<((int)constants[0]-idx1);++idx2)
+				for(int idx2=0;idx2<((int)parameters[2]-idx1);++idx2)
 					ts[idx1][idx2] = ts[idx1-1][idx2] - ts[idx1-1][idx2+1];
 			}
 
 			for(int idx2=0;idx2<array.length;++idx2)
-				ts[(int)constants[0]-1][idx2+1] = ts[(int)constants[0]-1][idx2] + array[idx2];
+				ts[(int)parameters[2]-1][idx2+1] = ts[(int)parameters[2]-1][idx2] + array[idx2];
 
-			for(int idx1=((int)constants[0]-2);idx1>=0;--idx1)
+			for(int idx1=((int)parameters[2]-2);idx1>=0;--idx1)
 			{
-				for(int idx2=((int)constants[0]-1-idx1);idx2<(ts[idx1].length-1);++idx2)
+				for(int idx2=((int)parameters[2]-1-idx1);idx2<(ts[idx1].length-1);++idx2)
 					ts[idx1][idx2+1] = ts[idx1][idx2] + ts[idx1+1][idx2];
 			}
 
@@ -292,7 +346,7 @@ public class ARIMA extends Model {
 			temp[idx] = ts[idx];
 		}
 
-		for(int idx1=0;idx1<(int)constants[0];++idx1)
+		for(int idx1=0;idx1<(int)parameters[2];++idx1)
 		{
 			temp = new double[ts.length-1];
 

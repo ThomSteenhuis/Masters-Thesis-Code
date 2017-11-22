@@ -1,6 +1,4 @@
 
-#model <- arima(ts, order = c(1,0,1),method = "CSS")
-#write.table(data,"C:/Users/emp5220514/Desktop/test/table01.txt",row.names = F,quote = F,sep = "\t")
 arma <- function(cat,p,q,noPers)
 {
   data <- read.table("C:/Users/emp5220514/Desktop/git/MasterThesis/src/data/prepared_data.txt",header = T,sep="\t")
