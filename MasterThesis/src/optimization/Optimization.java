@@ -76,7 +76,6 @@ public abstract class Optimization {
 		return performance;
 	}
 	
-	public abstract boolean optimizeAll(boolean silent);
 	public abstract boolean optimize(boolean silent);
 	
 	protected void updateBest()

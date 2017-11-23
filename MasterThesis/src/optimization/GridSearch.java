@@ -52,30 +52,6 @@ public class GridSearch extends Optimization{
 		}
 	}
 	
-	public boolean optimizeAll(boolean silent)
-	{		
-		for(String cat:measures.getModel().getData().getCategories())
-		{
-			measures.getModel().setCategory(cat);
-			
-			for(int idx2=0;idx2<noCombinations;++idx2)
-			{
-				measures.getModel().setParameters(getGridConfig(idx2));
-				if(measures.getModel().train())
-				{
-					measures.calculateMeasures("validation");
-					updateBest();
-				}
-				else
-				{
-					return false;
-				}
-			}
-		}
-		
-		return true;
-	}
-	
 	public boolean optimize(boolean silent)
 	{				
 		if(measures.getModel().getCategory().equals(""))

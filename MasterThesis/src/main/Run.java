@@ -19,6 +19,7 @@ import models.ARIMA;
 import models.ExponentialSmoothing;
 import models.Naive;
 import models.SVR;
+import optimization.Genetic;
 import optimization.GridSearch;
 import performance.PerformanceMeasures;
 
@@ -32,11 +33,11 @@ public class Run {
 
 	public static void main(String[] args)
 	{
-		initializeRandom();
+		r = new Random(seed);
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
 		
-		Experiment e = new Experiment(data,"src/data/experiment.txt","src/data/machine_list.txt");
+		/*Experiment e = new Experiment(data,"src/data/experiment.txt","src/data/machine_list.txt");
 
 		try
 		{
@@ -49,7 +50,14 @@ public class Run {
 		catch (FileNotFoundException e1)
 		{
 			e1.printStackTrace();
-		}
+		}*/
+		
+		SVR svr = new SVR(data,1);
+		PerformanceMeasures pm = new PerformanceMeasures(svr);
+		double[][] bounds = {{0,1},{0,1}};
+		String[] type = {"real","real"};
+		Genetic g = new Genetic(pm,bounds,type);
+		g.optimize(false);
 		
 		/*ARIMA arma = new ARIMA(data,1,seed);
 		arma.setCategory("2200EVO");
@@ -270,11 +278,6 @@ public class Run {
 		Performance.printMeasures(methods,RMSE,MAPE,MAE,ME);
 
 		graph.Plot.initialize(mode, allData, dates, header, input.Run.labels);*/
-	}
-
-	private static void initializeRandom()
-	{
-		r = new Random(seed);
 	}
 
 	private static double[] initData(String set,double[] data)
