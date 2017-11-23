@@ -52,12 +52,41 @@ public class Run {
 			e1.printStackTrace();
 		}*/
 		
-		SVR svr = new SVR(data,1);
-		PerformanceMeasures pm = new PerformanceMeasures(svr);
-		double[][] bounds = {{0,1},{0,1}};
-		String[] type = {"real","real"};
+		ExponentialSmoothing des = new ExponentialSmoothing("mTES",1,data);
+		des.setCategory("2200EVO");
+		double[] cons = {12};
+		des.setConstants(cons);
+		PerformanceMeasures pm = new PerformanceMeasures(des);
+		double[][] bounds = {{0,1},{0,1},{0,1}};
+		String[] type = {"real","real","real"};
 		Genetic g = new Genetic(pm,bounds,type);
-		g.optimize(false);
+		if(g.optimize(false))
+		{
+			Matrix.print(g.getOptimalParameters());
+			des.setParameters(g.getOptimalParameters());
+			des.train();
+			pm.calculateMeasures("validation");
+			pm.printMeasures();
+		}
+		
+		ExponentialSmoothing des2 = new ExponentialSmoothing("mTES",1,data);
+		des2.setCategory("2200EVO");
+		des2.setConstants(cons);
+		PerformanceMeasures pm2 = new PerformanceMeasures(des2);
+		double[][] bounds2 = {{0,1},{0,1},{0,1}};
+		boolean[] type2 = {false,false,false};
+		double[] expb = {2,2,2};
+		int[] stps = {40,40,40};
+		GridSearch g2 = new GridSearch(pm2,bounds2,type2,expb,stps);
+		if(g2.optimize(false))
+		{
+			Matrix.print(g2.getOptimalParameters());
+			des2.setParameters(g2.getOptimalParameters());
+			des2.train();
+			pm2.calculateMeasures("validation");
+			pm2.printMeasures();
+			des2.plotForecast("validation");
+		}
 		
 		/*ARIMA arma = new ARIMA(data,1,seed);
 		arma.setCategory("2200EVO");

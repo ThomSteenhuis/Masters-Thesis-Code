@@ -4,8 +4,11 @@ import performance.PerformanceMeasures;
 
 public class Genetic extends Optimization {
 	
-	private final int popSizeMultiplyer = 5;
-	private final int noEpochMultiplyer = 25;
+	private final int popSizeMultiplyer = 10;
+	private final int noEpochMultiplyer = 100;
+	private final int noOffspring = 4;
+	private final double mutationProb = 0.2;
+	private final double randomParentProb = 0.2;	
 	
 	private int populationSize;
 	private int noEpochs;
@@ -38,6 +41,12 @@ public class Genetic extends Optimization {
 	{
 		if(!initialized)
 			return false;
+		
+		for(int idx=0;idx<noEpochs;++idx)
+		{
+			if(!epoch())
+				return false;
+		}
 		
 		return true;
 	}
@@ -73,6 +82,162 @@ public class Genetic extends Optimization {
 		return initialized;
 	}
 	
+	private double mutation(int idx)
+	{
+		double output = main.Run.r.nextDouble()*(parameterBounds[idx][1]-parameterBounds[idx][0])+parameterBounds[idx][0];
+		
+		if(parameterType[idx].equals("integer"))
+			return (int) output;
+		else 
+			return output;
+	}
+	
+	private double crossover(Member parent1,Member parent2,int idx)
+	{
+		double v = main.Run.r.nextDouble();
+		
+		return v*parent1.getChromosome()[idx].getValue() +(1-v)*parent2.getChromosome()[idx].getValue();
+	}
+	
+	private boolean epoch()
+	{
+		Member[] offsprings = new Member[noOffspring];
+		
+		for(int idx=0;idx<noOffspring;++idx)
+		{
+			int[] parents = selectParents();
+			offsprings[idx] = createOffspring(population[parents[0]],population[parents[1]]);
+			
+			if(!offsprings[idx].evaluateFitness())
+				return false;
+			
+			compare(offsprings[idx]);
+		}
+		
+		return true;
+	}
+	
+	private void compare(Member m)
+	{
+		int idx1=0;
+		double f = m.fitness;
+		
+		while(f > population[idx1].fitness)
+		{
+			idx1++;
+			
+			if(idx1 == populationSize)
+			{
+				idx1--;
+				break;
+			}
+		}		
+		
+		for(int idx2=populationSize-1;idx2>idx1;idx2--)
+			population[idx2] = population[idx2-1];
+		
+		population[idx1] = m;
+	}
+	
+	private Member createOffspring(Member parent1,Member parent2)
+	{
+		Member offspring = new Member(noParameters);
+		
+		for(int idx=0;idx<noParameters;++idx)
+		{
+			double v = main.Run.r.nextDouble();
+			double geneValue;
+			
+			if(v < mutationProb)
+				geneValue = mutation(idx);
+			else
+				geneValue = crossover(parent1,parent2,idx);
+			
+			offspring.getChromosome()[idx] = new Gene(parameterType[idx],geneValue);
+		}
+		
+		return offspring;
+	}
+	
+	private int[] selectParents()
+	{
+		int[] parents = new int[2];
+		double v = main.Run.r.nextDouble();
+		double w = main.Run.r.nextDouble();
+		double b = 0.5;
+		int idx = 0;
+		
+		if(w < randomParentProb)
+		{
+			while(idx < (populationSize - 1) )
+			{
+				if(v < ( (idx+1) / populationSize) )
+					break;
+				else
+					idx++;	
+			}
+		}
+		else
+		{
+			while(idx < (populationSize - 2 ) )
+			{
+				if(v > b)
+					break;
+				else
+				{
+					idx ++;
+					b = b / 2;
+				}
+			}
+		}
+		
+		parents[0] = idx;
+		
+		if(parents[0] == 0)
+			idx = 1;
+		else
+			idx = 0;
+		
+		if(w < randomParentProb)
+		{
+			while(idx < (populationSize - 2) )
+			{
+				if(v < ( (idx+1) / (populationSize - 1)) )
+					break;
+				else
+				{
+					idx++;	
+					
+					if(idx == parents[0])
+						idx++;
+				}
+			}
+		}
+		else
+		{
+			while(idx < (populationSize - 2 ) )
+			{
+				if(v > b)
+					break;
+				else
+				{
+					idx ++;
+					b = b / 2;
+					
+					if(idx == parents[0])
+						idx++;
+				}
+			}
+		}
+		
+		
+		if(idx == populationSize)
+			idx = (populationSize - 2);
+		
+		parents[1] = idx;
+		return parents;
+	}
+	
 	private boolean initialize()
 	{
 		population = new Member[populationSize];
@@ -97,7 +262,7 @@ public class Genetic extends Optimization {
 		int[] indices = partition(indexL,indexR);
 
 		sort(indexL,indices[0]);
-		sort(indices[1],indexR);		
+		sort(indices[1],indexR);
 	}
 	
 	private int[] partition(int indexL,int indexR)
@@ -116,7 +281,7 @@ public class Genetic extends Optimization {
 		{
 			tmpValue = population[i].fitness;			
 			
-			if(tmpValue < pivotValue)
+			if(tmpValue > pivotValue)
 			{
 				swap(i,k);
 				i++;
@@ -190,7 +355,8 @@ public class Genetic extends Optimization {
 				return false;
 			
 			measures.calculateMeasures("validation");
-			fitness = measures.getRMSE();
+			fitness = 1/measures.getRMSE();
+			updateBest();
 			
 			return true;
 		}
@@ -204,44 +370,45 @@ public class Genetic extends Optimization {
 		{
 			return fitness;
 		}
+	}
+	
+	private class Gene
+	{
+		private String type;
+		private double value;
 		
-		private class Gene
+		public Gene(String t)
 		{
-			private String type;
-			private double value;
-			
-			public Gene(String t)
+			type = t;
+		}
+		
+		public Gene(String t,double v)
+		{
+			type = t;
+			value = v;
+		}
+		
+		public boolean initialize(double[] bounds)
+		{
+			if(type.equals("real"))
 			{
-				type = t;
+				value = main.Run.r.nextDouble()*(bounds[1]-bounds[0]) + bounds[0];
+				return true;
 			}
-			
-			public boolean initialize(double[] bounds)
+			else if(type.equals("integer"))
 			{
-				if(type.equals("real"))
-				{
-					value = main.Run.r.nextDouble()*(bounds[1]-bounds[0]) + bounds[0];
-					return true;
-				}
-				else if(type.equals("integer"))
-				{
-					value = main.Run.r.nextInt((int)bounds[1]-(int)bounds[0]) + (int)bounds[0];
-					return true;
-				}
-				else
-				{
-					return false;
-				}				
+				value = main.Run.r.nextInt((int)bounds[1]-(int)bounds[0]) + (int)bounds[0];
+				return true;
 			}
-			
-			public String getType()
+			else
 			{
-				return type;
-			}
-			
-			public double getValue()
-			{
-				return value;
-			}
+				return false;
+			}				
+		}
+		
+		public double getValue()
+		{
+			return value;
 		}
 	}
 }

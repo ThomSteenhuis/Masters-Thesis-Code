@@ -70,9 +70,7 @@ public class GridSearch extends Optimization{
 				updateBest();
 			}
 			else
-			{
 				return false;
-			}
 			
 			if(!silent)
 			{

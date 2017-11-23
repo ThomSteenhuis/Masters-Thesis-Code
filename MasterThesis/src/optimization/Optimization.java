@@ -10,7 +10,7 @@ public abstract class Optimization {
 	protected double[][] bounds;
 	protected String name;
 	
-	protected boolean startOptimization;
+	protected boolean optimized;
 	protected double[] optPars;
 	protected double performance;
 
@@ -24,13 +24,13 @@ public abstract class Optimization {
 		{
 			measures = pm;
 			bounds = parBounds;
-			startOptimization = true;
+			optimized = false;
 		}
 	}
 	
 	public void printBest()
 	{
-		if(!startOptimization)
+		if(optimized)
 		{
 			System.out.printf("RMSE\t= %s\n",performance);
 			System.out.print("Best parameters\t= ");
@@ -61,9 +61,9 @@ public abstract class Optimization {
 		return name;
 	}
 	
-	public boolean optimizationStarted()
+	public boolean isOptimized()
 	{
-		return !startOptimization;
+		return optimized;
 	}
 	
 	public double[] getOptimalParameters()
@@ -82,20 +82,20 @@ public abstract class Optimization {
 	{		
 		if(measures.getModel().getName().equals("ARIMA"))
 		{
-			if( startOptimization || (performance > measures.getModel().getAIC() ) )
+			if( !optimized || (performance > measures.getModel().getAIC() ) )
 			{
 				performance = measures.getModel().getAIC();
 				optPars = measures.getModel().getParameters();
-				startOptimization = false;
+				optimized = true;
 			}
 		}
 		else
 		{
-			if( startOptimization || (performance > measures.getRMSE() ) )
+			if( !optimized || (performance > measures.getRMSE() ) )
 			{
 				performance = measures.getRMSE();
 				optPars = measures.getModel().getParameters();
-				startOptimization = false;
+				optimized = true;
 			}
 		}
 	}

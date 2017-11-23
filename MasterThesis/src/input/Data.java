@@ -406,10 +406,4 @@ public class Data {
 
 		return (int) output;
 	}
-
-	public static void main(String[] args) 
-	{
-		
-	}
-
 }
