@@ -4,16 +4,18 @@ import performance.PerformanceMeasures;
 
 public class Genetic extends Optimization {
 	
-	private final int popSizeMultiplyer = 10;
-	private final int noEpochMultiplyer = 100;
-	private final int noOffspring = 4;
+	private final int popSizeMultiplyer = 20;
+	private final int noOffspringMultiplyer = 2;
+	private final int noEpochs = 1000;
+	private final int neighborhoodSize = 50;
 	private final double mutationProb = 0.2;
-	private final double randomParentProb = 0.2;	
+	private final double randomParentProb = 0.2;
+	private final double mixingGeneProb = 0.5;
 	
-	private int populationSize;
-	private int noEpochs;
+	private int populationSize;	
+	private int noOffspring;
 	
-	private String[] parameterType;
+	private boolean[] integerType;
 	private int noParameters;
 	private double[][] parameterBounds;
 	
@@ -31,8 +33,8 @@ public class Genetic extends Optimization {
 		
 		noParameters = parType.length;
 		populationSize = noParameters * popSizeMultiplyer;
-		noEpochs = noParameters * noEpochMultiplyer;
-		parameterType = parType;
+		noOffspring = noParameters * noOffspringMultiplyer;
+		integerType = checkInteger(parType);
 		parameterBounds = bounds;
 		initialized = initialize();
 	}
@@ -57,9 +59,9 @@ public class Genetic extends Optimization {
 			System.out.println(population[idx].fitness);
 	}
 	
-	public String[] getParameterTypes()
+	public boolean[] getIntegerType()
 	{
-		return parameterType;
+		return integerType;
 	}
 	
 	public int getNoParameters()
@@ -86,7 +88,7 @@ public class Genetic extends Optimization {
 	{
 		double output = main.Run.r.nextDouble()*(parameterBounds[idx][1]-parameterBounds[idx][0])+parameterBounds[idx][0];
 		
-		if(parameterType[idx].equals("integer"))
+		if(integerType[idx])
 			return (int) output;
 		else 
 			return output;
@@ -95,8 +97,14 @@ public class Genetic extends Optimization {
 	private double crossover(Member parent1,Member parent2,int idx)
 	{
 		double v = main.Run.r.nextDouble();
+		double w = main.Run.r.nextDouble();
 		
-		return v*parent1.getChromosome()[idx].getValue() +(1-v)*parent2.getChromosome()[idx].getValue();
+		if(w < mixingGeneProb)
+			return v*parent1.getChromosome()[idx].getValue() +(1-v)*parent2.getChromosome()[idx].getValue();
+		else if(w < 0.5 + 0.5*mixingGeneProb )
+			return parent1.getChromosome()[idx].getValue();
+		else
+			return parent2.getChromosome()[idx].getValue();
 	}
 	
 	private boolean epoch()
@@ -108,9 +116,7 @@ public class Genetic extends Optimization {
 			int[] parents = selectParents();
 			offsprings[idx] = createOffspring(population[parents[0]],population[parents[1]]);
 			
-			if(!offsprings[idx].evaluateFitness())
-				return false;
-			
+			updateBest();			
 			compare(offsprings[idx]);
 		}
 		
@@ -120,7 +126,7 @@ public class Genetic extends Optimization {
 	private void compare(Member m)
 	{
 		int idx1=0;
-		double f = m.fitness;
+		double f = m.getFitness();
 		
 		while(f > population[idx1].fitness)
 		{
@@ -153,8 +159,11 @@ public class Genetic extends Optimization {
 			else
 				geneValue = crossover(parent1,parent2,idx);
 			
-			offspring.getChromosome()[idx] = new Gene(parameterType[idx],geneValue);
+			offspring.getChromosome()[idx] = new Gene(integerType[idx],geneValue);
 		}
+		
+		offspring.evaluateFitness();
+		offspring.localSearch();
 		
 		return offspring;
 	}
@@ -246,7 +255,7 @@ public class Genetic extends Optimization {
 		{
 			population[idx] = new Member(noParameters);
 			
-			if(!population[idx].initialize(parameterBounds,parameterType))
+			if(!population[idx].initialize(parameterBounds,integerType))
 				return false;
 		}
 		
@@ -313,6 +322,21 @@ public class Genetic extends Optimization {
 		population[idx2] = tmp;
 	}
 	
+	private static boolean[] checkInteger(String[] s)
+	{
+		boolean[] output = new boolean[s.length];
+		
+		for(int idx=0;idx<s.length;++idx)
+		{
+			if(s[idx].equals("integer"))
+				output[idx] = true;
+			else
+				output[idx] = false;
+		}
+		
+		return output;
+	}
+	
 	private class Member
 	{
 		private Gene[] chromosome;
@@ -323,7 +347,7 @@ public class Genetic extends Optimization {
 			chromosome = new Gene[noGenes];
 		}
 		
-		public boolean initialize(double[][] bounds,String[] types)
+		public boolean initialize(double[][] bounds,boolean[] types)
 		{
 			if( (bounds.length != chromosome.length) || (types.length != chromosome.length) )
 			{
@@ -356,7 +380,6 @@ public class Genetic extends Optimization {
 			
 			measures.calculateMeasures("validation");
 			fitness = 1/measures.getRMSE();
-			updateBest();
 			
 			return true;
 		}
@@ -370,40 +393,55 @@ public class Genetic extends Optimization {
 		{
 			return fitness;
 		}
+		
+		private void localSearch()
+		{
+			double best = fitness;
+			double[] 
+			
+			for(int idx1=0;idx1<noParameters;++idx1)
+			{				
+				for(int idx2=0;idx2<neighborhoodSize;++idx2)
+				{
+					double neighbor = main.Run.r.nextDouble()*(parameterBounds[idx1][1]-parameterBounds[idx1][0]) + parameterBounds[idx1][0];
+					
+					if(integerType[idx1])
+						neighbor = (int)neighbor;
+
+					chromosome[idx].
+				}					
+			}
+		}
 	}
 	
 	private class Gene
 	{
-		private String type;
+		private boolean integerType;
 		private double value;
 		
-		public Gene(String t)
+		public Gene(boolean t)
 		{
-			type = t;
+			integerType = t;
 		}
 		
-		public Gene(String t,double v)
+		public Gene(boolean t,double v)
 		{
-			type = t;
+			integerType = t;
 			value = v;
 		}
 		
 		public boolean initialize(double[] bounds)
 		{
-			if(type.equals("real"))
-			{
-				value = main.Run.r.nextDouble()*(bounds[1]-bounds[0]) + bounds[0];
-				return true;
-			}
-			else if(type.equals("integer"))
+			if(integerType)
 			{
 				value = main.Run.r.nextInt((int)bounds[1]-(int)bounds[0]) + (int)bounds[0];
 				return true;
 			}
 			else
 			{
-				return false;
-			}				
+				value = main.Run.r.nextDouble()*(bounds[1]-bounds[0]) + bounds[0];
+				return true;
+			}			
 		}
 		
 		public double getValue()

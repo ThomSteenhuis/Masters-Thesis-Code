@@ -52,13 +52,13 @@ public class Run {
 			e1.printStackTrace();
 		}*/
 		
-		ExponentialSmoothing des = new ExponentialSmoothing("mTES",1,data);
+		ExponentialSmoothing des = new ExponentialSmoothing("mTESd",1,data);
 		des.setCategory("2200EVO");
 		double[] cons = {12};
 		des.setConstants(cons);
 		PerformanceMeasures pm = new PerformanceMeasures(des);
-		double[][] bounds = {{0,1},{0,1},{0,1}};
-		String[] type = {"real","real","real"};
+		double[][] bounds = {{0,1},{0,1},{0,1},{0,1}};
+		String[] type = {"real","real","real","real"};
 		Genetic g = new Genetic(pm,bounds,type);
 		if(g.optimize(false))
 		{
@@ -69,14 +69,14 @@ public class Run {
 			pm.printMeasures();
 		}
 		
-		ExponentialSmoothing des2 = new ExponentialSmoothing("mTES",1,data);
+		ExponentialSmoothing des2 = new ExponentialSmoothing("mTESd",1,data);
 		des2.setCategory("2200EVO");
 		des2.setConstants(cons);
 		PerformanceMeasures pm2 = new PerformanceMeasures(des2);
-		double[][] bounds2 = {{0,1},{0,1},{0,1}};
-		boolean[] type2 = {false,false,false};
-		double[] expb = {2,2,2};
-		int[] stps = {40,40,40};
+		double[][] bounds2 = {{0,1},{0,1},{0,1},{0,1}};
+		boolean[] type2 = {false,false,false,false};
+		double[] expb = {2,2,2,2};
+		int[] stps = {40,40,40,40};
 		GridSearch g2 = new GridSearch(pm2,bounds2,type2,expb,stps);
 		if(g2.optimize(false))
 		{
