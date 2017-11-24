@@ -1,1 +1,2 @@
-Grid Search
+GridSearch
+Genetic

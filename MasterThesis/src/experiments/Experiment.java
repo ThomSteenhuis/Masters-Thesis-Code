@@ -20,6 +20,7 @@ public class Experiment {
 
 	private static final int seed = 34304903;
 	private ArrayList<Optimization> instances;
+	
 	private ArrayList<String> machines;
 	
 	private boolean[] success;
@@ -32,16 +33,7 @@ public class Experiment {
 		instances = new ArrayList<Optimization>();
 		
 		try{
-			Scanner s = new Scanner(new File(machineFile));
-			machines = new ArrayList<String>();
-			
-			while(s.hasNextLine())
-			{
-				String line = s.nextLine().trim();
-				machines.add(line);
-			}
-			
-			s.close();
+			machines = main.Run.readFile(machineFile);
 		}
 		catch(IOException e)
 		{
@@ -55,7 +47,6 @@ public class Experiment {
 		
 		try{
 			Scanner s1 = new Scanner(new File(expFile) );
-			Scanner s2 = new Scanner(new File(machineFile));
 			ArrayList<String[]> experiments = new ArrayList<String[]>();
 			
 			while(s1.hasNextLine())
@@ -73,15 +64,8 @@ public class Experiment {
 			}
 			
 			s1.close();
-			machines = new ArrayList<String>();
 			
-			while(s2.hasNextLine())
-			{
-				String line = s2.nextLine().trim();
-				machines.add(line);
-			}
-			
-			s2.close();
+			machines = main.Run.readFile(machineFile);
 				
 			for(int idx1=0;idx1<experiments.size();++idx1)
 			{

@@ -1,6 +1,7 @@
 package graph;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -13,7 +14,12 @@ public class AutoPlot {
 	private static String iLoc2;
 	private static String oLoc;
 	
-	private static String[] categories;
+	private static ArrayList<String> machines;
+	private static ArrayList<String> models;
+	private static ArrayList<String> periods;
+	private static ArrayList<String> optimizations;
+	
+	private static String[] machine;
 	private static String[] model;
 	private static String[] optimization;
 	private static int[] noPersAhead;
@@ -33,7 +39,7 @@ public class AutoPlot {
 	
 	private static double[][][] volumes;
 	private static String[][] dates;
-	private static String[][] cats;
+	private static String[][] header;
 	private static String[][] labels;
 
 	public static void main(String[] args) 
@@ -42,17 +48,41 @@ public class AutoPlot {
 		iLoc2 = args[1];
 		oLoc = args[2];
 		
-		readInput();
-		deriveData();
+		try{
+			machines = main.Run.readFile(args[3]);
+			models = main.Run.readFile(args[4]);
+			periods = main.Run.readFile(args[5]);
+			optimizations = main.Run.readFile(args[5]);
+		}
+		catch(FileNotFoundException e)
+		{
+			e.printStackTrace();
+			return;
+		}
 		
-		LineGraph lg = new LineGraph(volumes,dates,cats,labels);
-		lg.plot();
+		readInput();
+		
+		int[] split = {0,2};
+		int[] categories = {1};
+		int[] filter = {3};
+		String[][] filterVals = {{"GridSearch"}};
+		
+		deriveData("testing",split,categories,filter,filterVals);
+		
+		LineGraph lg = new LineGraph(volumes,dates,header,labels);
+		lg.autoplot();
 		
 		
 	}
 	
-	private static void deriveData()
+	private static boolean deriveData(String set,int[] split,int[] categories,int[] filter,String[][] filterValues)
 	{
+		if(!validInput(split,categories,filter,filterValues))
+		{
+			System.out.println("Error (deriveData): invalid input");
+			return false;
+		}
+		
 		ArrayList<String> tmp1 = new ArrayList<String>(); 
 		ArrayList<String> tmp2 = new ArrayList<String>(); 
 		ArrayList<String> tmp3 = new ArrayList<String>(); 
@@ -65,9 +95,9 @@ public class AutoPlot {
 		{
 			if(success[idx])
 			{
-				if(!tmp1.contains(categories[idx]))
+				if(!tmp1.contains(machine[idx]))
 				{
-					tmp1.add(categories[idx]);
+					tmp1.add(machine[idx]);
 					dataLength1.add(realTrainingData[idx].length);
 					dataLength2.add(realValidationData[idx].length);
 					dataLength3.add(realTestingData[idx].length);
@@ -107,7 +137,7 @@ public class AutoPlot {
 		
 		volumes = new double[noPlots][][];
 		dates = new String[noPlots][];
-		cats = new String[noPlots][noCats];
+		header = new String[noPlots][noCats];
 		labels = new String[noPlots][2];
 		
 		for(int idx1=0;idx1<tmp1.size();idx1++)
@@ -135,12 +165,12 @@ public class AutoPlot {
 				
 				labels[idx1*tmp2.size()+idx2][0] = "Time";
 				labels[idx1*tmp2.size()+idx2][1] = "Volume";
-				cats[idx1*tmp2.size()+idx2][0] = "Actual data";
+				header[idx1*tmp2.size()+idx2][0] = tmp1.get(idx1) + " " + tmp2.get(idx2) + " periods ahead";
 				
 				for(int idx3=0;idx3<tmp3.size();++idx3)
 				{
 					for(int idx4=0;idx4<tmp4.size();++idx4)
-						cats[idx1*tmp2.size()+idx2][idx3*tmp4.size()+idx4+1] = tmp3.get(idx3) + " " + tmp4.get(idx4);
+						header[idx1*tmp2.size()+idx2][idx4*tmp3.size()+idx3+1] = tmp4.get(idx4) + " " + tmp3.get(idx3);
 				}
 				
 				for(int idx3=0;idx3<dataLength1.get(idx1);++idx3)
@@ -188,7 +218,7 @@ public class AutoPlot {
 			s1.close();
 			
 			model = new String[lines.size()-1];
-			categories = new String[lines.size()-1];
+			machine = new String[lines.size()-1];
 			optimization = new String[lines.size()-1];
 			noPersAhead = new int[lines.size()-1];
 			success = new boolean[lines.size()-1];
@@ -197,7 +227,7 @@ public class AutoPlot {
 			{
 				String[] l = lines.get(idx).split("\t");
 				model[idx-1] = l[0].trim();
-				categories[idx-1] = l[1].trim();
+				machine[idx-1] = l[1].trim();
 				optimization[idx-1] = l[2].trim();
 				noPersAhead[idx-1] = Integer.parseInt(l[3].trim());
 				
@@ -272,6 +302,63 @@ public class AutoPlot {
 			e.printStackTrace();
 			return false;
 		}
+	}
+	
+	private static boolean validInput(int[] split,int[] categories,int[] filter,String[][] filterValues)
+	{
+		int[] count = new int[4];
+		
+		for(int idx:split)
+		{
+			if( (idx<0) || (idx>3) )
+				return false;
+			else
+				count[idx]++;
+		}
+			
+		for(int idx:categories)
+		{
+			if( (idx<0) || (idx>3) )
+				return false;
+			else
+				count[idx]++;
+		}
+		
+		for(int idx:filter)
+		{
+			if( (idx<0) || (idx>3) )
+				return false;
+			else
+				count[idx]++;
+		}
+		
+		for(int idx:count)
+		{
+			if(idx != 1)
+				return false;
+		}
+		
+		return validFilterValue(filter,filterValues);
+	}
+	
+	private static boolean validFilterValue(int[] filter,String[][] filterValues)
+	{
+		if(filter.length != filterValues.length)
+			return false;
+		
+		for(int idx=0;idx<filter.length;++idx)
+		{
+			switch(filter[idx])
+			{
+			case 0: for(int idx2=0;idx2<filterValues[idx].length;++idx2) {if(!machines.contains(filterValues[idx][idx2])) return false;} break;
+			case 1: for(int idx2=0;idx2<filterValues[idx].length;++idx2) {if(!models.contains(filterValues[idx][idx2])) return false;} break;
+			case 2: for(int idx2=0;idx2<filterValues[idx].length;++idx2) {if(!periods.contains(filterValues[idx][idx2])) return false;} break;
+			case 3: for(int idx2=0;idx2<filterValues[idx].length;++idx2) {if(!optimizations.contains(filterValues[idx][idx2])) return false;} break;
+			default: System.out.println("Error (validFilterValues): default case reached");
+			}
+		}
+		
+		return true;
 	}
 
 }

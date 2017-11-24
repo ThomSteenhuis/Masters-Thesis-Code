@@ -1,8 +1,11 @@
 package main;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Random;
+import java.util.Scanner;
 
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
@@ -309,6 +312,21 @@ public class Run {
 		Performance.printMeasures(methods,RMSE,MAPE,MAE,ME);
 
 		graph.Plot.initialize(mode, allData, dates, header, input.Run.labels);*/
+	}
+	
+	public static ArrayList<String> readFile(String location) throws FileNotFoundException
+	{
+		Scanner s = new Scanner(new File(location));
+		
+		ArrayList<String> output = new ArrayList<String>();
+		
+		
+		while(s.hasNextLine())
+			output.add(s.nextLine().trim());
+		
+		s.close();
+		
+		return output;
 	}
 
 	private static double[] initData(String set,double[] data)

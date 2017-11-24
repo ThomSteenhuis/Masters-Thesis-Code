@@ -54,7 +54,6 @@ public class LineGraph{
 	private Label[] yLabels;
 	
 	private int current;
-	private boolean saveAndClose;
 
 	private int xMode = 1;
 	private int xInterval;
@@ -87,7 +86,13 @@ public class LineGraph{
 	public void plot()
 	{
 		String[] args = new String[0];
-		saveAndClose = false;
+		Plot.plot(args,this);
+	}
+	
+	public void autoplot()
+	{
+		String[] args = new String[0];
+		current = 1;
 		Plot.plot(args,this);
 	}
 	
@@ -96,14 +101,6 @@ public class LineGraph{
 		axisCoordinates = calculateAxesCoordinates();
 		drawAxes();
 		drawData();
-		
-		if(saveAndClose)
-			saveAndClose(stage);
-	}
-	
-	private void saveAndClose(Stage stage)
-	{
-		stage.close();
 	}
 	
 	private void drawData()

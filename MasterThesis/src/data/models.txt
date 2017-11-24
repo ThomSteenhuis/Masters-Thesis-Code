@@ -1,5 +1,13 @@
-model	class	no	noPars
-SES	0	0	1
-Holt additive	0	1	2
-Holt-Winters additive	0	2	3
-Holt-Winters multiplicative	0	3	3
+SES
+aDES
+mDES
+aDESd
+mDESd
+aTES
+mTES
+aTESd
+mTESd
+four
+ANN
+ARIMA
+SVR
