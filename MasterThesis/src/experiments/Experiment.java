@@ -90,7 +90,6 @@ public class Experiment {
 				
 				for(String idx2:categories)
 				{
-					System.out.println(experiments.get(idx1)[0]);
 					if(isExponentialSmoothing(experiments.get(idx1)[0]))
 						model = initializeES(experiments.get(idx1),idx2,data);
 					else if(isARIMA(experiments.get(idx1)[0]))
@@ -149,7 +148,7 @@ public class Experiment {
 		{
 			long startTime = System.currentTimeMillis();
 			
-			success[idx] = instances.get(idx).optimize(false);
+			success[idx] = instances.get(idx).optimize(true);
 				
 			long stopTime = System.currentTimeMillis();
 			
@@ -347,16 +346,17 @@ public class Experiment {
 	private void createOutcomes()
 	{
 		outcomes = new String[instances.size()+1][];
-		outcomes[0] = new String[9];
+		outcomes[0] = new String[10];
 		outcomes[0][0] = "Model name";
 		outcomes[0][1] = "Machine name";
 		outcomes[0][2] = "Optimization name";
-		outcomes[0][3] = "Runtime (seconds)";
-		outcomes[0][4] = "RMSE";
-		outcomes[0][5] = "MAPE";
-		outcomes[0][6] = "MAE";
-		outcomes[0][7] = "ME";
-		outcomes[0][8] = "Best parameters";
+		outcomes[0][3] = "No periods ahead";
+		outcomes[0][4] = "Runtime (seconds)";
+		outcomes[0][5] = "RMSE";
+		outcomes[0][6] = "MAPE";
+		outcomes[0][7] = "MAE";
+		outcomes[0][8] = "ME";
+		outcomes[0][9] = "Best parameters";
 		
 		for(int idx1=0;idx1<instances.size();++idx1)
 		{
@@ -365,23 +365,24 @@ public class Experiment {
 			outcomes[idx1+1][0] = instances.get(idx1).getPerformanceMeasures().getModel().getName();
 			outcomes[idx1+1][1] = instances.get(idx1).getPerformanceMeasures().getModel().getCategory();
 			outcomes[idx1+1][2] = instances.get(idx1).getName();
+			outcomes[idx1+1][3] = Integer.toString(instances.get(idx1).getPerformanceMeasures().getModel().getNoPeriodsAhead());
 			
 			if(success[idx1])
 			{
-				outcomes[idx1+1][3] = Double.toString(runTimes[idx1]);
-				outcomes[idx1+1][4] = Double.toString(instances.get(idx1).getPerformanceMeasures().getRMSE());
-				outcomes[idx1+1][5] = Double.toString(instances.get(idx1).getPerformanceMeasures().getMAPE());
-				outcomes[idx1+1][6] = Double.toString(instances.get(idx1).getPerformanceMeasures().getMAE());
-				outcomes[idx1+1][7] = Double.toString(instances.get(idx1).getPerformanceMeasures().getME());
+				outcomes[idx1+1][4] = Double.toString(runTimes[idx1]);
+				outcomes[idx1+1][5] = Double.toString(instances.get(idx1).getPerformanceMeasures().getRMSE());
+				outcomes[idx1+1][6] = Double.toString(instances.get(idx1).getPerformanceMeasures().getMAPE());
+				outcomes[idx1+1][7] = Double.toString(instances.get(idx1).getPerformanceMeasures().getMAE());
+				outcomes[idx1+1][8] = Double.toString(instances.get(idx1).getPerformanceMeasures().getME());
 				
 				for(int idx2=0;idx2<noPars;++idx2)
 				{
-					outcomes[idx1+1][8+idx2] = Double.toString(instances.get(idx1).getOptimalParameters()[idx2]);
+					outcomes[idx1+1][9+idx2] = Double.toString(instances.get(idx1).getOptimalParameters()[idx2]);
 				}
 			}
 			else
 			{
-				outcomes[idx1+1][3] = "Instance failed";
+				outcomes[idx1+1][4] = "Instance failed";
 			}
 		}
 	}

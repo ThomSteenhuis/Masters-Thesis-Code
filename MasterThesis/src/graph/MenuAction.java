@@ -52,7 +52,7 @@ public class MenuAction {
 				{
 					if(graph.getCheckboxes()[idx].isSelected())
 					{
-						lineNames.add(graph.getCategories()[idx]);
+						lineNames.add(graph.getCategories()[graph.getCurrent()][idx]);
 					}
 				}
 					
@@ -69,7 +69,7 @@ public class MenuAction {
 					lines[idx].setStartY(graph.getTopMargin()+legendBorderMargin+legendLineMargin+txtSize*idx);
 					lines[idx].setEndY(lines[idx].getStartY());
 					
-					txts[idx] = new Label(graph.getCategories()[idx]);
+					txts[idx] = new Label(graph.getCategories()[graph.getCurrent()][idx]);
 					txts[idx].setFont(new Font(txtSize));
 					txts[idx].setLayoutX(lines[idx].getEndX()+legendTxtMargin);
 					txts[idx].setLayoutY(lines[idx].getStartY()-0.7*txtSize);

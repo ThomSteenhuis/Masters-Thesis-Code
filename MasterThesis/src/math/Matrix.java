@@ -380,6 +380,14 @@ public class Matrix {
 		System.out.println();
 	}
 	
+	public static void print(int[] array)
+	{
+		for(int idx=0;idx<array.length;++idx)
+			System.out.printf("%d\t",array[idx]);
+
+		System.out.println();
+	}
+	
 	public static void print(String[] array)
 	{
 		for(int idx=0;idx<array.length;++idx)

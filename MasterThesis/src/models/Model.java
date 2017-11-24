@@ -93,12 +93,14 @@ public abstract class Model {
 
 	public void plotForecast(String mode)
 	{
-		String[] pars = new String[1];
-		pars[0] = "pivot";
-
-		String[] cats = new String[2];
-		cats[0] = category;
-		cats[1] = "Forecast";
+		String[][] cats = new String[1][2];
+		String[][] lbls = new String[1][];
+		String[][] dts = new String[1][];
+		cats[0][0] = category;
+		cats[0][1] = "Forecast";
+		lbls[0] = data.getLabels();
+		
+		
 
 		switch (mode)
 		{
@@ -110,9 +112,10 @@ public abstract class Model {
 					return;
 				}
 
-				double[][] vols = merge(trainingReal,trainingForecast);
-
-				LineGraph lg = new LineGraph(vols,trainingDates,cats,data.getLabels());
+				double[][][] vols = merge(trainingReal,trainingForecast);
+				dts[0] = trainingDates;
+				
+				LineGraph lg = new LineGraph(vols,dts,cats,lbls);
 				lg.plot();
 				break;
 			}
@@ -124,9 +127,10 @@ public abstract class Model {
 					return;
 				}
 
-				double[][] vols = merge(validationReal,validationForecast);
-
-				LineGraph lg = new LineGraph(vols,validationDates,cats,data.getLabels());
+				double[][][] vols = merge(validationReal,validationForecast);
+				dts[0] = validationDates;
+				
+				LineGraph lg = new LineGraph(vols,dts,cats,lbls);
 				lg.plot();
 				break;
 			}
@@ -138,9 +142,10 @@ public abstract class Model {
 					return;
 				}
 
-				double[][] vols = merge(testingReal,testingForecast);
+				double[][][] vols = merge(testingReal,testingForecast);
+				dts[0] = testingDates;
 
-				LineGraph lg = new LineGraph(vols,testingDates,cats,data.getLabels());
+				LineGraph lg = new LineGraph(vols,dts,cats,lbls);
 				lg.plot();
 				break;
 			}
@@ -276,7 +281,7 @@ public abstract class Model {
 		System.out.printf("Error (%s): %s\n",model,txt);
 	}
 
-	private static double[][] merge(double[] array1,double[] array2)
+	private static double[][][] merge(double[] array1,double[] array2)
 	{
 		if(array1.length != array2.length)
 		{
@@ -284,12 +289,12 @@ public abstract class Model {
 			return null;
 		}
 
-		double[][] output = new double[array1.length][2];
+		double[][][] output = new double[1][array1.length][2];
 
 		for(int idx=0;idx<array1.length;++idx)
 		{
-			output[idx][0] = array1[idx];
-			output[idx][1] = array2[idx];
+			output[0][idx][0] = array1[idx];
+			output[0][idx][1] = array2[idx];
 		}
 
 		return output;

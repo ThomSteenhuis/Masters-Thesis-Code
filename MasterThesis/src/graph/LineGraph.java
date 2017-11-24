@@ -39,21 +39,22 @@ public class LineGraph{
 	private CheckBox[] checkboxes;
 	private Color[] colors;
 
-	private double[][] yValues;
-	private String[] categories;
-	private String[] xValues;
-	private String[] axesLabels;
+	private double[][][] yValues;
+	private String[][] categories;
+	private String[][] xValues;
 	
 	double[][][] lineCoordinates;
 
 	private double[][] axisCoordinates;
-	private String xAxisName;
-	private String yAxisName;
+	private String[][] axisNames;
 
 	private String[] yAxisCategories;
 
 	private Label[] xLabels;
 	private Label[] yLabels;
+	
+	private int current;
+	private boolean saveAndClose;
 
 	private int xMode = 1;
 	private int xInterval;
@@ -65,68 +66,58 @@ public class LineGraph{
 	private int maxNoMajorYTicks = 10;
 	private boolean minorYTicks = false;
 
-	public LineGraph(double[][] input,String[] leftLine,String[] header,String[] labels)
+	
+	public LineGraph(double[][][] input,String[][] leftLine,String[][] header,String[][] labels)
 	{
-		int tableLength = input.length;
-
-		if( (tableLength == 0) || (tableLength != leftLine.length) || (labels.length != 2) )
-			initializeError();
-
-		int tableWidth =  input[0].length;
-
-		if( (tableWidth == 0) || (tableWidth != header.length) )
+		setData(input,leftLine,header,labels);
+	}
+	
+	public void setData(double[][][] input,String[][] leftLine,String[][] header,String[][] labels)
+	{
+		if( (input.length != leftLine.length) || (input.length != header.length) || (input.length != labels.length) )
 			initializeError();
 
 		categories = header;
 		xValues = leftLine;
-		axesLabels = labels;
-
-		yValues = new double[tableLength][];
-		
-		for(int idx1=0;idx1<tableLength;++idx1)
-		{
-			if(input[idx1].length != tableWidth)
-				initializeError();
-
-			yValues[idx1] = new double[tableWidth];
-
-			for(int idx2=0;idx2<tableWidth;++idx2)
-				yValues[idx1][idx2] = input[idx1][idx2];
-		}
+		axisNames = labels;
+		yValues = input;		
+		current = 0;
 	}
 	
 	public void plot()
 	{
 		String[] args = new String[0];
+		saveAndClose = false;
 		Plot.plot(args,this);
 	}
 	
-	public void draw()
+	public void draw(Stage stage)
 	{
-		colors = getColors(categories.length);
-
-		xAxisName = axesLabels[0];
-		yAxisName = axesLabels[1];
-
-		axisCoordinates = new double[4][2];
-		axisCoordinates[0][0] = leftMargin + yAxisSpace;
-		axisCoordinates[0][1] = topMargin;
-		axisCoordinates[1][0] = leftMargin + yAxisSpace;
-		axisCoordinates[1][1] = drawPane.getHeight() - bottomMargin - xAxisSpace;
-		axisCoordinates[2][0] = drawPane.getWidth() - rightMargin;
-		axisCoordinates[2][1] = drawPane.getHeight() - bottomMargin - xAxisSpace;
-		axisCoordinates[3][0] = drawPane.getWidth() - rightMargin;
-		axisCoordinates[3][1] = topMargin;
-
-		double[] extremes = getExtremes(yValues);
+		axisCoordinates = calculateAxesCoordinates();
+		drawAxes();
+		drawData();
+		
+		if(saveAndClose)
+			saveAndClose(stage);
+	}
+	
+	private void saveAndClose(Stage stage)
+	{
+		stage.close();
+	}
+	
+	private void drawData()
+	{
+		colors = getColors(categories[current].length);
+		double[] extremes = getExtremes(yValues[current]);
 		yAxisCategories = new String[(int) Math.ceil(extremes[1]) + 1];
 
 		for(int idx=0;idx<yAxisCategories.length;++idx)
 			yAxisCategories[idx] = Integer.toString(idx);
 		
-		drawAxes();
+		drawTicks();
 		calculateLineCoordinates();
-		createCheckboxes(categories);
+		createCheckboxes();
 	}
 	
 	public void setDrawPane(Pane pane)
@@ -184,7 +175,7 @@ public class LineGraph{
 		return checkboxes;
 	}
 	
-	public String[] getCategories()
+	public String[][] getCategories()
 	{
 		return categories;
 	}
@@ -204,9 +195,14 @@ public class LineGraph{
 		return rightPane;
 	}
 	
+	public int getCurrent()
+	{
+		return current;
+	}
+	
 	private void calculateIntervals()
 	{
-		xInterval = (int)Math.ceil( ( (double)(xValues.length-1) ) / maxNoMajorXTicks );
+		xInterval = (int)Math.ceil( ( (double)(xValues[current].length-1) ) / maxNoMajorXTicks );
 		
 		int guess = (int)Math.ceil(Double.parseDouble(yAxisCategories[yAxisCategories.length-1])/(maxNoMajorYTicks-1) );
 		int powerOf10 = (int) Math.floor(Math.log10(guess) );
@@ -241,32 +237,35 @@ public class LineGraph{
 		axes[3].setEndY(axisCoordinates[0][1]);
 
 		drawPane.getChildren().addAll(axes);
-
+	}
+	
+	private void drawTicks()
+	{
 		calculateIntervals();
-		Line[] xTicks = new Line[xValues.length];
-		String[] xTickNames = new String[xValues.length];
-		xLabels = new Label[xValues.length];
+		Line[] xTicks = new Line[xValues[current].length];
+		String[] xTickNames = new String[xValues[current].length];
+		xLabels = new Label[xValues[current].length];
 
-		for(int idx=0;idx<xValues.length;++idx)
+		for(int idx=0;idx<xValues[current].length;++idx)
 		{
 			xTicks[idx] = new Line();
 
 			if( (idx%xInterval) == 0)
 			{
-				xTicks[idx].setStartX(axisCoordinates[1][0] + idx*(axisCoordinates[2][0] - axisCoordinates[1][0])/(xValues.length-1));
+				xTicks[idx].setStartX(axisCoordinates[1][0] + idx*(axisCoordinates[2][0] - axisCoordinates[1][0])/(xValues[current].length-1));
 				xTicks[idx].setStartY(axisCoordinates[1][1]);
 				xTicks[idx].setEndX(xTicks[idx].getStartX());
 				xTicks[idx].setEndY(axisCoordinates[1][1] + tickSize);
 			}
 			else if( ( (idx%xInterval) != 0) && minorXTicks)
 			{
-				xTicks[idx].setStartX(axisCoordinates[1][0] + idx*(axisCoordinates[2][0] - axisCoordinates[1][0])/(xValues.length-1));
+				xTicks[idx].setStartX(axisCoordinates[1][0] + idx*(axisCoordinates[2][0] - axisCoordinates[1][0])/(xValues[current].length-1));
 				xTicks[idx].setStartY(axisCoordinates[1][1]);
 				xTicks[idx].setEndX(xTicks[idx].getStartX());
 				xTicks[idx].setEndY(axisCoordinates[1][1] + 0.5*tickSize);
 			}
 
-			xTickNames[idx] = xValues[(int) (idx*(xValues.length-1)/(xValues.length-1))];
+			xTickNames[idx] = xValues[current][(int) (idx*(xValues[current].length-1)/(xValues[current].length-1))];
 
 			xLabels[idx] = new Label(xTickNames[idx]);
 		}
@@ -306,10 +305,10 @@ public class LineGraph{
 		drawPane.getChildren().addAll(xTicks);
 		drawPane.getChildren().addAll(yTicks);
 
-		Label xLabel = new Label(xAxisName);
+		Label xLabel = new Label(axisNames[current][0]);
 		xLabel.setLayoutX(axisCoordinates[1][0] + (axisCoordinates[2][0]-axisCoordinates[1][0])/2);
 		xLabel.setLayoutY(drawPane.getHeight() - xNameMargin);
-		Label yLabel = new Label(yAxisName);
+		Label yLabel = new Label(axisNames[current][1]);
 		yLabel.setLayoutX(yNameMargin);
 		yLabel.setLayoutY((axisCoordinates[1][1]-axisCoordinates[0][1])/2);
 
@@ -456,7 +455,7 @@ public class LineGraph{
 	{
 		for(int idx=0;idx<xLabels.length;idx+=xInterval)
 		{
-			xLabels[idx].setLayoutX(axisCoordinates[0][0] + idx*(axisCoordinates[3][0]-axisCoordinates[0][0])/(xValues.length-1) - 0.5*xLabels[idx].getWidth());
+			xLabels[idx].setLayoutX(axisCoordinates[0][0] + idx*(axisCoordinates[3][0]-axisCoordinates[0][0])/(xLabels.length-1) - 0.5*xLabels[idx].getWidth());
 			xLabels[idx].setLayoutY(axisCoordinates[1][1] + 2*tickSize + xLabels[idx].getHeight());
 		}
 	}
@@ -465,6 +464,7 @@ public class LineGraph{
 	{
 		drawPane.getChildren().clear();
 		drawAxes();
+		drawTicks();
 
 		Line line = null;
 
@@ -486,9 +486,9 @@ public class LineGraph{
 		}
 	}
 
-	private void createCheckboxes(final String[] names)
+	private void createCheckboxes()
 	{
-		checkboxes = new CheckBox[names.length];
+		checkboxes = new CheckBox[categories[current].length];
 
 		final CheckBox all = new CheckBox("Show All");
 		all.setLayoutX(10);
@@ -497,9 +497,9 @@ public class LineGraph{
 		none.setLayoutX(10);
 		none.setLayoutY(30);
 
-		for(int idx=0;idx<names.length;++idx)
+		for(int idx=0;idx<categories[current].length;++idx)
 		{
-			checkboxes[idx] = new CheckBox(names[idx]);
+			checkboxes[idx] = new CheckBox(categories[current][idx]);
 			checkboxes[idx].setLayoutX(10);
 			checkboxes[idx].setLayoutY(60 + idx*20);
 
@@ -528,7 +528,7 @@ public class LineGraph{
 		        {
 		        	none.setSelected(false);
 
-		        	for(int idx=0;idx<names.length;++idx)
+		        	for(int idx=0;idx<categories[current].length;++idx)
 		        		checkboxes[idx].setSelected(true);
 		        }
 		    }
@@ -542,7 +542,7 @@ public class LineGraph{
 		        {
 		        	all.setSelected(false);
 
-		        	for(int idx=0;idx<names.length;++idx)
+		        	for(int idx=0;idx<categories[current].length;++idx)
 		        		checkboxes[idx].setSelected(false);
 		        }
 		    }
@@ -553,32 +553,47 @@ public class LineGraph{
 
 	private void calculateLineCoordinates()
 	{
-		if(yValues.length == 0)
+		if(yValues[current].length == 0)
 			return;
 
-		lineCoordinates = new double[yValues[0].length][yValues.length][4];
+		lineCoordinates = new double[yValues[current][0].length][yValues[current].length][4];
 		
 		double[] coordinates;
 		double defWidth = axisCoordinates[2][0] - axisCoordinates[0][0];
 		double defHeight = axisCoordinates[2][1] - axisCoordinates[0][1];
 		double xStart = axisCoordinates[0][0];
 		double yStart = axisCoordinates[0][1];
-		double xStep = defWidth/( (double) (xValues.length - 1) );
+		double xStep = defWidth/( (double) (xValues[current].length - 1) );
 
-		for(int idx1=0;idx1<(yValues[0].length);++idx1)
+		for(int idx1=0;idx1<(yValues[current][0].length);++idx1)
 		{
-			for(int idx2=0;idx2<(yValues.length-1);idx2++)
+			for(int idx2=0;idx2<(yValues[current].length-1);idx2++)
 			{
 				coordinates = new double[4];
 				coordinates[0] = idx2*xStep + xStart;
 				coordinates[2] = (idx2+1)*xStep + xStart;
-				coordinates[1] = yStart + defHeight * (1 - (yValues[idx2][idx1] / (yNoIntervals*yInterval) ) );
-				coordinates[3] = yStart + defHeight * (1 - (yValues[idx2+1][idx1] / (yNoIntervals*yInterval) ) );
+				coordinates[1] = yStart + defHeight * (1 - (yValues[current][idx2][idx1] / (yNoIntervals*yInterval) ) );
+				coordinates[3] = yStart + defHeight * (1 - (yValues[current][idx2+1][idx1] / (yNoIntervals*yInterval) ) );
 				lineCoordinates[idx1][idx2] = coordinates;
 			}
 		}
 	}
 
+	private double[][] calculateAxesCoordinates()
+	{
+		double[][] output = new double[4][2];
+		output[0][0] = leftMargin + yAxisSpace;
+		output[0][1] = topMargin;
+		output[1][0] = leftMargin + yAxisSpace;
+		output[1][1] = drawPane.getHeight() - bottomMargin - xAxisSpace;
+		output[2][0] = drawPane.getWidth() - rightMargin;
+		output[2][1] = drawPane.getHeight() - bottomMargin - xAxisSpace;
+		output[3][0] = drawPane.getWidth() - rightMargin;
+		output[3][1] = topMargin;
+		
+		return output;
+	}
+	
 	private static double[] getExtremes(double[][] table)
 	{
 		double[] output = new double[2];
