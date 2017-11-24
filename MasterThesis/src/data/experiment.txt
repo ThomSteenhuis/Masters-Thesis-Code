@@ -1,6 +1,6 @@
-ANN	all	GridSearch	1	0.00001	0.95	1	6	5	linear	2	1	50	49	linear	2	-7	-2	4	exponential	10	1	50	24	linear	2
-ANN	all	Genetic	1	0.00001	0.95	1	6	integer	linear	2	1	50	integer	linear	2	-7	-2	real	exponential	10	1	50	integer	linear	2
-ANN	all	GridSearch	3	0.00001	0.95	1	6	5	linear	2	1	50	49	linear	2	-7	-2	4	exponential	10	1	50	24	linear	2
-ANN	all	Genetic	3	0.00001	0.95	1	6	integer	linear	2	1	50	integer	linear	2	-7	-2	real	exponential	10	1	50	integer	linear	2
-ANN	all	GridSearch	6	0.00001	0.95	1	6	5	linear	2	1	50	49	linear	2	-7	-2	4	exponential	10	1	50	24	linear	2
-ANN	all	Genetic	6	0.00001	0.95	1	6	integer	linear	2	1	50	integer	linear	2	-7	-2	real	exponential	10	1	50	integer	linear	2
+ANN	2200EVO	GridSearch	1	0.00001	0.95	1	6	5	linear	2	1	20	19	linear	2	-4	-4	0	exponential	10	1	20	4	linear	2
+ANN	2200EVO	Genetic	1	0.00001	0.95	1	6	integer	linear	2	1	20	integer	linear	2	-4	-4	real	exponential	10	1	20	integer	linear	2
+ANN	2200EVO	GridSearch	3	0.00001	0.95	1	6	5	linear	2	1	20	19	linear	2	-4	-4	0	exponential	10	1	20	4	linear	2
+ANN	2200EVO	Genetic	3	0.00001	0.95	1	6	integer	linear	2	1	20	integer	linear	2	-4	-4	real	exponential	10	1	20	integer	linear	2
+ANN	2200EVO	GridSearch	6	0.00001	0.95	1	6	5	linear	2	1	20	19	linear	2	-4	-4	0	exponential	10	1	20	4	linear	2
+ANN	2200EVO	Genetic	6	0.00001	0.95	1	6	integer	linear	2	1	20	integer	linear	2	-4	-4	real	exponential	10	1	20	integer	linear	2

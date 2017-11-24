@@ -28,7 +28,7 @@ public class GridSearch extends Optimization{
 		{
 			for(int idx=0;idx<steps.length;++idx)
 			{
-				if(steps[idx] < 1)
+				if(steps[idx] < 0)
 					stepsNOK = true;
 			}
 			
