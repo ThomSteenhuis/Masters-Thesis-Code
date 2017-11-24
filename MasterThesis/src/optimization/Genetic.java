@@ -184,10 +184,13 @@ public class Genetic extends Optimization {
 			offspring.getChromosome()[idx] = new Gene(integerType[idx],geneValue);
 		}
 		
-		offspring.evaluateFitness();
-		offspring.localSearch();
-		
-		return offspring;
+		if(offspring.evaluateFitness()) 
+		{
+			offspring.localSearch(); 
+			return offspring;
+		}
+		else
+			return createOffspring(parent1,parent2);
 	}
 	
 	private int[] selectParents()
@@ -429,9 +432,8 @@ public class Genetic extends Optimization {
 						neighbor = (int)neighbor;
 
 					chromosome[idx1].setValue(neighbor);
-					evaluateFitness();
 					
-					if(fitness > best)
+					if( evaluateFitness() && (fitness > best) )
 					{
 						best = fitness;
 						bestGenevalues = getGenevalues();
