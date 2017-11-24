@@ -1,8 +1,5 @@
 package optimization;
 
-import org.rosuda.REngine.REXPMismatchException;
-import org.rosuda.REngine.Rserve.RserveException;
-
 import performance.PerformanceMeasures;
 
 public abstract class Optimization {

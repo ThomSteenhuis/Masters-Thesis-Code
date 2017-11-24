@@ -53,6 +53,14 @@ public class Genetic extends Optimization {
 		{
 			if(!epoch())
 				return false;
+			
+			if(!silent)
+			{
+				if( ( ( (100*idx) % noEpochs ) < 100) && ( (100*idx) >= noEpochs ) && ( ( (100*idx) / noEpochs) < 100 ) )
+				{
+					System.out.printf("Completed %d%% of %d epochs\n",(100*idx) / noEpochs,noEpochs);
+				}
+			}	
 		}
 		
 		return true;
