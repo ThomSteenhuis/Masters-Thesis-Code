@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import input.Data;
+import models.ANN;
 import models.ARIMA;
 import models.ExponentialSmoothing;
 import models.Model;
@@ -66,7 +67,7 @@ public class Experiment {
 			s1.close();
 			
 			machines = main.Run.readFile(machineFile);
-				
+			
 			for(int idx1=0;idx1<experiments.size();++idx1)
 			{
 				Model model;
@@ -78,12 +79,14 @@ public class Experiment {
 						model = initializeES(experiments.get(idx1),idx2,data);
 					else if(isARIMA(experiments.get(idx1)[0]))
 						model = initializeARIMA(experiments.get(idx1),idx2,data);
+					else if(isANN(experiments.get(idx1)[0]))
+						model = initializeANN(experiments.get(idx1),idx2,data);
 					else
 					{
 						System.out.println("Error (Experiment): model not recognized");
 						continue;
 					}
-					
+
 					PerformanceMeasures pm = new PerformanceMeasures(model);
 					
 					if(experiments.get(idx1)[2].equals("GridSearch") )
@@ -131,8 +134,8 @@ public class Experiment {
 		for(int idx=0;idx<instances.size();++idx)
 		{
 			long startTime = System.currentTimeMillis();
-			
-			success[idx] = instances.get(idx).optimize(true);
+
+			success[idx] = instances.get(idx).optimize(false);
 				
 			long stopTime = System.currentTimeMillis();
 			
@@ -215,8 +218,7 @@ public class Experiment {
 		
 		if(line[0].contains("TES") || line[0].equals("four") )
 		{
-			double[] constants = new double[1];
-			constants[0] = Double.parseDouble(line[4]);
+			double[] constants = {Double.parseDouble(line[4])};
 			es.setConstants(constants);
 		}
 			
@@ -229,6 +231,17 @@ public class Experiment {
 		arma.setCategory(cat);
 			
 		return arma;
+	}
+	
+	private static Model initializeANN(String[] line,String cat,Data data) throws NumberFormatException
+	{		
+		ANN ann = new ANN(data,Integer.parseInt(line[3]));
+		ann.setCategory(cat);
+			
+		double[] constants = {Double.parseDouble(line[4]),Double.parseDouble(line[5])};
+		ann.setConstants(constants);
+		
+		return ann;
 	}
 	
 	private static Optimization initializeGA(String[] line,PerformanceMeasures pm) throws FileNotFoundException,NumberFormatException
@@ -310,6 +323,14 @@ public class Experiment {
 	private static boolean isARIMA(String modelName)
 	{
 		if(modelName.equals("ARMA"))
+			return true;
+		else
+			return false;
+	}
+	
+	private static boolean isANN(String modelName)
+	{
+		if(modelName.equals("ANN"))
 			return true;
 		else
 			return false;

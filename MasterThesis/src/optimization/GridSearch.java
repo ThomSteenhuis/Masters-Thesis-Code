@@ -109,7 +109,6 @@ public class GridSearch extends Optimization{
 			output[idx2] = grid[idx2][ (idx / perm ) % grid[idx2].length];
 		}
 			
-		
 		return output;
 	}
 	

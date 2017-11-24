@@ -1,5 +1,6 @@
 package optimization;
 
+import math.Matrix;
 import performance.PerformanceMeasures;
 
 public class Genetic extends Optimization {
@@ -271,7 +272,7 @@ public class Genetic extends Optimization {
 	private boolean initialize()
 	{
 		population = new Member[populationSize];
-		
+
 		for(int idx=0;idx<populationSize;++idx)
 		{
 			population[idx] = new Member(noParameters);
@@ -279,7 +280,7 @@ public class Genetic extends Optimization {
 			if(!population[idx].initialize(idx))
 				return false;
 		}
-		
+
 		sort(0,populationSize-1);
 		return true;
 	}
@@ -372,7 +373,7 @@ public class Genetic extends Optimization {
 			
 			for(int idx=0;idx<chromosome.length;++idx)
 				parameters[idx] = chromosome[idx].getValue();
-			
+
 			measures.getModel().setParameters(parameters);
 			
 			if(!measures.getModel().train())

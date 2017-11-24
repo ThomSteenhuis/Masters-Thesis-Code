@@ -26,7 +26,7 @@ public class ANN extends Model {
 	public int noTrainingEpochs;
 
 	private final double maxInitBounds = 0.01;
-	private final int epochMultiplyer = 100;
+	private final int epochMultiplyer = 1000;
 
 	public ANN(Data data,int noPeriods)
 	{
