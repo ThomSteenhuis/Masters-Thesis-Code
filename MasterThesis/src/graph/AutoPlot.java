@@ -4,11 +4,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Scanner;
 
 import math.Matrix;
 
 public class AutoPlot {
+	
+	private static final int[] split = {0,2};
+	private static final int[] categories = {1};
+	private static final int[] filter = {3};
+	private static final String[] filterValue = {"GridSearch"};
 	
 	private static String iLoc1;
 	private static String iLoc2;
@@ -23,6 +29,7 @@ public class AutoPlot {
 	private static String[] model;
 	private static String[] optimization;
 	private static int[] noPersAhead;
+	private static Hashtable<String,Integer> hash;
 	private static boolean[] success;
 	
 	private static double[][] realTrainingData;
@@ -52,7 +59,7 @@ public class AutoPlot {
 			machines = main.Run.readFile(args[3]);
 			models = main.Run.readFile(args[4]);
 			periods = main.Run.readFile(args[5]);
-			optimizations = main.Run.readFile(args[5]);
+			optimizations = main.Run.readFile(args[6]);
 		}
 		catch(FileNotFoundException e)
 		{
@@ -61,148 +68,172 @@ public class AutoPlot {
 		}
 		
 		readInput();
-		
-		int[] split = {0,2};
-		int[] categories = {1};
-		int[] filter = {3};
-		String[][] filterVals = {{"GridSearch"}};
-		
-		deriveData("testing",split,categories,filter,filterVals);
+		deriveData("testing");
 		
 		LineGraph lg = new LineGraph(volumes,dates,header,labels);
 		lg.autoplot();
-		
-		
 	}
 	
-	private static boolean deriveData(String set,int[] split,int[] categories,int[] filter,String[][] filterValues)
+	private static boolean deriveData(String set)
 	{
-		if(!validInput(split,categories,filter,filterValues))
+		if(!validInput())
 		{
 			System.out.println("Error (deriveData): invalid input");
 			return false;
 		}
 		
-		ArrayList<String> tmp1 = new ArrayList<String>(); 
-		ArrayList<String> tmp2 = new ArrayList<String>(); 
-		ArrayList<String> tmp3 = new ArrayList<String>(); 
-		ArrayList<String> tmp4 = new ArrayList<String>(); 
-		ArrayList<Integer> dataLength1 = new ArrayList<Integer>();
-		ArrayList<Integer> dataLength2 = new ArrayList<Integer>();
-		ArrayList<Integer> dataLength3 = new ArrayList<Integer>();
+		String[][] splittedList = deriveList(split,false); 
+		String[][] categoriesList = deriveList(categories,true);
+				
+		volumes = new double[splittedList.length][][];
+		dates = new String[splittedList.length][];
+		header = new String[splittedList.length][categoriesList.length];
+		labels = new String[splittedList.length][2];
 		
-		for(int idx=0;idx<model.length;++idx)
+		for(int idx1=0;idx1<splittedList.length;idx1++)
 		{
-			if(success[idx])
+			double[][] tmp = new double[categoriesList.length][];
+			labels[idx1][0] = "Time"; labels[idx1][1] = "Volume";
+			
+			for(int idx2=0;idx2<categoriesList.length;idx2++)
 			{
-				if(!tmp1.contains(machine[idx]))
+				String key = makeKey(idx1,idx2,splittedList,categoriesList);
+				int index = hash.get(key);
+				
+				header[idx1][idx2] = "";
+				for(int idx3=0;idx3<categoriesList[idx2].length;++idx3) 
+					header[idx1][idx2] = header[idx1][idx2] + categoriesList[idx2][idx3];
+
+				switch(set)
 				{
-					tmp1.add(machine[idx]);
-					dataLength1.add(realTrainingData[idx].length);
-					dataLength2.add(realValidationData[idx].length);
-					dataLength3.add(realTestingData[idx].length);
-				}
-			}
-		}
-		
-		for(int idx=0;idx<model.length;++idx)
-		{
-			if(success[idx])
-			{
-				if(!tmp2.contains(Integer.toString(noPersAhead[idx]) ) )
-					tmp2.add(Integer.toString(noPersAhead[idx]));
-			}
-		}
-		
-		for(int idx=0;idx<model.length;++idx)
-		{
-			if(success[idx])
-			{
-				if(!tmp3.contains(optimization[idx]))
-					tmp3.add(optimization[idx]);
-			}
-		}
-		
-		for(int idx=0;idx<model.length;++idx)
-		{
-			if(success[idx])
-			{
-				if(!tmp4.contains(model[idx]))
-					tmp4.add(model[idx]);
-			}
-		}
-		
-		int noPlots = tmp1.size() * tmp2.size() * 3;
-		int noCats = tmp3.size() * tmp4.size() + 1;
-		
-		volumes = new double[noPlots][][];
-		dates = new String[noPlots][];
-		header = new String[noPlots][noCats];
-		labels = new String[noPlots][2];
-		
-		for(int idx1=0;idx1<tmp1.size();idx1++)
-		{
-			for(int idx2=0;idx2<tmp2.size();idx2++)
-			{
-				volumes[idx1*tmp2.size()*3+idx2*3] = new double[dataLength1.get(idx1)][noCats];
-				volumes[idx1*tmp2.size()*3+idx2*3+1] = new double[dataLength2.get(idx1)][noCats];
-				volumes[idx1*tmp2.size()*3+idx2*3+2] = new double[dataLength3.get(idx1)][noCats];
-				
-				dates[idx1*tmp2.size()*3+idx2*3] = new String[dataLength1.get(idx1)];
-				dates[idx1*tmp2.size()*3+idx2*3+1] = new String[dataLength2.get(idx1)];
-				dates[idx1*tmp2.size()*3+idx2*3+2] = new String[dataLength3.get(idx1)];
-				
-				ArrayList<Integer> instances = new ArrayList<Integer>();
-				
-				for(int idx3=0;idx3<model.length;++idx3)
+				case "training":
 				{
-					if(success[idx3])
+					tmp[idx2] = new double[realTrainingDates[index].length];
+					
+					if(idx2 == 0)
 					{
-						if(tmp1.get(idx1).equals(categories[idx3]) && tmp2.get(idx2).equals(Integer.toString(noPersAhead[idx3]) ) )
-							instances.add(idx3);
+						dates[idx1] = new String[realTrainingDates[index].length];
+						
+						for(int idx3=0;idx3<tmp[idx2].length;++idx3) 
+						{
+							dates[idx1][idx3] = realTrainingDates[index][idx3];
+							tmp[idx2][idx3] = realTrainingData[index][idx3];
+						}
 					}
+						
+					else
+						for(int idx3=0;idx3<tmp[idx2].length;++idx3) tmp[idx2][idx3] = forecastTrainingData[index][idx3];
+					break;
 				}
-				
-				labels[idx1*tmp2.size()+idx2][0] = "Time";
-				labels[idx1*tmp2.size()+idx2][1] = "Volume";
-				header[idx1*tmp2.size()+idx2][0] = tmp1.get(idx1) + " " + tmp2.get(idx2) + " periods ahead";
-				
-				for(int idx3=0;idx3<tmp3.size();++idx3)
+				case "validation":
 				{
-					for(int idx4=0;idx4<tmp4.size();++idx4)
-						header[idx1*tmp2.size()+idx2][idx4*tmp3.size()+idx3+1] = tmp4.get(idx4) + " " + tmp3.get(idx3);
+					tmp[idx2] = new double[realValidationDates[index].length];
+					
+					if(idx2 == 0)
+					{
+						dates[idx1] = new String[realValidationDates[index].length];
+						
+						for(int idx3=0;idx3<tmp[idx2].length;++idx3) 
+						{
+							dates[idx1][idx3] = realValidationDates[index][idx3];
+							tmp[idx2][idx3] = realValidationData[index][idx3];
+						}
+					}						
+					else
+						for(int idx3=0;idx3<tmp[idx2].length;++idx3) tmp[idx2][idx3] = forecastValidationData[index][idx3];
+					break;
 				}
-				
-				for(int idx3=0;idx3<dataLength1.get(idx1);++idx3)
+				case "testing":
 				{
-					volumes[idx1*tmp2.size()*3+idx2*3][idx3][0] = realTrainingData[instances.get(0)][idx3];
-					dates[idx1*tmp2.size()*3+idx2*3][idx3]  = realTrainingDates[instances.get(0)][idx3];
+					tmp[idx2] = new double[realTestingDates[index].length];
 					
-					for(int idx4=0;idx4<instances.size();++idx4)
-						volumes[idx1*tmp2.size()*3+idx2*3][idx3][idx4+1] = forecastTrainingData[instances.get(idx4)][idx3];						
+					if(idx2 == 0)
+					{
+						dates[idx1] = new String[realTestingDates[index].length];
+						
+						for(int idx3=0;idx3<tmp[idx2].length;++idx3) 
+						{
+							dates[idx1][idx3] = realTestingDates[index][idx3];
+							tmp[idx2][idx3] = realTestingData[index][idx3];
+						}
+					}
+					else
+						for(int idx3=0;idx3<tmp[idx2].length;++idx3) tmp[idx2][idx3] = forecastTestingData[index][idx3];
+					break;
 				}
-					
-				for(int idx3=0;idx3<dataLength2.get(idx1);++idx3)
-				{
-					volumes[idx1*tmp2.size()*3+idx2*3+1][idx3][0] = realValidationData[instances.get(0)][idx3];
-					dates[idx1*tmp2.size()*3+idx2*3+1][idx3]  = realValidationDates[instances.get(0)][idx3];
-					
-					for(int idx4=0;idx4<instances.size();++idx4)
-						volumes[idx1*tmp2.size()*3+idx2*3+1][idx3][idx4+1] = forecastValidationData[instances.get(idx4)][idx3];
+				default: System.out.println("Error (deriveData): default case reached");
 				}
-				
-				for(int idx3=0;idx3<dataLength3.get(idx1);++idx3)
-				{
-					volumes[idx1*tmp2.size()*3+idx2*3+2][idx3][0] = realTestingData[instances.get(0)][idx3];
-					dates[idx1*tmp2.size()*3+idx2*3+2][idx3]  = realTestingDates[instances.get(0)][idx3];
-					
-					for(int idx4=0;idx4<instances.size();++idx4)
-						volumes[idx1*tmp2.size()*3+idx2*3+2][idx3][idx4+1] = forecastTestingData[instances.get(idx4)][idx3];						
-				}				
 			}
+			
+			volumes[idx1] = Matrix.inverse(tmp);
 		}
+		
+		return true;
 	}
 	
+	private static String makeAlternativeKey(int index)
+	{
+		ArrayList<Integer> cat = new ArrayList<Integer>();
+		for(int idx=0;idx<categories.length;++idx) cat.add(categories[idx]);
+		
+		String output = "";
+		if(cat.get(0) == 0) output = output + "Actual data"; else if(!cat.contains(0)) output = output + machine[index];
+		if(cat.get(0) == 1) output = output + "Actual data"; else if(!cat.contains(1)) output = output + model[index];
+		if(cat.get(0) == 2) output = output + "Actual data"; else if(!cat.contains(2)) output = output + noPersAhead[index];
+		if(cat.get(0) == 3) output = output + "Actual data"; else if(!cat.contains(3)) output = output + optimization[index];
+
+		return output;
+	}
+	
+	private static String makeKey(int index1,int index2,String[][] list1,String[][] list2)
+	{
+		int[] translate = new int[4];
+		
+		for(int idx1=0;idx1<translate.length;++idx1)
+		{
+			for(int idx2:split)
+				translate[idx2] = 0;
+			
+			for(int idx2:categories)
+				translate[idx2] = 1;
+			
+			for(int idx2:filter)
+				translate[idx2] = 2;
+		}
+		
+		String key = "";
+		
+		for(int idx1=0;idx1<translate.length;++idx1)
+		{
+			switch(translate[idx1])
+			{
+			case 0: 
+			{
+				int lstIdx = 0;
+				while(!(split[lstIdx] == idx1)) lstIdx ++;
+				key = key + list1[index1][lstIdx];
+				break;
+			}
+			case 1: 
+			{
+				int lstIdx = 0;
+				while(!(categories[lstIdx] == idx1)) lstIdx ++;
+				key = key + list2[index2][lstIdx];
+				break;
+			}
+			case 2: 
+			{
+				int lstIdx = 0;
+				while(filter[lstIdx] != idx1) lstIdx ++;
+				key = key + filterValue[lstIdx];
+				break;
+			}
+			default: System.out.println("Error (makeKey): default case reached");
+			}
+		}
+		
+		return key;
+	}
 	
 	private static boolean readInput()
 	{
@@ -221,6 +252,7 @@ public class AutoPlot {
 			machine = new String[lines.size()-1];
 			optimization = new String[lines.size()-1];
 			noPersAhead = new int[lines.size()-1];
+			hash = new Hashtable<String,Integer>();
 			success = new boolean[lines.size()-1];
 			
 			for(int idx=1;idx<lines.size();++idx)
@@ -230,12 +262,14 @@ public class AutoPlot {
 				machine[idx-1] = l[1].trim();
 				optimization[idx-1] = l[2].trim();
 				noPersAhead[idx-1] = Integer.parseInt(l[3].trim());
+				hash.put(machine[idx-1]+model[idx-1]+Integer.toString(noPersAhead[idx-1])+optimization[idx-1],idx-1);
+				hash.put(makeAlternativeKey(idx-1),idx-1);
 				
 				if(l[4].equals("Instance failed"))
 					success[idx-1] = false;
 				else
 					success[idx-1] = true;
-			}
+			}			
 			
 			lines = new ArrayList<String>();
 			
@@ -304,7 +338,48 @@ public class AutoPlot {
 		}
 	}
 	
-	private static boolean validInput(int[] split,int[] categories,int[] filter,String[][] filterValues)
+	private static String[][] deriveList(int[] input,boolean actualData)
+	{
+		String[][] table = new String[4][];
+		int l = 1;
+		
+		for(int idx1:input)
+		{
+			ArrayList<String> list = new ArrayList<String>();
+			
+			switch(idx1)
+			{
+			case 0: for(int idx2=0;idx2<machine.length;++idx2) if(!list.contains(machine[idx2])) list.add(machine[idx2]);break;
+			case 1: for(int idx2=0;idx2<model.length;++idx2) if(!list.contains(model[idx2])) list.add(model[idx2]);break;
+			case 2: for(int idx2=0;idx2<noPersAhead.length;++idx2) if(!list.contains(Integer.toString(noPersAhead[idx2]))) list.add(Integer.toString(noPersAhead[idx2]));break;
+			case 3: for(int idx2=0;idx2<optimization.length;++idx2) if(!list.contains(optimization[idx2])) list.add(optimization[idx2]);break;
+			default:  System.out.println("Error (deriveList): default case reached");
+			}
+			
+			table[idx1] = new String[list.size()];
+			int cnt = 0;
+			for(String idx2:list) {table[idx1][cnt] = idx2; cnt++;}
+			l = l * cnt;
+		}
+		
+		if(actualData) l++;
+		String[][] output = new String[l][input.length];
+		
+		int first = 0;
+		if(actualData) {output[0][0] = "Actual data"; first = 1;}
+		
+		for(int idx2=0;idx2<input.length;++idx2)
+		{
+			int perm = 1; for(int idx3=idx2+1;idx3<input.length;++idx3) perm = perm * table[input[idx3]].length;
+			
+			for(int idx1=first;idx1<l;++idx1)
+				output[idx1][idx2] = table[input[idx2]][( (idx1-first) / perm ) % table[input[idx2]].length]; 
+		}
+		
+		return output;
+	}
+	
+	private static boolean validInput()
 	{
 		int[] count = new int[4];
 		
@@ -337,23 +412,23 @@ public class AutoPlot {
 			if(idx != 1)
 				return false;
 		}
-		
-		return validFilterValue(filter,filterValues);
+
+		return validFilterValue();
 	}
 	
-	private static boolean validFilterValue(int[] filter,String[][] filterValues)
+	private static boolean validFilterValue()
 	{
-		if(filter.length != filterValues.length)
+		if(filter.length != filterValue.length)
 			return false;
 		
 		for(int idx=0;idx<filter.length;++idx)
 		{
 			switch(filter[idx])
 			{
-			case 0: for(int idx2=0;idx2<filterValues[idx].length;++idx2) {if(!machines.contains(filterValues[idx][idx2])) return false;} break;
-			case 1: for(int idx2=0;idx2<filterValues[idx].length;++idx2) {if(!models.contains(filterValues[idx][idx2])) return false;} break;
-			case 2: for(int idx2=0;idx2<filterValues[idx].length;++idx2) {if(!periods.contains(filterValues[idx][idx2])) return false;} break;
-			case 3: for(int idx2=0;idx2<filterValues[idx].length;++idx2) {if(!optimizations.contains(filterValues[idx][idx2])) return false;} break;
+			case 0: if(!machines.contains(filterValue[idx])) return false; break;
+			case 1: if(!models.contains(filterValue[idx])) return false; break;
+			case 2: if(!periods.contains(filterValue[idx])) return false; break;
+			case 3: if(!optimizations.contains(filterValue[idx])) return false; break;
 			default: System.out.println("Error (validFilterValues): default case reached");
 			}
 		}

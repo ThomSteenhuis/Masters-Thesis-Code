@@ -368,39 +368,6 @@ public class Run {
 		}
 	}
 
-	private static double[][] inverse(double[][] input)
-	{
-		if(input.length == 0)
-		{
-			inverseError("input is of length 0");
-			return null;
-		}
-
-		int noLines = input.length;
-		int noColumns = input[0].length;
-
-		double[][] output = new double[noColumns][noLines];
-
-		for(int idx1=0;idx1<noLines;++idx1)
-		{
-			if(input[idx1].length != noColumns)
-			{
-				inverseError("input does not have the same no of columns everywhere");
-				return null;
-			}
-
-			for(int idx2=0;idx2<noColumns;++idx2)
-				output[idx2][idx1] = input[idx1][idx2];
-		}
-
-		return output;
-	}
-
-	private static void inverseError(String txt)
-	{
-		System.out.println("Error (inverse): "+ txt);
-	}
-
 	private static double[][] mergeColVectors(double[] vec1, double[] vec2)
 	{
 		if(vec1.length != vec2.length)

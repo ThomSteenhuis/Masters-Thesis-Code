@@ -230,6 +230,34 @@ public class Matrix {
 
 		return Math.sqrt(output);
 	}
+	
+	public static double[][] inverse(double[][] input)
+	{
+		if(input.length == 0)
+		{
+			System.out.println("Error (inverse): input has length 0");
+			return null;
+		}
+
+		int noLines = input.length;
+		int noColumns = input[0].length;
+
+		double[][] output = new double[noColumns][noLines];
+
+		for(int idx1=0;idx1<noLines;++idx1)
+		{
+			if(input[idx1].length != noColumns)
+			{
+				System.out.println("Error (inverse): input does not have the same no of columns everywhere");
+				return null;
+			}
+
+			for(int idx2=0;idx2<noColumns;++idx2)
+				output[idx2][idx1] = input[idx1][idx2];
+		}
+
+		return output;
+	}
 
 	public static double[] tanh(double[] array)
 	{

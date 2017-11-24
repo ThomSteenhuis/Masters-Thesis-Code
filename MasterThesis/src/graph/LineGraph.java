@@ -92,7 +92,7 @@ public class LineGraph{
 	public void autoplot()
 	{
 		String[] args = new String[0];
-		current = 1;
+		current = 14;
 		Plot.plot(args,this);
 	}
 	

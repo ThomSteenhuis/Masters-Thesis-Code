@@ -104,7 +104,11 @@ public class GridSearch extends Optimization{
 		double[] output = new double[noParameters];
 		
 		for(int idx2=0;idx2<noParameters;++idx2)
-			output[idx2] = grid[idx2][ (idx / ( (int) ( Math.pow(grid[idx2].length,noParameters-1-idx2) ) ) ) % grid[idx2].length];
+		{
+			int perm = 1; for(int idx3=idx2+1;idx3<noParameters;++idx3) perm = perm * grid[idx3].length;
+			output[idx2] = grid[idx2][ (idx / perm ) % grid[idx2].length];
+		}
+			
 		
 		return output;
 	}
