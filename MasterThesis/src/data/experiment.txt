@@ -1,3 +1,60 @@
 SES	all	GridSearch	1	0.01	1	50	linear	2
 SES	all	Genetic	1	0.01	1	real	linear	2
-aDES	all	GridSearch	1	0.01	1	40	linear	2	0.01	1	40	linear	2
+SES	all	GridSearch	3	0.01	1	50	linear	2
+SES	all	Genetic	3	0.01	1	real	linear	2
+SES	all	GridSearch	6	0.01	1	50	linear	2
+SES	all	Genetic	6	0.01	1	real	linear	2
+aDES	all	GridSearch	1	0.01	1	50	linear	2	0.01	1	50	linear	2
+aDES	all	Genetic	1	0.01	1	50	linear	2	0.01	1	50	linear	2
+aDES	all	GridSearch	3	0.01	1	50	linear	2	0.01	1	50	linear	2
+aDES	all	Genetic	3	0.01	1	50	linear	2	0.01	1	50	linear	2
+aDES	all	GridSearch	6	0.01	1	40	linear	2	0.01	1	50	linear	2
+aDES	all	Genetic	6	0.01	1	50	linear	2	0.01	1	50	linear	2
+mDES	all	GridSearch	1	0.01	1	50	linear	2	0.01	1	50	linear	2
+mDES	all	Genetic	1	0.01	1	50	linear	2	0.01	1	50	linear	2
+mDES	all	GridSearch	3	0.01	1	50	linear	2	0.01	1	50	linear	2
+mDES	all	Genetic	3	0.01	1	50	linear	2	0.01	1	50	linear	2
+mDES	all	GridSearch	6	0.01	1	40	linear	2	0.01	1	50	linear	2
+mDES	all	Genetic	6	0.01	1	50	linear	2	0.01	1	50	linear	2
+aDESd	all	GridSearch	1	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aDESd	all	Genetic	1	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aDESd	all	GridSearch	3	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aDESd	all	Genetic	3	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aDESd	all	GridSearch	6	0.01	1	40	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aDESd	all	Genetic	6	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mDESd	all	GridSearch	1	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mDESd	all	Genetic	1	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mDESd	all	GridSearch	3	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mDESd	all	Genetic	3	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mDESd	all	GridSearch	6	0.01	1	40	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mDESd	all	Genetic	6	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aTES	all	GridSearch	1	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aTES	all	Genetic	1	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aTES	all	GridSearch	3	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aTES	all	Genetic	3	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aTES	all	GridSearch	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aTES	all	Genetic	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mTES	all	GridSearch	1	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mTES	all	Genetic	1	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mTES	all	GridSearch	3	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mTES	all	Genetic	3	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mTES	all	GridSearch	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mTES	all	Genetic	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aTESd	all	GridSearch	1	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aTESd	all	Genetic	1	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aTESd	all	GridSearch	3	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aTESd	all	Genetic	3	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aTESd	all	GridSearch	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aTESd	all	Genetic	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mTESd	all	GridSearch	1	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mTESd	all	Genetic	1	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mTESd	all	GridSearch	3	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mTESd	all	Genetic	3	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mTESd	all	GridSearch	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mTESd	all	Genetic	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+four	all	GridSearch	1	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+four	all	Genetic	1	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+four	all	GridSearch	3	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+four	all	Genetic	3	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+four	all	GridSearch	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+four	all	Genetic	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2

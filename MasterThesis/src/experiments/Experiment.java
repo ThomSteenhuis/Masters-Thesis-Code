@@ -90,6 +90,7 @@ public class Experiment {
 				
 				for(String idx2:categories)
 				{
+					System.out.println(experiments.get(idx1)[0]);
 					if(isExponentialSmoothing(experiments.get(idx1)[0]))
 						model = initializeES(experiments.get(idx1),idx2,data);
 					else if(isARIMA(experiments.get(idx1)[0]))
@@ -148,7 +149,7 @@ public class Experiment {
 		{
 			long startTime = System.currentTimeMillis();
 			
-			success[idx] = instances.get(idx).optimize(silent);
+			success[idx] = instances.get(idx).optimize(false);
 				
 			long stopTime = System.currentTimeMillis();
 			
@@ -313,7 +314,7 @@ public class Experiment {
 			case "aDES": return true;
 			case "mDES": return true;
 			case "aDESd": return true;
-			case "aDESm": return true;
+			case "mDESd": return true;
 			case "aTES": return true;
 			case "mTES": return true;
 			case "aTESd": return true;

@@ -139,20 +139,16 @@ public class ExponentialSmoothing extends Model{
 		
 		switch(modelNo){
 		case 0:{
-			train_val_testSES();
-			return true;
+			return train_val_testSES();
 		}
 		case 1:{
-			train_val_testDES();
-			return true;
+			return train_val_testDES();
 		}
 		case 2:{
-			train_val_testTES();
-			return true;
+			return train_val_testTES();
 		}
 		case 3:{
-			train_val_testTES();	
-			return true;
+			return train_val_testTES();	
 		}
 		default:{
 			System.out.println("Error (train): default case reached");
@@ -208,14 +204,14 @@ public class ExponentialSmoothing extends Model{
 		}
 	}
 
-	private void train_val_testSES()
+	private boolean train_val_testSES()
 	{			
 		int idx1 = data.getIndexFromCat(category);
 		
 		if( (data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1]) < noPersAhead)
 		{
 			modelError("trainSES","data is of length smaller than the number of periods");
-			return;
+			return false;
 		}
 		
 		double[][] dataset = data.getVolumes();
@@ -255,16 +251,18 @@ public class ExponentialSmoothing extends Model{
 		trainingForecasted = true;
 		validationForecasted = true;
 		testingForecasted = true;
+		
+		return true;
 	}
 	
-	private void train_val_testDES()
+	private boolean train_val_testDES()
 	{		
 		int idx1 = data.getIndexFromCat(category);
 		
 		if( (data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1]) < noPersAhead)
 		{
 			modelError("trainDES","data is of length smaller than the number of periods");
-			return;
+			return false;
 		}
 		
 		double[][] dataset = data.getVolumes();
@@ -332,12 +330,7 @@ public class ExponentialSmoothing extends Model{
 		for(int idx2=Math.max(2,noPersAhead);idx2<noData1;++idx2)
 		{
 			if(additive)
-			{
-				if(damped)
-					trainingForecast[idx2] = avals[idx2-noPersAhead] + dampingValue * bvals[idx2-noPersAhead];
-				else
-					trainingForecast[idx2] = avals[idx2-noPersAhead] + noPersAhead * bvals[idx2-noPersAhead];
-			}
+				trainingForecast[idx2] = avals[idx2-noPersAhead] + dampingValue * bvals[idx2-noPersAhead];
 			else
 				trainingForecast[idx2] = avals[idx2-noPersAhead] + Math.pow(bvals[idx2-noPersAhead] , dampingValue);
 		}
@@ -345,12 +338,7 @@ public class ExponentialSmoothing extends Model{
 		for(int idx2=0;idx2<noData2;++idx2)
 		{
 			if(additive)
-			{
-				if(damped)
-					validationForecast[idx2] = avals[idx2+noData1-noPersAhead] + dampingValue * bvals[idx2+noData1-noPersAhead];
-				else
-					validationForecast[idx2] = avals[idx2+noData1-noPersAhead] + noPersAhead * bvals[idx2+noData1-noPersAhead];
-			}
+				validationForecast[idx2] = avals[idx2+noData1-noPersAhead] + dampingValue * bvals[idx2+noData1-noPersAhead];
 			else
 				validationForecast[idx2] = avals[idx2+noData1-noPersAhead] + Math.pow(bvals[idx2+noData1-noPersAhead] , dampingValue);
 		}
@@ -358,12 +346,7 @@ public class ExponentialSmoothing extends Model{
 		for(int idx2=0;idx2<noData3;++idx2)
 		{
 			if(additive)
-			{
-				if(damped)
-					testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead] + dampingValue * bvals[idx2+noData1+noData2-noPersAhead];
-				else
-					testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead] + noPersAhead * bvals[idx2+noData1+noData2-noPersAhead];
-			}
+				testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead] + dampingValue * bvals[idx2+noData1+noData2-noPersAhead];
 			else
 				testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead] + Math.pow(bvals[idx2+noData1+noData2-noPersAhead] , dampingValue);
 		}
@@ -371,20 +354,25 @@ public class ExponentialSmoothing extends Model{
 		trainingForecasted = true;
 		validationForecasted = true;
 		testingForecasted = true;
+		
+		return true;
 	}
 	
-	private void train_val_testTES()
+	private boolean train_val_testTES()
 	{		
 		int idx1 = data.getIndexFromCat(category);
 		
 		if( (data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1]) < (constants[0]+noPersAhead) )
 		{
 			modelError("trainTES","data is of length smaller than the number of periods");
-			return;
+			return false;
 		}
 		
 		if(constants[0]<1)
+		{
 			modelError("trainTES","L should be larger than 0");
+			return false;
+		}
 		
 		double[][] dataset = data.getVolumes();
 		
@@ -441,6 +429,8 @@ public class ExponentialSmoothing extends Model{
 		trainingForecasted = true;
 		validationForecasted = true;
 		testingForecasted = true;
+		
+		return true;
 	}
 	
 	private void train_val_testFour(double[][] dataset,int index,int firstIndex,double[] avals,double[] bvals,double[] cvals,int L,int noData1,int noData2,int noData3)

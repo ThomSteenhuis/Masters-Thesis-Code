@@ -59,7 +59,7 @@ public abstract class Model {
 		}
 		catch(NullPointerException e)
 		{
-			System.out.println("Error (setCategory): this category does not exist");
+			System.out.println("Error (setCategory): category not recognized");
 			return;
 		}
 		category = cat;
