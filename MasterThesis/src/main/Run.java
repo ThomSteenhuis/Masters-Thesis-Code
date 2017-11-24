@@ -37,7 +37,7 @@ public class Run {
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
 		
-		/*Experiment e = new Experiment(data,"src/data/experiment.txt","src/data/machine_list.txt");
+		Experiment e = new Experiment(data,"src/data/experiment.txt","src/data/machine_list.txt");
 
 		try
 		{
@@ -50,16 +50,18 @@ public class Run {
 		catch (FileNotFoundException e1)
 		{
 			e1.printStackTrace();
-		}*/
+		}
 		
-		ExponentialSmoothing des = new ExponentialSmoothing("mTESd",1,data);
+		/*ExponentialSmoothing des = new ExponentialSmoothing("mTESd",1,data);
 		des.setCategory("2200EVO");
 		double[] cons = {12};
 		des.setConstants(cons);
 		PerformanceMeasures pm = new PerformanceMeasures(des);
 		double[][] bounds = {{0,1},{0,1},{0,1},{0,1}};
-		String[] type = {"real","real","real","real"};
-		Genetic g = new Genetic(pm,bounds,type);
+		boolean[] type = {false,false,false,false};
+		boolean[] exp = {false,false,false,false};
+		double[] base = {2,2,2,2};
+		Genetic g = new Genetic(pm,bounds,type,exp,base);
 		if(g.optimize(false))
 		{
 			Matrix.print(g.getOptimalParameters());
@@ -86,7 +88,7 @@ public class Run {
 			pm2.calculateMeasures("validation");
 			pm2.printMeasures();
 			des2.plotForecast("validation");
-		}
+		}*/
 		
 		/*ARIMA arma = new ARIMA(data,1,seed);
 		arma.setCategory("2200EVO");

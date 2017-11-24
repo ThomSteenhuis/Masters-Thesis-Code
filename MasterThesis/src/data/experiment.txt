@@ -1,3 +1,3 @@
 SES	all	GridSearch	1	0.01	1	50	linear	2
-SES	all	Genetic	1	0.01	1
+SES	all	Genetic	1	0.01	1	real	linear	2
 aDES	all	GridSearch	1	0.01	1	40	linear	2	0.01	1	40	linear	2

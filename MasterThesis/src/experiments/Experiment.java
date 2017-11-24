@@ -11,6 +11,7 @@ import input.Data;
 import models.ARIMA;
 import models.ExponentialSmoothing;
 import models.Model;
+import optimization.Genetic;
 import optimization.GridSearch;
 import optimization.Optimization;
 import performance.PerformanceMeasures;
@@ -99,10 +100,16 @@ public class Experiment {
 						continue;
 					}
 					
+					PerformanceMeasures pm = new PerformanceMeasures(model);
+					
 					if(experiments.get(idx1)[2].equals("GridSearch") )
-					{
-						PerformanceMeasures pm = new PerformanceMeasures(model);
+					{	
 						Optimization opt = initializeGS(experiments.get(idx1),pm);
+						instances.add(opt);
+					}
+					else if(experiments.get(idx1)[2].equals("Genetic") )
+					{
+						Optimization opt = initializeGA(experiments.get(idx1),pm);
 						instances.add(opt);
 					}
 					else
@@ -182,7 +189,7 @@ public class Experiment {
 		{
 			if(success[idx1])
 			{
-				p.printf("Instance %d was successfull\n",idx1);
+				p.printf("Instance %d was successful\n",idx1);
 				
 				for(int idx2=0;idx2<forecasts[idx1].length;++idx2)
 				{
@@ -195,7 +202,7 @@ public class Experiment {
 			}
 			else
 			{
-				p.printf("Instance %d was not successfull\n",idx1);
+				p.printf("Instance %d was not successful\n",idx1);
 			}
 		}
 		p.close();
@@ -238,6 +245,37 @@ public class Experiment {
 		arma.setCategory(cat);
 			
 		return arma;
+	}
+	
+	private static Optimization initializeGA(String[] line,PerformanceMeasures pm) throws FileNotFoundException,NumberFormatException
+	{
+		if( ( ( (line.length-4-pm.getModel().getNoConstants()) % 5) != 0) || ( ( (line.length-4-pm.getModel().getNoConstants()) / 5) != pm.getModel().getNoParameters() ) )
+			throw new FileNotFoundException("number of inputs not correct");
+		
+		double[][] parBounds = new double[pm.getModel().getNoParameters()][2];
+		boolean[] expSteps = new boolean[pm.getModel().getNoParameters()];
+		boolean[] integer = new boolean[pm.getModel().getNoParameters()];
+		double[] expBase = new double[pm.getModel().getNoParameters()];
+		
+		for(int idx=0;idx<pm.getModel().getNoParameters();++idx)
+		{
+			parBounds[idx][0] = Double.parseDouble(line[4+5*idx+pm.getModel().getNoConstants()]);
+			parBounds[idx][1] = Double.parseDouble(line[4+5*idx+pm.getModel().getNoConstants()+1]);
+			
+			if(line[4+5*idx+pm.getModel().getNoConstants()+2].equals("integer"))
+				integer[idx] = true;
+			else
+				integer[idx] = false;
+			
+			if(line[4+5*idx+pm.getModel().getNoConstants()+3].equals("exponential"))
+				expSteps[idx] = true;
+			else
+				expSteps[idx] = false;
+			
+			expBase[idx] = Double.parseDouble(line[4+5*idx+pm.getModel().getNoConstants()+4]);
+		}
+		
+		return new Genetic(pm,parBounds,integer,expSteps,expBase);
 	}
 	
 	private static Optimization initializeGS(String[] line,PerformanceMeasures pm) throws FileNotFoundException,NumberFormatException

@@ -18,23 +18,28 @@ public class Genetic extends Optimization {
 	private boolean[] integerType;
 	private int noParameters;
 	private double[][] parameterBounds;
+	private boolean[] exponentialSteps;
+	private double[] exponentialBase;
 	
 	private Member[] population;
 	private boolean initialized;
 	
-	public Genetic(PerformanceMeasures pm, double[][] bounds,String[] parType)
+	public Genetic(PerformanceMeasures pm, double[][] bounds,boolean[] intType,boolean[] expSteps,double[] expBase)
 	{
 		super(pm,bounds);
 		
-		if(bounds.length != parType.length)
+		if( (bounds.length != intType.length) || (bounds.length != expSteps.length) )
 		{
 			optimizationError("Genetic","illegal input variables");
 		}
 		
-		noParameters = parType.length;
+		name = "Genetic";
+		noParameters = intType.length;
 		populationSize = noParameters * popSizeMultiplyer;
 		noOffspring = noParameters * noOffspringMultiplyer;
-		integerType = checkInteger(parType);
+		integerType = intType;
+		exponentialSteps = expSteps;
+		exponentialBase = expBase;
 		parameterBounds = bounds;
 		initialized = initialize();
 	}
@@ -88,6 +93,9 @@ public class Genetic extends Optimization {
 	{
 		double output = main.Run.r.nextDouble()*(parameterBounds[idx][1]-parameterBounds[idx][0])+parameterBounds[idx][0];
 		
+		if(exponentialSteps[idx])
+			output = Math.pow(exponentialBase[idx],output);
+			
 		if(integerType[idx])
 			return (int) output;
 		else 
@@ -100,7 +108,12 @@ public class Genetic extends Optimization {
 		double w = main.Run.r.nextDouble();
 		
 		if(w < mixingGeneProb)
-			return v*parent1.getChromosome()[idx].getValue() +(1-v)*parent2.getChromosome()[idx].getValue();
+		{
+			if(exponentialSteps[idx])
+				return Math.pow(exponentialBase[idx],v*Math.log(parent1.getChromosome()[idx].getValue())/Math.log(exponentialBase[idx]) +(1-v)*Math.log(parent2.getChromosome()[idx].getValue())/Math.log(exponentialBase[idx]) );
+			else
+				return v*parent1.getChromosome()[idx].getValue() +(1-v)*parent2.getChromosome()[idx].getValue();
+		}
 		else if(w < 0.5 + 0.5*mixingGeneProb )
 			return parent1.getChromosome()[idx].getValue();
 		else
@@ -255,7 +268,7 @@ public class Genetic extends Optimization {
 		{
 			population[idx] = new Member(noParameters);
 			
-			if(!population[idx].initialize(parameterBounds,integerType))
+			if(!population[idx].initialize(idx))
 				return false;
 		}
 		
@@ -322,21 +335,6 @@ public class Genetic extends Optimization {
 		population[idx2] = tmp;
 	}
 	
-	private static boolean[] checkInteger(String[] s)
-	{
-		boolean[] output = new boolean[s.length];
-		
-		for(int idx=0;idx<s.length;++idx)
-		{
-			if(s[idx].equals("integer"))
-				output[idx] = true;
-			else
-				output[idx] = false;
-		}
-		
-		return output;
-	}
-	
 	private class Member
 	{
 		private Gene[] chromosome;
@@ -347,19 +345,13 @@ public class Genetic extends Optimization {
 			chromosome = new Gene[noGenes];
 		}
 		
-		public boolean initialize(double[][] bounds,boolean[] types)
-		{
-			if( (bounds.length != chromosome.length) || (types.length != chromosome.length) )
-			{
-				optimizationError("Member","illegal input variables");
-				return false;
-			}
-			
+		public boolean initialize(int index)
+		{			
 			for(int idx=0;idx<chromosome.length;++idx)
 			{
-				chromosome[idx] = new Gene(types[idx]);
+				chromosome[idx] = new Gene(integerType[idx]);
 				
-				if(!chromosome[idx].initialize(bounds[idx]))
+				if(!chromosome[idx].initialize(idx))
 					return false;
 			}
 			
@@ -421,6 +413,9 @@ public class Genetic extends Optimization {
 				{
 					double neighbor = main.Run.r.nextDouble()*(parameterBounds[idx1][1]-parameterBounds[idx1][0]) + parameterBounds[idx1][0];
 					
+					if(exponentialSteps[idx1])
+						neighbor = Math.pow(exponentialBase[idx1],neighbor);
+					
 					if(integerType[idx1])
 						neighbor = (int)neighbor;
 
@@ -456,18 +451,17 @@ public class Genetic extends Optimization {
 			value = v;
 		}
 		
-		public boolean initialize(double[] bounds)
+		public boolean initialize(int idx)
 		{
+			value = main.Run.r.nextDouble()*(parameterBounds[idx][1]-parameterBounds[idx][0]) + parameterBounds[idx][0];
+
+			if(exponentialSteps[idx])
+				value = Math.pow(exponentialBase[idx],value);
+			
 			if(integerType)
-			{
-				value = main.Run.r.nextInt((int)bounds[1]-(int)bounds[0]) + (int)bounds[0];
-				return true;
-			}
-			else
-			{
-				value = main.Run.r.nextDouble()*(bounds[1]-bounds[0]) + bounds[0];
-				return true;
-			}			
+				value = (int)value;
+			
+			return true;
 		}
 		
 		public void setValue(double val)
