@@ -114,7 +114,17 @@ public class Data {
 	
 	public void plot()
 	{
-		LineGraph lg = new LineGraph(volumes,dates,categories,labels);
+		double[][][] vols = new double[1][][];
+		String[][] dts = new String[1][];
+		String[][] cats = new String[1][];
+		String[][] lbls = new String[1][];
+		
+		vols[0] = volumes;
+		dts[0] = dates;
+		cats[0] = categories;
+		lbls[0] = labels;
+		
+		LineGraph lg = new LineGraph(vols,dts,cats,lbls);
 		lg.plot();
 	}
 	
@@ -131,53 +141,56 @@ public class Data {
 		String[] pars = new String[1];
 		pars[0] = "pivot";
 		
-		String[] cats = new String[1];
-		cats[0] = categories[index];
+		String[][] cats = new String[1][1];
+		String[][] lbls = new String[1][];
+		
+		cats[0][0] = categories[index];
+		lbls[0] = labels;
 		
 		switch (set)
 		{
 			case "training":
 			{
-				double[][] vols = new double[validationFirstIndex[index]-trainingFirstIndex[index]][1];
-				String[] dats = new String[vols.length];
+				double[][][] vols = new double[1][validationFirstIndex[index]-trainingFirstIndex[index]][1];
+				String[][] dats = new String[1][vols.length];
 				
 				for(int idx=trainingFirstIndex[index];idx<validationFirstIndex[index];++idx)
 				{
-					vols[idx-trainingFirstIndex[index]][0] = volumes[idx][index];
-					dats[idx-trainingFirstIndex[index]] = dates[idx];
+					vols[0][idx-trainingFirstIndex[index]][0] = volumes[idx][index];
+					dats[0][idx-trainingFirstIndex[index]] = dates[idx];
 				}
 				
-				LineGraph lg = new LineGraph(vols,dats,cats,labels);
+				LineGraph lg = new LineGraph(vols,dats,cats,lbls);
 				lg.plot();
 				break;
 			}
 			case "validation":
 			{
-				double[][] vols = new double[testingFirstIndex[index]-validationFirstIndex[index]][1];
-				String[] dats = new String[vols.length];
+				double[][][] vols = new double[1][testingFirstIndex[index]-validationFirstIndex[index]][1];
+				String[][] dats = new String[1][vols.length];
 				
 				for(int idx=validationFirstIndex[index];idx<testingFirstIndex[index];++idx)
 				{
-					vols[idx-validationFirstIndex[index]][0] = volumes[idx][index];
-					dats[idx-validationFirstIndex[index]] = dates[idx];
+					vols[0][idx-validationFirstIndex[index]][0] = volumes[idx][index];
+					dats[0][idx-validationFirstIndex[index]] = dates[idx];
 				}
 				
-				LineGraph lg = new LineGraph(vols,dats,cats,labels);
+				LineGraph lg = new LineGraph(vols,dats,cats,lbls);
 				lg.plot();
 				break;
 			}
 			case "testing":
 			{
-				double[][] vols = new double[noObs-testingFirstIndex[index]][1];
-				String[] dats = new String[vols.length];
+				double[][][] vols = new double[1][noObs-testingFirstIndex[index]][1];
+				String[][] dats = new String[1][vols.length];
 				
 				for(int idx=testingFirstIndex[index];idx<noObs;++idx)
 				{
-					vols[idx-testingFirstIndex[index]][0] = volumes[idx][index];
-					dats[idx-testingFirstIndex[index]] = dates[idx];
+					vols[0][idx-testingFirstIndex[index]][0] = volumes[idx][index];
+					dats[0][idx-testingFirstIndex[index]] = dates[idx];
 				}
 				
-				LineGraph lg = new LineGraph(vols,dats,cats,labels);
+				LineGraph lg = new LineGraph(vols,dats,cats,lbls);
 				lg.plot();
 				break;
 			}
