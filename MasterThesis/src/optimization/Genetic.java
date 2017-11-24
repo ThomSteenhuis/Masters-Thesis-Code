@@ -7,7 +7,7 @@ public class Genetic extends Optimization {
 	private final int popSizeMultiplyer = 20;
 	private final int noOffspringMultiplyer = 2;
 	private final int noEpochs = 1000;
-	private final int neighborhoodSize = 50;
+	private final int neighborhoodSize = 20;
 	private final double mutationProb = 0.2;
 	private final double randomParentProb = 0.2;
 	private final double mixingGeneProb = 0.5;
@@ -384,6 +384,22 @@ public class Genetic extends Optimization {
 			return true;
 		}
 		
+		public void setGenevalues(double[] genevals)
+		{
+			for(int idx=0;idx<noParameters;++idx)
+				chromosome[idx].setValue(genevals[idx]);
+		}
+		
+		public double[] getGenevalues()
+		{
+			double[] output = new double[noParameters];
+			
+			for(int idx=0;idx<noParameters;++idx)
+				output[idx] = chromosome[idx].getValue();
+			
+			return output;
+		}
+		
 		public Gene[] getChromosome()
 		{
 			return chromosome;
@@ -397,7 +413,7 @@ public class Genetic extends Optimization {
 		private void localSearch()
 		{
 			double best = fitness;
-			double[] 
+			double[] bestGenevalues = getGenevalues();			
 			
 			for(int idx1=0;idx1<noParameters;++idx1)
 			{				
@@ -408,9 +424,19 @@ public class Genetic extends Optimization {
 					if(integerType[idx1])
 						neighbor = (int)neighbor;
 
-					chromosome[idx].
+					chromosome[idx1].setValue(neighbor);
+					evaluateFitness();
+					
+					if(fitness > best)
+					{
+						best = fitness;
+						bestGenevalues = getGenevalues();
+					}
 				}					
 			}
+			
+			setGenevalues(bestGenevalues);
+			evaluateFitness();
 		}
 	}
 	
@@ -442,6 +468,11 @@ public class Genetic extends Optimization {
 				value = main.Run.r.nextDouble()*(bounds[1]-bounds[0]) + bounds[0];
 				return true;
 			}			
+		}
+		
+		public void setValue(double val)
+		{
+			value = val;
 		}
 		
 		public double getValue()
