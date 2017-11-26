@@ -1,12 +1,1 @@
 ANN	2200EVO	GridSearch	1	0.00001	0.95	1	6	5	linear	2	1	20	19	linear	2	-4	-4	0	exponential	10	1	20	4	linear	2
-ANN	2200EVO	Genetic	1	0.00001	0.95	1	6	integer	linear	2	1	20	integer	linear	2	-4	-4	real	exponential	10	1	20	integer	linear	2
-ANN	2200EVO	GridSearch	3	0.00001	0.95	1	6	5	linear	2	1	20	19	linear	2	-4	-4	0	exponential	10	1	20	4	linear	2
-ANN	2200EVO	Genetic	3	0.00001	0.95	1	6	integer	linear	2	1	20	integer	linear	2	-4	-4	real	exponential	10	1	20	integer	linear	2
-ANN	2200EVO	GridSearch	6	0.00001	0.95	1	6	5	linear	2	1	20	19	linear	2	-4	-4	0	exponential	10	1	20	4	linear	2
-ANN	2200EVO	Genetic	6	0.00001	0.95	1	6	integer	linear	2	1	20	integer	linear	2	-4	-4	real	exponential	10	1	20	integer	linear	2
-ANN	8800FCQ, RFID	GridSearch	1	0.00001	0.95	1	6	5	linear	2	1	20	19	linear	2	-4	-4	0	exponential	10	1	20	4	linear	2
-ANN	8800FCQ, RFID	Genetic	1	0.00001	0.95	1	6	integer	linear	2	1	20	integer	linear	2	-4	-4	real	exponential	10	1	20	integer	linear	2
-ANN	8800FCQ, RFID	GridSearch	3	0.00001	0.95	1	6	5	linear	2	1	20	19	linear	2	-4	-4	0	exponential	10	1	20	4	linear	2
-ANN	8800FCQ, RFID	Genetic	3	0.00001	0.95	1	6	integer	linear	2	1	20	integer	linear	2	-4	-4	real	exponential	10	1	20	integer	linear	2
-ANN	8800FCQ, RFID	GridSearch	6	0.00001	0.95	1	6	5	linear	2	1	20	19	linear	2	-4	-4	0	exponential	10	1	20	4	linear	2
-ANN	8800FCQ, RFID	Genetic	6	0.00001	0.95	1	6	integer	linear	2	1	20	integer	linear	2	-4	-4	real	exponential	10	1	20	integer	linear	2

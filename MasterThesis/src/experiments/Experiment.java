@@ -366,7 +366,7 @@ public class Experiment {
 		for(int idx1=0;idx1<instances.size();++idx1)
 		{
 			int noPars = instances.get(idx1).getPerformanceMeasures().getModel().getNoParameters();
-			outcomes[idx1+1] = new String[8+noPars];
+			outcomes[idx1+1] = new String[9+noPars];
 			outcomes[idx1+1][0] = instances.get(idx1).getPerformanceMeasures().getModel().getName();
 			outcomes[idx1+1][1] = instances.get(idx1).getPerformanceMeasures().getModel().getCategory();
 			outcomes[idx1+1][2] = instances.get(idx1).getName();
