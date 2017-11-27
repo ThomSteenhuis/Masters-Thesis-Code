@@ -1,0 +1,2 @@
+ANN	2200EVO	GridSearch	1	1	6	2	linear	2	1	20	19	linear	2
+ANN	8800FCQ, RFID	GridSearch	1	1	6	2	linear	2	1	20	19	linear	2
