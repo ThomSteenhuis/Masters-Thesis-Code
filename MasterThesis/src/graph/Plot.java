@@ -32,11 +32,11 @@ public class Plot extends Application{
 
 		pane.setCenter(drawPane);
 
-		MenuAction ma = new MenuAction(graph);
+		MenuAction ma = new MenuAction();
 		MenuBar menu = new MenuBar();
 		Menu file = new Menu("File");
 		MenuItem save = new MenuItem("Save");
-		save.setOnAction(ma.saveAction());
+		save.setOnAction(ma.saveAction(graph));
 		menu.getMenus().add(file);
 		file.getItems().add(save);
 
@@ -47,7 +47,7 @@ public class Plot extends Application{
 	    RadioMenuItem left = new RadioMenuItem("Left");
 	    RadioMenuItem hide = new RadioMenuItem("Hide");
 	    hide.setSelected(true);
-	    left.setOnAction(ma.legendAction(false));
+	    left.setOnAction(ma.legendAction(false,graph));
 	    left.setToggleGroup(legendGroup);
 	    right.setToggleGroup(legendGroup);
 	    hide.setToggleGroup(legendGroup);

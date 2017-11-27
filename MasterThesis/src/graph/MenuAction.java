@@ -31,60 +31,23 @@ public class MenuAction {
 	private final int legendLineLength = 10;
 	private final int legendLineWidth = 1;
 	private final int txtSize = 12;
-	
-	private LineGraph graph;
+
 	public TextField location,name;
 	
-	public MenuAction(LineGraph g)
-	{
-		graph = g;
-	}
+	public MenuAction() {}
 	
-	public EventHandler<ActionEvent> legendAction(boolean right)
+	public EventHandler<ActionEvent> legendAction(boolean right,final LineGraph graph)
 	{
 		return new EventHandler<ActionEvent>()
 		{
 			public void handle(ActionEvent arg0)
 			{
-				ArrayList<String> lineNames = new ArrayList<String>();
-				
-				for(int idx=0;idx<graph.getCheckboxes().length;++idx)
-				{
-					if(graph.getCheckboxes()[idx].isSelected())
-					{
-						lineNames.add(graph.getCategories()[graph.getCurrent()][idx]);
-					}
-				}
-					
-				Line[] lines = new Line[lineNames.size()];
-				Label[] txts = new Label[lineNames.size()];
-				
-				for(int idx=0;idx<lines.length;++idx)
-				{
-					lines[idx] = new Line();
-					lines[idx].setStroke(graph.getColors()[idx]);
-					lines[idx].setStrokeWidth(legendLineWidth);
-					lines[idx].setStartX(graph.getLeftMargin()+graph.getYAxisSpace()+legendBorderMargin+legendLineMargin);
-					lines[idx].setEndX(lines[idx].getStartX()+legendLineLength);
-					lines[idx].setStartY(graph.getTopMargin()+legendBorderMargin+legendLineMargin+txtSize*idx);
-					lines[idx].setEndY(lines[idx].getStartY());
-					
-					txts[idx] = new Label(graph.getCategories()[graph.getCurrent()][idx]);
-					txts[idx].setFont(new Font(txtSize));
-					txts[idx].setLayoutX(lines[idx].getEndX()+legendTxtMargin);
-					txts[idx].setLayoutY(lines[idx].getStartY()-0.7*txtSize);
-
-					graph.getDrawpane().getChildren().addAll(lines[idx],txts[idx]);
-				}
-				
-				Line[] border = new Line[4];
-				border[0] = new Line();
-				border[0].setStartX(legendBorderMargin);
+				drawLegend(graph);
 			}
 		};
 	}
 	
-	public EventHandler<ActionEvent> saveAction()
+	public EventHandler<ActionEvent> saveAction(final LineGraph graph)
 	{
 		return new EventHandler<ActionEvent>()
 		{
@@ -138,7 +101,7 @@ public class MenuAction {
 					}
 				});
 				
-				saveButton.setOnAction(saveImage(saveStage));
+				saveButton.setOnAction(saveImage(saveStage,graph));
 				
 				saveStage.show();
 			}
@@ -146,12 +109,7 @@ public class MenuAction {
 		};
 	}
 	
-	public LineGraph getGraph()
-	{
-		return graph;
-	}
-	
-	private EventHandler<ActionEvent> saveImage(final Stage saveStage)
+	private EventHandler<ActionEvent> saveImage(final Stage saveStage,final LineGraph graph)
 	{
 		return new EventHandler<ActionEvent>(){
 				
@@ -175,5 +133,40 @@ public class MenuAction {
 			}
 		};
 	}
+	
+	public void drawLegend(LineGraph graph)
+	{
+		ArrayList<String> lineNames = new ArrayList<String>();
+		
+		for(int idx=0;idx<graph.getCheckboxes().length;++idx)
+		{
+			if(graph.getCheckboxes()[idx].isSelected())
+				lineNames.add(graph.getCategories()[graph.getCurrent()][idx]);
+		}
+			
+		Line[] lines = new Line[lineNames.size()];
+		Label[] txts = new Label[lineNames.size()];
+		
+		for(int idx=0;idx<lines.length;++idx)
+		{
+			lines[idx] = new Line();
+			lines[idx].setStroke(graph.getColors()[idx]);
+			lines[idx].setStrokeWidth(legendLineWidth);
+			lines[idx].setStartX(graph.getLeftMargin()+graph.getYAxisSpace()+legendBorderMargin+legendLineMargin);
+			lines[idx].setEndX(lines[idx].getStartX()+legendLineLength);
+			lines[idx].setStartY(graph.getTopMargin()+legendBorderMargin+legendLineMargin+txtSize*idx);
+			lines[idx].setEndY(lines[idx].getStartY());
+			
+			txts[idx] = new Label(graph.getCategories()[graph.getCurrent()][idx]);
+			txts[idx].setFont(new Font(txtSize));
+			txts[idx].setLayoutX(lines[idx].getEndX()+legendTxtMargin);
+			txts[idx].setLayoutY(lines[idx].getStartY()-0.7*txtSize);
 
+			graph.getDrawpane().getChildren().addAll(lines[idx],txts[idx]);
+		}
+		
+		Line[] border = new Line[4];
+		border[0] = new Line();
+		border[0].setStartX(legendBorderMargin);
+	}
 }

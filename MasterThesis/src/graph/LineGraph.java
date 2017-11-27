@@ -45,6 +45,7 @@ public class LineGraph{
 	private Pane drawPane,rightPane;
 	private CheckBox[] checkboxes;
 	private Color[] colors;
+	private MenuAction menu;
 
 	private double[][][] yValues;
 	private String[][] categories;
@@ -121,6 +122,7 @@ public class LineGraph{
 		{
 			current = idx;
 			drawData();
+			menu.drawLegend(this);
 			
 			if(saveGraph())
 				System.out.println("Succesfully saved graph "+current);
