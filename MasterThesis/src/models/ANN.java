@@ -1,5 +1,7 @@
 package models;
 
+import java.util.Random;
+
 import input.Data;
 import math.FFANNErrorFunction;
 import math.Matrix;
@@ -30,12 +32,13 @@ public class ANN extends Model {
 	private final double maxInitBounds = 0.01;
 	private final int epochMultiplyer = 1000;
 
-	public ANN(Data data,int noPeriods)
+	public ANN(Data data,int noPeriods,Random R)
 	{
 		super(data,noPeriods);
 		noParameters = 2;
 		noConstants = 0;
 		name = "ANN";
+		r = R;
 	}
 
 	public boolean train()
@@ -133,6 +136,7 @@ public class ANN extends Model {
 		for(int idx=0;idx<parameters[1];++idx) lowerBias[idx] = array[idx];
 		
 		lowerWeights = new double[ (int)parameters[1] ][ (int)parameters[0] ];
+		System.out.printf("%f\t%f\t%d\n",parameters[0],parameters[1],array.length);
 		for(int idx1=0;idx1<parameters[1];++idx1)
 		{
 			for(int idx2=0;idx2<parameters[0];++idx2)
@@ -147,7 +151,7 @@ public class ANN extends Model {
 	private boolean nelderMead()
 	{
 		FFANNErrorFunction f = new FFANNErrorFunction((int)parameters[1],X,Y);
-		NelderMead nm = new NelderMead(f);
+		NelderMead nm = new NelderMead(f,r);
 		
 		if(!nm.optimize()) return false;
 
@@ -280,7 +284,7 @@ public class ANN extends Model {
 		mean = Matrix.mean(data.getTrainingSet(category));
 		max = Matrix.max(data.getTrainingSet(category));
 		N = data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index] - (int) (parameters[0]) - noPersAhead + 1;
-		X = new double[(int) (parameters[0])][N];
+		X = new double[(int) parameters[0] ][N];
 		Y = new double[N];
 
 		for(int idx=0;idx<N;++idx)

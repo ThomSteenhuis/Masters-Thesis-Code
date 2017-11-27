@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Scanner;
 
 import input.Data;
@@ -19,7 +20,7 @@ import performance.PerformanceMeasures;
 
 public class Experiment {
 
-	private static final int seed = 34304903;
+	private Random r;
 	private ArrayList<Optimization> instances;
 	
 	private ArrayList<String> machines;
@@ -29,8 +30,9 @@ public class Experiment {
 	private String[][] outcomes;
 	private String[][][] forecasts;
 	
-	public Experiment(String machineFile)
+	public Experiment(String machineFile,Random R)
 	{
+		r = R;
 		instances = new ArrayList<Optimization>();
 		
 		try{
@@ -42,8 +44,9 @@ public class Experiment {
 		}
 	}
 	
-	public Experiment(Data data,String expFile,String machineFile)
+	public Experiment(Data data,Random R,String expFile,String machineFile)
 	{
+		r = R;
 		instances = new ArrayList<Optimization>();
 		
 		try{
@@ -263,17 +266,17 @@ public class Experiment {
 		return es;
 	}
 	
-	private static Model initializeARIMA(String[] line,String cat,Data data) throws NumberFormatException
+	private Model initializeARIMA(String[] line,String cat,Data data) throws NumberFormatException
 	{		
-		ARIMA arma = new ARIMA(data,Integer.parseInt(line[3]));
+		ARIMA arma = new ARIMA(data,Integer.parseInt(line[3]),r);
 		arma.setCategory(cat);
 			
 		return arma;
 	}
 	
-	private static Model initializeANN(String[] line,String cat,Data data) throws NumberFormatException
+	private Model initializeANN(String[] line,String cat,Data data) throws NumberFormatException
 	{		
-		ANN ann = new ANN(data,Integer.parseInt(line[3]));
+		ANN ann = new ANN(data,Integer.parseInt(line[3]),r);
 		ann.setCategory(cat);
 			
 		//double[] constants = {Double.parseDouble(line[4]),Double.parseDouble(line[5])};

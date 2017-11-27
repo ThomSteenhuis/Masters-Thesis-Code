@@ -16,12 +16,13 @@ public class ARIMA extends Model {
 	private double[] coefficients;
 	private double[] residuals;
 
-	public ARIMA(Data data,int periods)
+	public ARIMA(Data data,int periods, Random R)
 	{
 		super(data,periods);
 		noParameters = 3;
 		noConstants = 0;
 		name = "ARIMA";
+		r = R;
 	}
 
 	public boolean train()
@@ -46,7 +47,7 @@ public class ARIMA extends Model {
 		createDifferences();
 		LLARMAFunction f = new LLARMAFunction(this,(int)parameters[0],(int)parameters[1]);
 
-		NelderMead nm = new NelderMead(f);
+		NelderMead nm = new NelderMead(f,r);
 		nm.optimize();
 		coefficients = new double[2+(int)parameters[0]+(int)parameters[1]];
 

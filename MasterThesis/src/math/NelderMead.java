@@ -4,9 +4,12 @@ import java.util.Random;
 
 public class NelderMead extends FunctionOptimization {
 
-	public NelderMead(Function f)
+	private Random r;
+	
+	public NelderMead(Function f, Random R)
 	{
 		super(f);
+		r = R;
 	}
 	
 	public boolean optimize() 
@@ -62,8 +65,6 @@ public class NelderMead extends FunctionOptimization {
 		private final double gamma = -2;
 		private final double error = 0.0001;
 		
-		private final int seed = 84372382;
-		
 		public Simplex(int dim)
 		{
 			dimension = dim;
@@ -73,7 +74,6 @@ public class NelderMead extends FunctionOptimization {
 		{
 			double[] xBasis = new double[dimension];
 			xVectors = new double[dimension+1][dimension];
-			Random r = new Random(seed);
 			double eta = r.nextDouble();
 			
 			for(int idx=0;idx<dimension;++idx)

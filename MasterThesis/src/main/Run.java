@@ -40,7 +40,7 @@ public class Run {
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
 
-		Experiment e = new Experiment(data,"src/data/experiment.txt","src/data/machine_list.txt");
+		Experiment e = new Experiment(data,r,"src/data/experiment.txt","src/data/machine_list.txt");
 
 		try
 		{

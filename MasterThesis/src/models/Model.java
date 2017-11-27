@@ -1,10 +1,13 @@
 package models;
 
+import java.util.Random;
+
 import graph.LineGraph;
 import input.Data;
 
 public abstract class Model {
 
+	protected Random r;
 	protected Data data;
 	protected int noPersAhead;
 	protected double[] parameters;

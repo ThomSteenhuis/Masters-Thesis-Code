@@ -69,8 +69,7 @@ public class GridSearch extends Optimization{
 				measures.calculateMeasures("validation");
 				updateBest();
 			}
-			else
-				return false;
+			else System.out.printf("Error (GridSearch): model %d did not converge");
 			
 			if(!silent)
 			{
