@@ -1,7 +1,9 @@
 package models;
 
 import input.Data;
+import math.FFANNErrorFunction;
 import math.Matrix;
+import math.NelderMead;
 
 public class ANN extends Model {
 
@@ -56,7 +58,7 @@ public class ANN extends Model {
 			return false;
 		}
 
-		noTrainingEpochs = epochMultiplyer*(int)parameters[3];
+		/*noTrainingEpochs = epochMultiplyer*(int)parameters[3];
 		alr = parameters[2];
 
 		initializeWeights();
@@ -69,8 +71,17 @@ public class ANN extends Model {
 			updateLowerWeights(upperWeights);
 			updateUpperBias();
 			updateUpperWeights();
-		}
+		}*/
+		
+		initializeData();
+		FFANNErrorFunction f = new FFANNErrorFunction((int)parameters[1],X,Y);
+		NelderMead nm = new NelderMead(f);
+		
+		if(!nm.optimize()) return false;
 
+		translateOptimalweights(nm.getOptimalIntput());
+		calculateYHat();
+		
 		initializeSets();
 		forecast();
 
@@ -125,6 +136,31 @@ public class ANN extends Model {
 	public double[] getUpperWeights()
 	{
 		return upperWeights;
+	}
+	
+	private void calculateYHat()
+	{
+		double[][] XT = Matrix.inverse(X);
+		Y_hat = new double[N];
+		
+		for(int idx=0;idx<N;++idx) Y_hat[idx] = predict(XT[idx]);
+	}
+	
+	private void translateOptimalweights(double[] array)
+	{
+		lowerBias = new double[(int)parameters[1]];
+		for(int idx=0;idx<parameters[1];++idx) lowerBias[idx] = array[idx];
+		
+		lowerWeights = new double[ (int)parameters[1] ][ (int)parameters[0] ];
+		for(int idx1=0;idx1<parameters[1];++idx1)
+		{
+			for(int idx2=0;idx2<parameters[0];++idx2)
+				lowerWeights[idx1][idx2] = array[(int)parameters[1] + idx2*(int)parameters[1] + (int)parameters[0]];
+		}
+		
+		upperBias = array[array.length-1-(int)parameters[1]];
+		upperWeights = new double[(int)parameters[1]];
+		for(int idx=0;idx<parameters[1];++idx) upperWeights[idx] = array[array.length - (int)parameters[1] + idx];
 	}
 
 	private void forecast()

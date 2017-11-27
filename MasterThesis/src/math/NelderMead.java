@@ -9,7 +9,7 @@ public class NelderMead extends FunctionOptimization {
 		super(f);
 	}
 	
-	public void optimize() 
+	public boolean optimize() 
 	{
 		Simplex S = new Simplex(function.getNoInputs() );
 		S.initialize();
@@ -23,14 +23,12 @@ public class NelderMead extends FunctionOptimization {
 			iter ++;
 		}
 		
-		if(stop)
-			converged = true;
-		else
-			converged = false;
-		
 		noIterations = iter;
 		optimalValue = S.getBestValue();
 		optimalInput =  S.getBestVector();
+		
+		if(stop){ converged = true; return true;}
+		else{ converged = false; return false;}
 	}
 	
 	public void printSummary()

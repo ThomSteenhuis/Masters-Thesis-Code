@@ -16,7 +16,7 @@ public abstract class FunctionOptimization {
 		function = f;
 	}
 	
-	public abstract void optimize();
+	public abstract boolean optimize();
 	
 	public Function getFunction()
 	{
