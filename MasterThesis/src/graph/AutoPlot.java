@@ -248,27 +248,27 @@ public class AutoPlot {
 			
 			s1.close();
 			
-			model = new String[lines.size()-1];
-			machine = new String[lines.size()-1];
-			optimization = new String[lines.size()-1];
-			noPersAhead = new int[lines.size()-1];
+			model = new String[(int)(0.5*lines.size())];
+			machine = new String[model.length];
+			optimization = new String[model.length];
+			noPersAhead = new int[model.length];
 			hash = new Hashtable<String,Integer>();
-			success = new boolean[lines.size()-1];
+			success = new boolean[model.length];
 			
-			for(int idx=1;idx<lines.size();++idx)
+			for(int idx=1;idx<lines.size();idx+=2)
 			{
 				String[] l = lines.get(idx).split("\t");
-				model[idx-1] = l[0].trim();
-				machine[idx-1] = l[1].trim();
-				optimization[idx-1] = l[2].trim();
-				noPersAhead[idx-1] = Integer.parseInt(l[3].trim());
-				hash.put(machine[idx-1]+model[idx-1]+Integer.toString(noPersAhead[idx-1])+optimization[idx-1],idx-1);
-				hash.put(makeAlternativeKey(idx-1),idx-1);
+				model[(int)(0.5*(idx-1))] = l[0].trim();
+				machine[(int)(0.5*(idx-1))] = l[1].trim();
+				optimization[(int)(0.5*(idx-1))] = l[2].trim();
+				noPersAhead[(int)(0.5*(idx-1))] = Integer.parseInt(l[3].trim());
+				hash.put(machine[(int)(0.5*(idx-1))]+model[(int)(0.5*(idx-1))]+Integer.toString(noPersAhead[(int)(0.5*(idx-1))])+optimization[(int)(0.5*(idx-1))],(int)(0.5*(idx-1)));
+				hash.put(makeAlternativeKey((int)(0.5*(idx-1))),(int)(0.5*(idx-1)));
 				
 				if(l[4].equals("Instance failed"))
-					success[idx-1] = false;
+					success[(int)(0.5*(idx-1))] = false;
 				else
-					success[idx-1] = true;
+					success[(int)(0.5*(idx-1))] = true;
 			}			
 			
 			lines = new ArrayList<String>();
