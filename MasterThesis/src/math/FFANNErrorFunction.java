@@ -45,9 +45,9 @@ public class FFANNErrorFunction extends Function {
 	private double calculateZ(int index1,int index2,double[] array)
 	{
 		double input = array[index2];
-		int firstIndex = noHiddenUnits + index1 * noHiddenUnits + index2;
+		int firstIndex = noHiddenUnits + index2;
 		
-		for(int idx=0;idx<X.length;++idx) input += X[idx][index1] * array[firstIndex+idx];
+		for(int idx=0;idx<X.length;++idx) input += X[idx][index1] * array[firstIndex+noHiddenUnits*idx];
 		
 		return Math.tanh(input);
 	}

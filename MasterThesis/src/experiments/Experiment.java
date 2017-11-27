@@ -276,8 +276,8 @@ public class Experiment {
 		ANN ann = new ANN(data,Integer.parseInt(line[3]));
 		ann.setCategory(cat);
 			
-		double[] constants = {Double.parseDouble(line[4]),Double.parseDouble(line[5])};
-		ann.setConstants(constants);
+		//double[] constants = {Double.parseDouble(line[4]),Double.parseDouble(line[5])};
+		//ann.setConstants(constants);
 		
 		return ann;
 	}
@@ -388,7 +388,7 @@ public class Experiment {
 	
 	private void createOutcomes(int index)
 	{
-		outcomes = new String[instances.size()+1][];
+		outcomes = new String[2][];
 		outcomes[0] = new String[10];
 		outcomes[0][0] = "Model name";
 		outcomes[0][1] = "Machine name";
@@ -402,28 +402,28 @@ public class Experiment {
 		outcomes[0][9] = "Best parameters";
 		
 		int noPars = instances.get(index).getPerformanceMeasures().getModel().getNoParameters();
-		outcomes[index+1] = new String[9+noPars];
-		outcomes[index+1][0] = instances.get(index).getPerformanceMeasures().getModel().getName();
-		outcomes[index+1][1] = instances.get(index).getPerformanceMeasures().getModel().getCategory();
-		outcomes[index+1][2] = instances.get(index).getName();
-		outcomes[+1][3] = Integer.toString(instances.get(index).getPerformanceMeasures().getModel().getNoPeriodsAhead());
+		outcomes[1] = new String[9+noPars];
+		outcomes[1][0] = instances.get(index).getPerformanceMeasures().getModel().getName();
+		outcomes[1][1] = instances.get(index).getPerformanceMeasures().getModel().getCategory();
+		outcomes[1][2] = instances.get(index).getName();
+		outcomes[1][3] = Integer.toString(instances.get(index).getPerformanceMeasures().getModel().getNoPeriodsAhead());
 		
 		if(success[index])
 		{
-			outcomes[index+1][4] = Double.toString(runTimes[index]);
-			outcomes[index+1][5] = Double.toString(instances.get(index).getPerformanceMeasures().getRMSE());
-			outcomes[index+1][6] = Double.toString(instances.get(index).getPerformanceMeasures().getMAPE());
-			outcomes[index+1][7] = Double.toString(instances.get(index).getPerformanceMeasures().getMAE());
-			outcomes[index+1][8] = Double.toString(instances.get(index).getPerformanceMeasures().getME());
+			outcomes[1][4] = Double.toString(runTimes[index]);
+			outcomes[1][5] = Double.toString(instances.get(index).getPerformanceMeasures().getRMSE());
+			outcomes[1][6] = Double.toString(instances.get(index).getPerformanceMeasures().getMAPE());
+			outcomes[1][7] = Double.toString(instances.get(index).getPerformanceMeasures().getMAE());
+			outcomes[1][8] = Double.toString(instances.get(index).getPerformanceMeasures().getME());
 			
 			for(int idx2=0;idx2<noPars;++idx2)
 			{
-				outcomes[index+1][9+idx2] = Double.toString(instances.get(index).getOptimalParameters()[idx2]);
+				outcomes[1][9+idx2] = Double.toString(instances.get(index).getOptimalParameters()[idx2]);
 			}
 		}
 		else
 		{
-			outcomes[index+1][4] = "Instance failed";
+			outcomes[1][4] = "Instance failed";
 		}
 	}
 	

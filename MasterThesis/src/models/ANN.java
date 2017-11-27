@@ -33,8 +33,8 @@ public class ANN extends Model {
 	public ANN(Data data,int noPeriods)
 	{
 		super(data,noPeriods);
-		noParameters = 4;
-		noConstants = 2;
+		noParameters = 2;
+		noConstants = 0;
 		name = "ANN";
 	}
 
@@ -46,15 +46,15 @@ public class ANN extends Model {
 			return false;
 		}
 
-		if( ( (int)parameters[0] < 1) || ( (int)parameters[1] < 1) || (parameters[2] > 1) || (parameters[2] < 0) || ( (int)parameters[3] < 1) )
+		/*if( ( (int)parameters[0] < 1) || ( (int)parameters[1] < 1) || (parameters[2] > 1) || (parameters[2] < 0) || ( (int)parameters[3] < 1) )
 		{
 			System.out.println("Error (ANN): parameters have invalid value");
 			return false;
-		}
-
-		if(constants.length != noConstants)
+		}*/
+		
+		if( ( (int)parameters[0] < 1) || ( (int)parameters[1] < 1) )
 		{
-			System.out.println("Error (ANN): invalid no of constants");
+			System.out.println("Error (ANN): parameters have invalid value");
 			return false;
 		}
 
@@ -136,7 +136,7 @@ public class ANN extends Model {
 		for(int idx1=0;idx1<parameters[1];++idx1)
 		{
 			for(int idx2=0;idx2<parameters[0];++idx2)
-				lowerWeights[idx1][idx2] = array[(int)parameters[1] + idx2*(int)parameters[1] + (int)parameters[0]];
+				lowerWeights[idx1][idx2] = array[(int)parameters[1] + idx2*(int)parameters[1] + idx1];
 		}
 		
 		upperBias = array[array.length-1-(int)parameters[1]];
