@@ -1,11 +1,17 @@
 package graph;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
@@ -13,6 +19,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -64,7 +71,8 @@ public class LineGraph{
 	private int maxNoMajorXTicks = 30;
 	private int maxNoMajorYTicks = 10;
 	private boolean minorYTicks = false;
-
+	
+	private String outputLoc;
 	
 	public LineGraph(double[][][] input,String[][] leftLine,String[][] header,String[][] labels)
 	{
@@ -90,8 +98,9 @@ public class LineGraph{
 		Plot.plot(args,this);
 	}
 	
-	public void autoplot()
+	public void autoplot(String oloc)
 	{
+		outputLoc = oloc;
 		String[] args = {"auto"};
 		Plot.plot(args,this);
 	}
@@ -112,6 +121,9 @@ public class LineGraph{
 		{
 			current = idx;
 			drawData();
+			
+			if(saveGraph())
+				System.out.println("Succesfully saved graph "+current);
 		}
 	}
 	
@@ -206,6 +218,23 @@ public class LineGraph{
 	public int getCurrent()
 	{
 		return current;
+	}
+	
+	private boolean saveGraph()
+	{
+		String number = Integer.toString(current);
+		while(number.length() < 3) number = "0" + number;
+		
+		WritableImage image = drawPane.snapshot(new SnapshotParameters(), null);
+        File file = new File(outputLoc + "/graph"+ number + ".png");        
+
+        try {
+            ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+            return true;
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return false;
+        }
 	}
 	
 	private void calculateIntervals()

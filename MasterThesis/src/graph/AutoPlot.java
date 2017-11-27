@@ -71,7 +71,7 @@ public class AutoPlot {
 		deriveData("testing");
 		
 		LineGraph lg = new LineGraph(volumes,dates,header,labels);
-		lg.autoplot();
+		lg.autoplot(oloc);
 	}
 	
 	private static boolean deriveData(String set)
