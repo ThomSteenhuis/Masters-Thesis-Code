@@ -65,7 +65,11 @@ public class Plot extends Application{
 		graph.setRightPane(rightPane);
 
 		stage.show();
-		graph.draw(stage);
+		
+		if(getParameters().getRaw().get(0).equals("auto"))
+			graph.autodraw(stage);
+		else	
+			graph.draw(stage);
 	}
 	
 }

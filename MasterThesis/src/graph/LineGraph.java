@@ -69,6 +69,7 @@ public class LineGraph{
 	public LineGraph(double[][][] input,String[][] leftLine,String[][] header,String[][] labels)
 	{
 		setData(input,leftLine,header,labels);
+		colors = makeColors(15);
 	}
 	
 	public void setData(double[][][] input,String[][] leftLine,String[][] header,String[][] labels)
@@ -91,8 +92,7 @@ public class LineGraph{
 	
 	public void autoplot()
 	{
-		String[] args = new String[0];
-		current = 14;
+		String[] args = {"auto"};
 		Plot.plot(args,this);
 	}
 	
@@ -103,9 +103,20 @@ public class LineGraph{
 		drawData();
 	}
 	
+	public void autodraw(Stage stage)
+	{
+		axisCoordinates = calculateAxesCoordinates();
+		drawAxes();
+		
+		for(int idx=0;idx<yValues.length;++idx)
+		{
+			current = idx;
+			drawData();
+		}
+	}
+	
 	private void drawData()
 	{
-		colors = getColors(categories[current].length);
 		double[] extremes = getExtremes(yValues[current]);
 		yAxisCategories = new String[(int) Math.ceil(extremes[1]) + 1];
 
@@ -615,9 +626,9 @@ public class LineGraph{
 		return output;
 	}
 
-	private static Color[] getColors(int no)
+	private static Color[] makeColors(int no)
 	{
-		int maxNoColors = 9;
+		int maxNoColors = 15;
 
 		if(no > maxNoColors)
 		{
@@ -636,6 +647,12 @@ public class LineGraph{
 		colors[6] = Color.BROWN;
 		colors[7] = Color.BLACK;
 		colors[8] = Color.PINK;
+		colors[9] = Color.AQUAMARINE;
+		colors[10] = Color.GRAY;
+		colors[11] = Color.GREEN;
+		colors[12] = Color.MAGENTA;
+		colors[13] = Color.CYAN;
+		colors[14] = Color.GOLD;
 
 		Color[] output = new Color[no];
 
