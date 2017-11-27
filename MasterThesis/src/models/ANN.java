@@ -58,29 +58,10 @@ public class ANN extends Model {
 			return false;
 		}
 
-		/*noTrainingEpochs = epochMultiplyer*(int)parameters[3];
-		alr = parameters[2];
-
-		initializeWeights();
 		initializeData();
-
-		for(int idx=0;idx<noTrainingEpochs;++idx)
-		{
-			evaluate();
-			updateLowerBias(upperWeights);
-			updateLowerWeights(upperWeights);
-			updateUpperBias();
-			updateUpperWeights();
-		}*/
 		
-		initializeData();
-		FFANNErrorFunction f = new FFANNErrorFunction((int)parameters[1],X,Y);
-		NelderMead nm = new NelderMead(f);
-		
-		if(!nm.optimize()) return false;
-
-		translateOptimalweights(nm.getOptimalIntput());
-		calculateYHat();
+		//backpropagation();
+		if(!nelderMead()) return false;
 		
 		initializeSets();
 		forecast();
@@ -161,6 +142,36 @@ public class ANN extends Model {
 		upperBias = array[array.length-1-(int)parameters[1]];
 		upperWeights = new double[(int)parameters[1]];
 		for(int idx=0;idx<parameters[1];++idx) upperWeights[idx] = array[array.length - (int)parameters[1] + idx];
+	}
+	
+	private boolean nelderMead()
+	{
+		FFANNErrorFunction f = new FFANNErrorFunction((int)parameters[1],X,Y);
+		NelderMead nm = new NelderMead(f);
+		
+		if(!nm.optimize()) return false;
+
+		translateOptimalweights(nm.getOptimalIntput());
+		calculateYHat();
+		
+		return true;
+	}
+	
+	private void backpropagation()
+	{
+		noTrainingEpochs = epochMultiplyer*(int)parameters[3];
+		alr = parameters[2];
+
+		initializeWeights();
+
+		for(int idx=0;idx<noTrainingEpochs;++idx)
+		{
+			evaluate();
+			updateLowerBias(upperWeights);
+			updateLowerWeights(upperWeights);
+			updateUpperBias();
+			updateUpperWeights();
+		}
 	}
 
 	private void forecast()
