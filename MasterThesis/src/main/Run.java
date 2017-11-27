@@ -46,9 +46,9 @@ public class Run {
 		{
 			PrintWriter p1 = new PrintWriter("src/data/outcomes.txt");
 			PrintWriter p2 = new PrintWriter("src/data/forecasts.txt");
-			e.run(false);
-			e.writeOutcomes(p1);
-			e.writeForecasts(p2);
+			e.run(false,p1,p2);
+			p1.close();
+			p2.close();
 		}
 		catch (FileNotFoundException e1)
 		{
