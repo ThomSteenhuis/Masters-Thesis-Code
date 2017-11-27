@@ -8,7 +8,8 @@ public class FFANNErrorFunction extends Function {
 
 	public FFANNErrorFunction(int hidden,double[][] x,double[] y)
 	{
-		super((x.length+1)*hidden+hidden+1);
+		super((x.length+2)*hidden+1);
+		
 		if(hidden < 1)
 			System.out.println("Error (FFANNErrorFunction): no of hidden units must be at least 1");
 		
@@ -37,7 +38,7 @@ public class FFANNErrorFunction extends Function {
 	{
 		double output = array[array.length-1-noHiddenUnits];
 		
-		for(int idx=array.length-noHiddenUnits;idx<array.length;++idx) output += array[idx] * calculateZ(index,idx-(array.length-1-noHiddenUnits),array);
+		for(int idx=array.length-noHiddenUnits;idx<array.length;++idx) output += array[idx] * calculateZ(index,idx-(array.length-noHiddenUnits),array);
 		
 		return output;
 	}
