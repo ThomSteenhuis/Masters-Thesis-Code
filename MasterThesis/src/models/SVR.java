@@ -6,37 +6,44 @@ import input.Data;
 import math.Matrix;
 
 public class SVR extends Model {
+	
+	private Random r;
 
 	private double[][] x_train;
 	private double[][] x_validate;
 	private double[][] x_test;
-	private double[] y_train;
-	private double[] y_validate;
-	private double[] y_test;
+	private double[][] y_train;
+	private double[][] y_validate;
+	private double[][] y_test;
 	private int N_train;
 	private int N_validate;
 	private int N_test;
 	
-	private double[] lambda;
+	private double[][] Kernel;
+	private double[] alpha;
+	private double[] alpha_ast;
 	private double error;
 	private int noIters;
 	private double bias;
 	
 	private final double stoppingError = 0.001;
-	private final int maxIters = 500000;
+	private final int maxIters = 50000;
 
-	public SVR(Data dataset, int periods)
+	public SVR(Data dataset, int periods, Random R)
 	{
 		super(dataset, periods);
 		name = "SVR";
 		noParameters = 4;
 		noConstants = 0;
+		r = R;
 	}
 
 	public boolean train()
 	{
 		initializeXY();
-		if(ellipsoidMethod())
+		initializeKernel();
+		
+		if(SMO())
 		{
 			calculateBias();
 			forecast();
@@ -51,7 +58,7 @@ public class SVR extends Model {
 		return x_train;
 	}
 
-	public double[] getYtrain()
+	public double[][] getYtrain()
 	{
 		return y_train;
 	}
@@ -66,7 +73,7 @@ public class SVR extends Model {
 		return x_validate;
 	}
 
-	public double[] getYvalidate()
+	public double[][] getYvalidate()
 	{
 		return y_validate;
 	}
@@ -81,7 +88,7 @@ public class SVR extends Model {
 		return x_test;
 	}
 
-	public double[] getYtest()
+	public double[][] getYtest()
 	{
 		return y_test;
 	}
@@ -91,9 +98,14 @@ public class SVR extends Model {
 		return N_test;
 	}
 
-	public double[] getLambda()
+	public double[] getAlpha()
 	{
-		return lambda;
+		return alpha;
+	}
+	
+	public double[] getAlphaAst()
+	{
+		return alpha_ast;
 	}
 	
 	public double getError()
@@ -111,12 +123,44 @@ public class SVR extends Model {
 		return bias;
 	}
 
-	public void printLambda()
+	public void printAlpha()
 	{
 		for(int idx=0;idx<N_train;++idx)
-			System.out.printf("%f\t",lambda[idx]);
+			System.out.printf("%f\t",alpha[idx]);
 
 		System.out.println();
+	}
+	
+	public void printAlphaAst()
+	{
+		for(int idx=0;idx<N_train;++idx)
+			System.out.printf("%f\t",alpha_ast[idx]);
+
+		System.out.println();
+	}
+	
+	private void initializeAlpha()
+	{
+		alpha = new double[N_train];
+		alpha_ast = new double[alpha.length];
+		
+		for(int idx=0;idx<alpha.length;++idx)
+		{
+			double draw1 = r.nextDouble();
+			double draw2 = r.nextDouble();
+			if(draw1 <0.5) alpha[idx] = draw2 * parameters[0]; else alpha_ast[idx] = draw2 * parameters[0];
+		}
+	}
+	
+	private void initializeKernel()
+	{
+		Kernel = new double[N_train][N_train];
+		
+		for(int idx1=0;idx1<Kernel.length;++idx1)
+		{
+			for(int idx2=0;idx2<idx1;++idx2) {Kernel[idx1][idx2] = kernel(x_train[idx1],x_train[idx2]); Kernel[idx2][idx1] = Kernel[idx1][idx2];}
+			Kernel[idx1][idx1] = 1;
+		}
 	}
 
 	private void initializeXY()
@@ -125,11 +169,11 @@ public class SVR extends Model {
 		
 		N_train = data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index] - (int) (parameters[3]) - noPersAhead;
 		x_train = new double[N_train][(int) (parameters[3])];
-		y_train = new double[N_train];
+		y_train = new double[N_train][1];
 
 		for(int idx1=0;idx1<N_train;++idx1)
 		{
-			y_train[idx1] = data.getVolumes()[idx1 + (int) (parameters[3]) + noPersAhead - 1][index];
+			y_train[idx1][0] = data.getVolumes()[idx1 + (int) (parameters[3]) + noPersAhead - 1][index];
 
 			for(int idx2=0;idx2<x_train[idx1].length;++idx2)
 			{
@@ -139,11 +183,11 @@ public class SVR extends Model {
 		
 		N_validate = data.getTestingFirstIndex()[index] - data.getValidationFirstIndex()[index];
 		x_validate = new double[N_validate][(int) (parameters[3])];
-		y_validate = new double[N_validate];
+		y_validate = new double[N_validate][1];
 
 		for(int idx1=0;idx1<N_validate;++idx1)
 		{
-			y_validate[idx1] = data.getVolumes()[idx1 + (int) (parameters[3]) + noPersAhead - 1 + N_train][index];
+			y_validate[idx1][0] = data.getVolumes()[idx1 + (int) (parameters[3]) + noPersAhead - 1 + N_train][index];
 
 			for(int idx2=0;idx2<x_validate[idx1].length;++idx2)
 			{
@@ -153,17 +197,22 @@ public class SVR extends Model {
 		
 		N_test = data.getNoObs() - data.getTestingFirstIndex()[index];
 		x_test = new double[N_test][(int) (parameters[3])];
-		y_test = new double[N_test];
+		y_test = new double[N_test][1];
 
 		for(int idx1=0;idx1<N_test;++idx1)
 		{
-			y_test[idx1] = data.getVolumes()[idx1 + (int) (parameters[3]) + noPersAhead - 1 + N_train + N_validate][index];
+			y_test[idx1][0] = data.getVolumes()[idx1 + (int) (parameters[3]) + noPersAhead - 1 + N_train + N_validate][index];
 
 			for(int idx2=0;idx2<x_test[idx1].length;++idx2)
 			{
 				x_test[idx1][idx2] =  data.getVolumes()[idx1 + idx2 + N_train + N_validate][index];
 			}
 		}
+	}
+	
+	private boolean SMO()
+	{
+		initializeAlpha();
 	}
 	
 	private void forecast()
@@ -205,18 +254,18 @@ public class SVR extends Model {
 		
 		for(int idx1=0;idx1<N_train;++idx1)
 		{
-			sumErrors += y_train[idx1];
+			sumErrors += y_train[idx1][0];
 			
 			for(int idx2=0;idx2<N_train;++idx2)
 			{
-				sumErrors  -= lambda[idx2] * kernel(x_train[idx2],x_train[idx1]);
+				sumErrors  -= (alpha[idx2] - alpha_ast[idx2]) * Kernel[idx2][idx1];
 			}
 		}
 		
 		bias = sumErrors / N_train;
 	}
 
-	private boolean ellipsoidMethod()
+	/*private boolean ellipsoidMethod()
 	{
 		double[] center = initializeCenter();
 		double[][] ellipsMatrix = initializeEllipsMatrix(center);
@@ -241,7 +290,7 @@ public class SVR extends Model {
 				for(int idx1=0;idx1<N_train;++idx1)
 				{
 					double sign = center[idx1] / Math.abs(center[idx1]);
-					subDifferential[idx1] = parameters[1] * sign - y_train[idx1];
+					subDifferential[idx1] = parameters[1] * sign - y_train[idx1][0];
 
 					for(int idx2=0;idx2<N_train;++idx2)
 						subDifferential[idx1] += (center[idx2] * kernel(x_train[idx1],x_train[idx2]) );
@@ -298,7 +347,7 @@ public class SVR extends Model {
 		lambda = bestCenter;
 		
 		return true;
-	}
+	}*/
 
 	private double objective(double[] input)
 	{
@@ -306,7 +355,7 @@ public class SVR extends Model {
 
 		for(int idx1=0;idx1<N_train;++idx1)
 		{
-			output += parameters[1] * Math.abs(input[idx1]) - y_train[idx1] * input[idx1] + 0.5 * Math.pow(input[idx1] , 2);
+			output += parameters[1] * Math.abs(input[idx1]) - y_train[idx1][0] * input[idx1] + 0.5 * Math.pow(input[idx1] , 2);
 
 			for(int idx2=0;idx2<idx1;++idx2)
 				output += input[idx1] * input[idx2] * kernel(x_train[idx1],x_train[idx2]);
