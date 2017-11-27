@@ -2,6 +2,7 @@ package models;
 
 import java.util.Random;
 
+import com.sun.org.apache.xalan.internal.xsltc.compiler.Template;
 
 import input.Data;
 import math.LLARMAFunction;
@@ -10,19 +11,17 @@ import math.NelderMead;
 
 public class ARIMA extends Model {
 
-	private int seed;
 
 	private double[] timeSeries;
 	private double[] coefficients;
 	private double[] residuals;
 
-	public ARIMA(Data data,int periods,int s)
+	public ARIMA(Data data,int periods)
 	{
 		super(data,periods);
 		noParameters = 3;
 		noConstants = 0;
 		name = "ARIMA";
-		seed = s;
 	}
 
 	public boolean train()
@@ -89,7 +88,7 @@ public class ARIMA extends Model {
 		calculateInformationCriteria();
 		initializeSets();		
 		
-		double[] forecast = forecast(convertRealData(),createErrors(seed,data.getNoObs(),coefficients[coefficients.length-1]),coefficients,(int)parameters[0],(int)parameters[1],(int)parameters[2]);
+		double[] forecast = forecast(convertRealData(),noPersAhead);
 
 		for(int idx=0;idx<trainingReal.length;++idx)
 			trainingForecast[idx] = forecast[idx];
@@ -219,17 +218,6 @@ public class ARIMA extends Model {
 		constants = new double[1];
 		constants[0] = noDiffs;
 	}
-
-	private static double[] createErrors(int seed,int no,double s2)
-	{
-		double[] errors = new double[no];
-		Random r = new Random(seed);
-
-		for(int idx=0;idx<no;++idx)
-			errors[idx] = r.nextGaussian()*Math.sqrt(s2);
-		
-		return errors;
-	}
 	
 	private static boolean DickyFuller(double[] ts)
 	{
@@ -264,27 +252,28 @@ public class ARIMA extends Model {
 		BIC = 2*Math.log(timeSeries.length-parameters[0])*(2+parameters[0]+parameters[1]) - 2*logLikelihood;
 	}
 
-	private double[] forecast(double[] ts, double[] errors,double[] coefs,int p,int q, int noDifs)
+	private double[] forecast(double[] ts,int noPersAhead)
 	{
 		double[] tmp = new double[ts.length];
+		double[] errors = new double[tmp.length];
 		
-		for(int idx=0;idx<p;++idx)
+		for(int idx=0;idx<(parameters[0]);++idx)
 			tmp[idx] = ts[idx];
 		
-		for(int idx1=p;idx1<tmp.length;++idx1)
+		for(int idx1=(int)parameters[0];idx1<tmp.length;++idx1)
 		{
-			tmp[idx1] = coefs[0];
+			tmp[idx1] = coefficients[0];
 			
-			for(int idx2=(idx1-p);idx2<idx1;++idx2)
-				tmp[idx1] += coefs[idx1-idx2]*(ts[idx2]-coefs[0]);
+			for(int idx2=idx1-(int)parameters[0];idx2<idx1;++idx2)
+				tmp[idx1] += coefficients[idx1-idx2]*(ts[idx2]-coefficients[0]);
 
-			for(int idx2=Math.max(0,idx1-q);idx2<idx1;++idx2)
-				tmp[idx1] += coefs[idx1-idx2+p]*errors[idx2];
+			for(int idx2=Math.max(0,idx1-(int)parameters[1]);idx2<idx1;++idx2)
+				tmp[idx1] += coefficients[idx1-idx2+(int)parameters[1]]*errors[idx2];
 		}
 		
-		if(noDifs > 0)
+		if(noPersAhead > 1)
 		{
-			return forecast(tmp,errors,coefs,p,q,noDifs-1);
+			return forecast(tmp,noPersAhead-1);
 		}
 		else
 		{			

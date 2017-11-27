@@ -265,7 +265,7 @@ public class Experiment {
 	
 	private static Model initializeARIMA(String[] line,String cat,Data data) throws NumberFormatException
 	{		
-		ARIMA arma = new ARIMA(data,Integer.parseInt(line[3]),seed);
+		ARIMA arma = new ARIMA(data,Integer.parseInt(line[3]));
 		arma.setCategory(cat);
 			
 		return arma;
