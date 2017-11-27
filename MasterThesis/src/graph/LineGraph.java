@@ -116,12 +116,14 @@ public class LineGraph{
 	public void autodraw(Stage stage)
 	{
 		axisCoordinates = calculateAxesCoordinates();
-		drawAxes();
 		
-		for(int idx=0;idx<yValues.length;++idx)
+		for(int idx1=0;idx1<yValues.length;++idx1)
 		{
-			current = idx;
+			drawPane.getChildren().clear();
+			drawAxes();
+			current = idx1;
 			drawData();
+			for(int idx2=0;idx2<checkboxes.length;++idx2) checkboxes[idx2].setSelected(true);
 			menu.drawLegend(this);
 			
 			if(saveGraph())
@@ -137,9 +139,9 @@ public class LineGraph{
 		for(int idx=0;idx<yAxisCategories.length;++idx)
 			yAxisCategories[idx] = Integer.toString(idx);
 		
-		drawTicks();
+		drawTicks(extremes[1]);
 		calculateLineCoordinates();
-		createCheckboxes();
+		createCheckboxes(extremes[1]);
 	}
 	
 	public void setDrawPane(Pane pane)
@@ -150,6 +152,11 @@ public class LineGraph{
 	public void setRightPane(Pane pane)
 	{
 		rightPane = pane;
+	}
+	
+	public void setMenuAction(MenuAction ma)
+	{
+		menu = ma;
 	}
 	
 	public double getDefWidth()
@@ -257,7 +264,7 @@ public class LineGraph{
 	}
 
 	private void drawAxes()
-	{
+	{		
 		Line[] axes = new Line[4];
 
 		for(int idx=0;idx<3;++idx)
@@ -278,7 +285,7 @@ public class LineGraph{
 		drawPane.getChildren().addAll(axes);
 	}
 	
-	private void drawTicks()
+	private void drawTicks(double max)
 	{
 		calculateIntervals();
 		Line[] xTicks = new Line[xValues[current].length];
@@ -339,7 +346,7 @@ public class LineGraph{
 			yLabels[idx] = new Label(yTickNames[idx]);
 		}
 
-		addYLabels();
+		addYLabels(max);
 
 		drawPane.getChildren().addAll(xTicks);
 		drawPane.getChildren().addAll(yTicks);
@@ -418,7 +425,7 @@ public class LineGraph{
 		}
 	}
 
-	private void addYLabels()
+	private void addYLabels(double extremes)
 	{
 		switch (yMode)
 		{
@@ -426,23 +433,26 @@ public class LineGraph{
 		{
 			for(int idx=0;idx<=yNoIntervals;idx++)
 			{
-				yLabels[idx*yInterval].widthProperty().addListener(new ChangeListener()
+				if(idx<=extremes)
 				{
-					public void changed(ObservableValue arg0, Object arg1, Object arg2)
+					yLabels[idx*yInterval].widthProperty().addListener(new ChangeListener()
 					{
-						adjustYLabels();
-					}
-				});
+						public void changed(ObservableValue arg0, Object arg1, Object arg2)
+						{
+							adjustYLabels();
+						}
+					});
 
-				yLabels[idx*yInterval].heightProperty().addListener(new ChangeListener()
-				{
-					public void changed(ObservableValue arg0, Object arg1, Object arg2)
+					yLabels[idx*yInterval].heightProperty().addListener(new ChangeListener()
 					{
-						adjustYLabels();
-					}
-				});
+						public void changed(ObservableValue arg0, Object arg1, Object arg2)
+						{
+							adjustYLabels();
+						}
+					});
 
-				drawPane.getChildren().add(yLabels[idx*yInterval]);
+					drawPane.getChildren().add(yLabels[idx*yInterval]);
+				}
 			}
 
 			break;
@@ -499,11 +509,11 @@ public class LineGraph{
 		}
 	}
 
-	private void drawLines()
+	private void drawLines(double max)
 	{
 		drawPane.getChildren().clear();
 		drawAxes();
-		drawTicks();
+		drawTicks(max);
 
 		Line line = null;
 
@@ -525,7 +535,7 @@ public class LineGraph{
 		}
 	}
 
-	private void createCheckboxes()
+	private void createCheckboxes(final double max)
 	{
 		checkboxes = new CheckBox[categories[current].length];
 
@@ -552,7 +562,7 @@ public class LineGraph{
 			    	if(newValue)
 			    		none.setSelected(false);
 
-			        drawLines();
+			        drawLines(max);
 			    }
 			});
 
