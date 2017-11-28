@@ -143,13 +143,6 @@ public class SVR extends Model {
 	{
 		alpha = new double[N_train];
 		alpha_ast = new double[alpha.length];
-		
-		for(int idx=0;idx<alpha.length;++idx)
-		{
-			double draw1 = r.nextDouble();
-			double draw2 = r.nextDouble();
-			if(draw1 <0.5) alpha[idx] = draw2 * parameters[0]; else alpha_ast[idx] = draw2 * parameters[0];
-		}
 	}
 	
 	private void initializeKernel()
