@@ -5,10 +5,10 @@ import performance.PerformanceMeasures;
 
 public class Genetic extends Optimization {
 	
-	private final int popSizeMultiplyer = 20;
+	private final int popSizeMultiplyer = 10;
 	private final int noOffspringMultiplyer = 2;
 	private final int noEpochs = 1000;
-	private final int neighborhoodSize = 20;
+	private final int neighborhoodSize = 10;
 	private final double mutationProb = 0.2;
 	private final double randomParentProb = 0.2;
 	private final double mixingGeneProb = 0.5;

@@ -226,7 +226,7 @@ public class Data {
 	public double[] getTestingSet(String cat)
 	{
 		int index = getIndexFromCat(cat);
-		double[] output = new double[noObs-testingFirstIndex[index]-1];
+		double[] output = new double[noObs-testingFirstIndex[index]];
 		
 		for(int idx=0;idx<output.length;++idx)
 			output[idx] = volumes[testingFirstIndex[index]+idx][index];
@@ -259,7 +259,7 @@ public class Data {
 	public String[] getTestingDates(String cat)
 	{
 		int index = getIndexFromCat(cat);
-		String[] output = new String[noObs-testingFirstIndex[index]-1];
+		String[] output = new String[noObs-testingFirstIndex[index]];
 		
 		for(int idx=0;idx<output.length;++idx)
 			output[idx] = dates[testingFirstIndex[index]+idx];

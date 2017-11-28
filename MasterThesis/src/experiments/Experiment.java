@@ -13,6 +13,7 @@ import models.ANN;
 import models.ARIMA;
 import models.ExponentialSmoothing;
 import models.Model;
+import models.SVR;
 import optimization.Genetic;
 import optimization.GridSearch;
 import optimization.Optimization;
@@ -84,6 +85,8 @@ public class Experiment {
 						model = initializeARIMA(experiments.get(idx1),idx2,data);
 					else if(isANN(experiments.get(idx1)[0]))
 						model = initializeANN(experiments.get(idx1),idx2,data);
+					else if(isSVR(experiments.get(idx1)[0]))
+						model = initializeSVR(experiments.get(idx1),idx2,data);
 					else
 					{
 						System.out.println("Error (Experiment): model not recognized");
@@ -285,6 +288,14 @@ public class Experiment {
 		return ann;
 	}
 	
+	private Model initializeSVR(String[] line,String cat,Data data) throws NumberFormatException
+	{		
+		SVR svr = new SVR(data,Integer.parseInt(line[3]),r);
+		svr.setCategory(cat);
+		
+		return svr;
+	}
+	
 	private static Optimization initializeGA(String[] line,PerformanceMeasures pm) throws FileNotFoundException,NumberFormatException
 	{
 		if( ( ( (line.length-4-pm.getModel().getNoConstants()) % 5) != 0) || ( ( (line.length-4-pm.getModel().getNoConstants()) / 5) != pm.getModel().getNoParameters() ) )
@@ -372,6 +383,14 @@ public class Experiment {
 	private static boolean isANN(String modelName)
 	{
 		if(modelName.equals("ANN"))
+			return true;
+		else
+			return false;
+	}
+	
+	private static boolean isSVR(String modelName)
+	{
+		if(modelName.equals("SVR"))
 			return true;
 		else
 			return false;

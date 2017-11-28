@@ -485,24 +485,41 @@ public class SVR extends Model {
 		{
 			int numChanged = 0;
 			boolean examineAll = true;
+			int cnt=0;
 			
 			while(numChanged > 0 || examineAll)
 			{
+				/*System.out.println(cnt);
+				System.out.println(numChanged);
+				System.out.println(parameters[0]);
+	
+				cnt++;*/
+				/*if(Double.isNaN(alph[0]))
+						{
+					Matrix.print(Kernel);
+					
+					return false;
+						}*/
+				System.out.println(evaluateObjective(alph,alph_ast));
+				Matrix.print(alph);
+				Matrix.print(alph_ast);
+				
 				numChanged = 0;
 				
 				if(examineAll)
 				{
 					for(int idx=0;idx<alph.length;++idx) numChanged += examineExample(idx,false);
-					for(int idx=0;idx<alph_ast.length;++idx) numChanged += examineExample(idx,true);
+					for(int idx=0;idx<alph.length;++idx) numChanged += examineExample(idx,true);
 				}
 				else
 				{
-					for(int idx:nonBound) numChanged += examineExample(idx,false);
+					for(int idx:nonBound) numChanged += examineExample(idx,false);  
 					for(int idx:nonBound_ast) numChanged += examineExample(idx,true);
 				}
 				
 				if(examineAll) examineAll = false;
 				else if(numChanged == 0) examineAll = true;
+				updateNonBound();
 			}
 			
 			return true;
@@ -525,89 +542,158 @@ public class SVR extends Model {
 		
 		private int examineExample(int exampleNo,boolean ast)
 		{
+			//System.out.printf("%d\t%b\n",exampleNo,ast);
 			double alpha2;
 			if(ast) alpha2 = alph_ast[exampleNo]; else alpha2 = alph[exampleNo];
 			
-			double E2 = calculateOutput(exampleNo) - y_train[0][exampleNo];
-			double err = parameters[1] - E2;
-			
+			double E2 = calculateOutput(exampleNo) - y_train[exampleNo][0];
+			double err = parameters[1] + E2;
 			if ( (err < -tol1 && alpha2 < parameters[1]) || (err > tol1 && alpha2 > 0) )
 			{
-				double n1 = r.nextDouble();
-				double n2 = r.nextDouble();
-				for(int idx:nonBound) {if(takeStep(idx,false,exampleNo,ast,E2) ) return 1;}
-				for(int idx:nonBound_ast) {if(takeStep(idx,true,exampleNo,ast,E2) ) return 1;}
-				for(int idx=0;idx<alph.length;++idx) {if(takeStep(idx,false,exampleNo,ast,E2) ) return 1;}
-				for(int idx=0;idx<alph_ast.length;++idx) {if(takeStep(idx,true,exampleNo,ast,E2) ) return 1;}
+				int[] permuteNonBound = getPermutation(nonBound.size()+nonBound_ast.size());
+				for(int idx:permuteNonBound) 
+				{
+					if(idx >= nonBound.size()) {if(takeStep(nonBound_ast.get(idx-nonBound.size()),true,exampleNo,ast,alpha2,E2) ) return 1;} 
+					else {if(takeStep(nonBound.get(idx),false,exampleNo,ast,alpha2,E2) ) return 1;} 
+				}
+				
+				int[] permuteAll = getPermutation(2*alph.length);
+				for(int idx:permuteAll) 
+				{
+					if(idx >= alph.length) {if(takeStep(idx-alph.length,true,exampleNo,ast,alpha2,E2) ) return 1;} 
+					else {if(takeStep(idx,false,exampleNo,ast,alpha2,E2) ) return 1;} 
+				}
 			}
 			return 0;
 		}
 		
-		private boolean takeStep(int exampleNo1, boolean ast1,int exampleNo2, boolean ast2,double E2)
+		private boolean takeStep(int exampleNo1, boolean ast1,int exampleNo2, boolean ast2,double alpha2,double E2)
 		{
-			if( (ast1 == ast2) && (exampleNo1 == exampleNo2) ) return false;
+			if(exampleNo1 == exampleNo2) return false;
 			
-			double alpha1,alpha2,L,H;
+			double alpha1,L,H,aux;
 			if(ast1) alpha1 = alph_ast[exampleNo1]; else alpha1 = alph[exampleNo1];
-			if(ast2) alpha2 = alph_ast[exampleNo2]; else alpha2 = alph[exampleNo2];
 			
-			if(exampleNo1==exampleNo2) {L = Math.max(0,alpha1+alpha2-parameters[0]); H = Math.min(parameters[0],alpha1+alpha2);} 
-			else {L = Math.max(0,alpha2-alpha1); H = Math.min(parameters[0],parameters[0]+alpha2-alpha1);}
+			if(ast1==ast2) {aux = 1;L = Math.max(0,alpha1+alpha2-parameters[0]); H = Math.min(parameters[0],alpha1+alpha2);} 
+			else {aux = -1;L = Math.max(0,alpha2-alpha1); H = Math.min(parameters[0],parameters[0]+alpha2-alpha1);}
 			
 			if(L==H) return false;
 			
-			double eta = 2*Kernel[exampleNo1][exampleNo2] - Kernel[exampleNo2][exampleNo2] - Kernel[exampleNo2][exampleNo2];
-			double E1 = calculateOutput(exampleNo1) - y_train[0][exampleNo1];
+			double eta = 2*Kernel[exampleNo1][exampleNo2] - Kernel[exampleNo1][exampleNo1] - Kernel[exampleNo2][exampleNo2];
+			double E1 = calculateOutput(exampleNo1) - y_train[exampleNo1][0];
 			
-			double a2 = alpha2 - y_train[0][exampleNo1]*(E1-E2)/eta;
+			//System.out.printf("%f\t%f\n",E1,E2);
+			
+			double a2;
+			if(eta<-tol2) a2 = alpha2 - y_train[exampleNo2][0]*(E1-E2)/eta;
+			else 
+			{
+				double[] LVec = new double[alph.length];
+				double[] LVec_ast = new double[LVec.length];
+				double[] HVec = new double[LVec.length];
+				double[] HVec_ast = new double[LVec.length];
+				
+				for(int idx=0;idx<LVec.length;++idx)
+				{
+					LVec[idx] = alph[idx];LVec_ast[idx] = alph_ast[idx];HVec[idx] = alph[idx];HVec_ast[idx] = alph_ast[idx];
+				}
+				
+				if(ast2) {LVec_ast[exampleNo2] = L; HVec_ast[exampleNo2] = H;} 
+				else {LVec[exampleNo2] = L;HVec[exampleNo2] = H;} 
+				double LObj = evaluateObjective(LVec,LVec_ast); double HObj = evaluateObjective(HVec,HVec_ast);
+				
+				if(LObj > HObj + tol2) a2 = L;
+				else if(HObj > LObj + tol2) a2 = H;
+				else a2 = alpha2;
+			}
+			//System.out.println(bias);
+			/*if(Double.isNaN(a2)) 
+			{
+				System.out.printf("%f\t%f\t%f\t%f\n",eta,E1,E2,bias);
+			}*/
+			
 			if (a2 < L) a2 = L;	else if (a2 > H) a2 = H;
-			if (a2 < tol2) a2 = 0; else if (a2 > parameters[0]-tol2) a2 = parameters[0];
+			if (a2 < tol2) a2 = 0; else if (a2 > (parameters[0]-tol2)) a2 = parameters[0];
 			if (Math.abs(a2-alpha2) < tol2*(a2+alpha2+tol2)) return false;
 			double a1;
-			if(ast1 == ast2) a1 = alpha1 + alpha2 - a2; else a1 = alpha1 - alpha2 + a2;
+			a1 = alpha1 + aux * (alpha2 - a2);
 			
 			bias = calculateNewBias(exampleNo1,exampleNo2,a1,alpha1,a2,alpha2,E1,E2);
-			updateNonBound(exampleNo1,exampleNo2,ast1,ast2,a1,a2,alpha1,alpha2);
+
+			if(ast1) alph_ast[exampleNo1] = a1; else alph[exampleNo1] = a1;
+			if(ast2) alph_ast[exampleNo2] = a2; else alph[exampleNo2] = a2;
+			//System.out.printf("%d\t%b\t%d\t%b\t%f\t%f\t%f\t%f\t%f\t\n",exampleNo1,ast1,exampleNo2,ast2,alpha1,alpha2,a1,a2,eta);
+			//Matrix.print(Kernel);
 			return true;
 		}
 		
-		private void updateNonBound(int ex1,int ex2,boolean ast1,boolean ast2,double newAlpha1,double newAlpha2,double oldAlpha1,double oldAlpha2)
+		private void updateNonBound()
 		{
-			if( ( (newAlpha1 > tol2) && (newAlpha1 < (parameters[0]-tol2) ) ) && !( (oldAlpha1 > tol2) && (oldAlpha1 < (parameters[0]-tol2) ) ) )
-			{
-				if(ast1) nonBound_ast.add(ex1); else nonBound.add(ex1);
-			}
-			else if( (oldAlpha1 > tol2) && (oldAlpha1 < (parameters[0]-tol2) ) && !( (newAlpha1 > tol2) && (newAlpha1 < (parameters[0]-tol2) ) ) )
-			{
-				if(ast1) nonBound_ast.remove(nonBound_ast.indexOf(ex1)); else nonBound.remove(nonBound.indexOf(ex1));
-			}
+			nonBound.clear();
+			nonBound_ast.clear();
 			
-			if( ( (newAlpha2 > tol2) && (newAlpha2 < (parameters[0]-tol2) ) ) && !( (oldAlpha2 > tol2) && (oldAlpha2 < (parameters[0]-tol2) ) ) )
+			for(int idx=0;idx<alph.length;++idx) 
 			{
-				if(ast2) nonBound_ast.add(ex2); else nonBound.add(ex2);
-			}
-			else if( (oldAlpha2 > tol2) && (oldAlpha2 < (parameters[0]-tol2) ) && !( (newAlpha2 > tol2) && (newAlpha2 < (parameters[0]-tol2) ) ) )
-			{
-				if(ast2) nonBound_ast.remove(nonBound_ast.indexOf(ex2)); else nonBound.remove(nonBound.indexOf(ex2));
+				if( (alph[idx] > tol2) && (alph[idx] < (parameters[0] - tol2) ) ) nonBound.add(idx); 
+				if( (alph_ast[idx] > tol2) && (alph_ast[idx] < (parameters[0] - tol2) ) ) nonBound_ast.add(idx); 
 			}
 		}
 		
 		private double calculateNewBias(int ex1,int ex2,double newAlpha1,double newAlpha2,double oldAlpha1,double oldAlpha2, double E1,double E2)
 		{
 			if( (newAlpha1 > tol2) && (newAlpha1 < (parameters[0]-tol2) ) ) 
-				return E1 + y_train[0][ex1]*(newAlpha1-oldAlpha1)*Kernel[ex1][ex1] + y_train[0][ex2]*(newAlpha2-oldAlpha2)*Kernel[ex1][ex2] + bias; 
+				return E1 + y_train[ex1][0]*(newAlpha1-oldAlpha1)*Kernel[ex1][ex1] + y_train[ex2][0]*(newAlpha2-oldAlpha2)*Kernel[ex1][ex2] + bias; 
 			else if( (newAlpha2 > tol2) && (newAlpha2 < (parameters[0]-tol2) ) ) 
-				return E2 + y_train[0][ex1]*(newAlpha1-oldAlpha1)*Kernel[ex1][ex2] + y_train[0][ex2]*(newAlpha2-oldAlpha2)*Kernel[ex2][ex2] + bias; 
+				return E2 + y_train[ex1][0]*(newAlpha1-oldAlpha1)*Kernel[ex1][ex2] + y_train[ex2][0]*(newAlpha2-oldAlpha2)*Kernel[ex2][ex2] + bias; 
 
-			double b1 = E1 + y_train[0][ex1]*(newAlpha1-oldAlpha1)*Kernel[ex1][ex1] + y_train[0][ex2]*(newAlpha2-oldAlpha2)*Kernel[ex1][ex2] + bias; 
-			double b2 = E2 + y_train[0][ex1]*(newAlpha1-oldAlpha1)*Kernel[ex1][ex2] + y_train[0][ex2]*(newAlpha2-oldAlpha2)*Kernel[ex2][ex2] + bias; 
+			double b1 = E1 + y_train[ex1][0]*(newAlpha1-oldAlpha1)*Kernel[ex1][ex1] + y_train[ex2][0]*(newAlpha2-oldAlpha2)*Kernel[ex1][ex2] + bias; 
+			double b2 = E2 + y_train[ex1][0]*(newAlpha1-oldAlpha1)*Kernel[ex1][ex2] + y_train[ex2][0]*(newAlpha2-oldAlpha2)*Kernel[ex2][ex2] + bias; 
 			return 0.5*(b1+b2);
 		}
 		
 		private double calculateOutput(int exampleNo)
 		{
-			double output = bias;
+			double output = -bias;
 			for(int idx=0;idx<N_train;++idx) output += (alph[idx] - alph_ast[idx]) * Kernel[idx][exampleNo];
+			return output;
+		}
+		
+		private double evaluateObjective(double[] Alpha,double[] Alpha_ast)
+		{
+			double objective = 0;
+			
+			for(int idx1=0;idx1<Alpha.length;++idx1)
+			{
+				for(int idx2=0;idx2<Alpha.length;++idx2) objective -= 0.5*(Alpha[idx1]-Alpha_ast[idx1])*(Alpha[idx2]-Alpha_ast[idx2])*Kernel[idx1][idx2];
+				objective -= parameters[1]*(Alpha[idx1]+Alpha_ast[idx1]);
+				objective += y_train[idx1][0]*(Alpha[idx1]-Alpha_ast[idx1]);
+			}
+			
+			return objective;			
+		}
+		
+		private int[] getPermutation(int max)
+		{
+			int[] output = new int[max];
+			boolean[] used = new boolean[output.length];
+			
+			for(int idx1=0;idx1<output.length;++idx1)
+			{
+				int n = r.nextInt(output.length-idx1);
+				int cnt = 0;
+				int idx2 = 0;
+				
+				while(cnt<=n)
+				{
+					if(used[idx2]) idx2++; 
+					else {cnt++;idx2++;}
+				}
+				
+				--idx2;
+				output[idx1] = idx2;
+				used[idx2] = true;
+			}
+			
 			return output;
 		}
 		
@@ -616,5 +702,16 @@ public class SVR extends Model {
 			alph = new double[noObs];
 			alph_ast = new double[noObs];
 		}
+		
+
+	}
+	
+	public static void main(String[] args)
+	{
+		Random R = new Random(3493);
+		double[] A = new double[10];
+		for(int idx=0;idx<10;idx++)
+			A[idx] = idx;
+		
 	}
 }

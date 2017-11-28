@@ -136,7 +136,7 @@ public class ANN extends Model {
 		for(int idx=0;idx<parameters[1];++idx) lowerBias[idx] = array[idx];
 		
 		lowerWeights = new double[ (int)parameters[1] ][ (int)parameters[0] ];
-		System.out.printf("%f\t%f\t%d\n",parameters[0],parameters[1],array.length);
+
 		for(int idx1=0;idx1<parameters[1];++idx1)
 		{
 			for(int idx2=0;idx2<parameters[0];++idx2)
