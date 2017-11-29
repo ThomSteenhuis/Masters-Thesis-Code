@@ -601,7 +601,7 @@ public class SVR extends Model {
 							double LObj = evaluateObjective(LVec,LVec_ast); double HObj = evaluateObjective(HVec,HVec_ast);
 							if(LObj > HObj + tol2) a2 = LH[0]; else if(HObj > LObj + tol2) a2 = LH[1]; else a2 = alpha2;
 						}
-						a1 = alpha1 - (a2 - alpha2); if(Math.abs(a2-alpha2) > tol2) {alpha2 = a2; alpha1 = a1;} delta_phi += Math.max(0,eta)*(a1 - alpha1);
+						a1 = alpha1 - (a2 - alpha2); if(Math.abs(a2-alpha2) > tol2) {alpha2 = a2; alpha1 = a1;} phi1 = calculateOutput(exampleNo1,alpha1,alpha1_ast)-y_train[exampleNo1][0];phi2 = calculateOutput(exampleNo2,alpha2,alpha2_ast)-y_train[exampleNo2][0];delta_phi = phi1-phi2;
 						//System.out.printf("%d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\n",exampleNo1,exampleNo2,a1,a2,alpha1,alpha2,eta,delta_phi);
 						double[] vec1 = alph;
 						double[] vec2 = alph_ast;
@@ -633,7 +633,7 @@ public class SVR extends Model {
 							double LObj = evaluateObjective(LVec,LVec_ast);double HObj = evaluateObjective(HVec,HVec_ast);
 							if(LObj > HObj + tol2) a2 = LH[0]; else if(HObj > LObj + tol2) a2 = LH[1]; else a2 = alpha2;
 						}
-						a1 = alpha1 + (a2 - alpha2_ast); if(Math.abs(a2-alpha2_ast) > tol2) {alpha2_ast = a2; alpha1 = a1;} delta_phi += Math.max(0,eta)*(a1 - alpha1);
+						a1 = alpha1 + (a2 - alpha2_ast); if(Math.abs(a2-alpha2_ast) > tol2) {alpha2_ast = a2; alpha1 = a1;} phi1 = calculateOutput(exampleNo1,alpha1,alpha1_ast)-y_train[exampleNo1][0];phi2 = calculateOutput(exampleNo2,alpha2,alpha2_ast)-y_train[exampleNo2][0];delta_phi = phi1-phi2;
 						//System.out.printf("%d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\n",exampleNo1,exampleNo2,a1,a2,alpha1,alpha2_ast,eta,delta_phi);
 						double[] vec1 = alph;
 						double[] vec2 = alph_ast;
@@ -665,7 +665,7 @@ public class SVR extends Model {
 							double LObj = evaluateObjective(LVec,LVec_ast);double HObj = evaluateObjective(HVec,HVec_ast);
 							if(LObj > HObj + tol2) a2 = LH[0]; else if(HObj > LObj + tol2) a2 = LH[1]; else a2 = alpha2;
 						}
-						a1 = alpha1_ast + (a2 - alpha2); if(Math.abs(a2-alpha2) > tol2) {alpha2 = a2; alpha1_ast = a1;} delta_phi += Math.max(0,eta)*(alpha1_ast - a1);
+						a1 = alpha1_ast + (a2 - alpha2); if(Math.abs(a2-alpha2) > tol2) {alpha2 = a2; alpha1_ast = a1;} phi1 = calculateOutput(exampleNo1,alpha1,alpha1_ast)-y_train[exampleNo1][0];phi2 = calculateOutput(exampleNo2,alpha2,alpha2_ast)-y_train[exampleNo2][0];delta_phi = phi1-phi2;
 						//System.out.printf("%d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\n",exampleNo1,exampleNo2,a1,a2,alpha1_ast,alpha2,eta,delta_phi);
 						double[] vec1 = alph;
 						double[] vec2 = alph_ast;
@@ -712,7 +712,7 @@ public class SVR extends Model {
 							
 							System.out.printf("%f\t%f\n",evaluateObjective(vec1,vec2),evaluateObjective(vec3,vec4));
 						}
-						if(Math.abs(a2-alpha2_ast) > tol2) {alpha2_ast = a2; alpha1_ast = a1;} delta_phi += Math.max(0,eta)*(alpha1_ast - a1);
+						if(Math.abs(a2-alpha2_ast) > tol2) {alpha2_ast = a2; alpha1_ast = a1;} phi1 = calculateOutput(exampleNo1,alpha1,alpha1_ast)-y_train[exampleNo1][0];phi2 = calculateOutput(exampleNo2,alpha2,alpha2_ast)-y_train[exampleNo2][0];delta_phi = phi1-phi2;
 					}
 					else finished = true;
 					case4 = false;
