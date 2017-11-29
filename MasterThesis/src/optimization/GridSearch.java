@@ -1,8 +1,5 @@
 package optimization;
 
-import org.rosuda.REngine.REXPMismatchException;
-import org.rosuda.REngine.Rserve.RserveException;
-
 import performance.PerformanceMeasures;
 
 public class GridSearch extends Optimization{
@@ -59,7 +56,7 @@ public class GridSearch extends Optimization{
 			optimizationError("optimize","set category first");
 			return false;
 		}
-		
+
 		for(int idx=0;idx<noCombinations;++idx)
 		{			
 			measures.getModel().setParameters(getGridConfig(idx));
@@ -119,6 +116,7 @@ public class GridSearch extends Optimization{
 		{
 			grid[idx1] = new double[noSteps[idx1]+1];
 			double stepLength = (bounds[idx1][1]-bounds[idx1][0])/noSteps[idx1];
+			if(noSteps[idx1] == 0) stepLength = 0;
 			
 			if(exponentialSteps[idx1])
 			{
