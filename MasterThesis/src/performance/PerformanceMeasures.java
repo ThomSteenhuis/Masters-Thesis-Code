@@ -5,10 +5,10 @@ import models.Model;
 public class PerformanceMeasures {
 	
 	private Model model;
-	private double RMSE;
-	private double MAPE;
-	private double MAE;
-	private double ME;
+	private double[] RMSE;
+	private double[] MAPE;
+	private double[] MAE;
+	private double[] ME;
 	
 	public PerformanceMeasures(Model mdl)
 	{
@@ -17,40 +17,54 @@ public class PerformanceMeasures {
 	
 	public void calculateMeasures(String mode)
 	{
-		double[] real;
-		double[] forecast;
-		
+		double[][] real = new double[model.getNoOutputs()][]; double[][] forecast = new double[model.getNoOutputs()][];
+
 		switch (mode)
 		{
 		case "training":
 		{
-			real = model.getTrainingReal();
-			forecast = model.getTrainingForecast();
+			for(int idx=0;idx<model.getNoOutputs();++idx)
+			{
+				real[idx] = model.getTrainingReal()[idx];
+				forecast[idx] = model.getTrainingForecast()[idx];
+			}
+
 			break;
 		}
 		case "validation":
 		{
-			real = model.getValidationReal();
-			forecast = model.getValidationForecast();
+			for(int idx=0;idx<model.getNoOutputs();++idx)
+			{
+				real[idx] = model.getValidationReal()[idx];
+				forecast[idx] = model.getValidationForecast()[idx];
+			}
+			
 			break;
 		}
 		case "testing":
 		{
-			real = model.getTestingReal();
-			forecast = model.getTestingForecast();
+			for(int idx=0;idx<model.getNoOutputs();++idx)
+			{
+				real[idx] = model.getTestingReal()[idx];
+				forecast[idx] = model.getTestingForecast()[idx];
+			}
 			break;
 		}
 		default:
-			real = new double[0];
-			forecast = new double[0];
+			real = new double[0][0];
+			forecast = new double[0][0];
 			System.out.println("Error (calculateMeasures): default case reached");
 			return;
 		}
 		
-		RMSE = calculateRMSE(real,forecast);
-		MAPE = calculateMAPE(real,forecast);
-		MAE = calculateMAE(real,forecast);
-		ME = calculateME(real,forecast);
+		RMSE = new double[model.getNoOutputs()]; MAPE = new double[RMSE.length]; MAE = new double[RMSE.length]; ME = new double[RMSE.length];
+		for(int idx=0;idx<model.getNoOutputs();++idx)
+		{
+			RMSE[idx] = calculateRMSE(real[idx],forecast[idx]);
+			MAPE[idx] = calculateMAPE(real[idx],forecast[idx]);
+			MAE[idx] = calculateMAE(real[idx],forecast[idx]);
+			ME[idx] = calculateME(real[idx],forecast[idx]);
+		}
 	}
 	
 	public Model getModel()
@@ -58,22 +72,22 @@ public class PerformanceMeasures {
 		return model;
 	}
 	
-	public double getRMSE()
+	public double[] getRMSE()
 	{
 		return RMSE;
 	}
 	
-	public double getMAPE()
+	public double[] getMAPE()
 	{
 		return MAPE;
 	}
 	
-	public double getMAE()
+	public double[] getMAE()
 	{
 		return MAE;
 	}
 	
-	public double getME()
+	public double[] getME()
 	{
 		return ME;
 	}

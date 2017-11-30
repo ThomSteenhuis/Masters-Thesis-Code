@@ -173,7 +173,7 @@ public class ANN extends Model {
 			int cat1 = idx1 / noPersAhead.length;
 			
 			for(int idx2=0;idx2<(X.length+Matrix.max(noPersAhead)-1);++idx2)
-				trainingForecast[idx1][idx2] = trainingReal[idx1][idx2];
+				trainingForecast[idx1][idx2] = trainingReal[idx1][idx2];			
 
 			for(int idx2=(X.length+Matrix.max(noPersAhead)-1);idx2<trainingReal[idx1].length;++idx2)
 				trainingForecast[idx1][idx2] = destandardize(Y_hat[idx1][idx2-(X.length+Matrix.max(noPersAhead)-1)],cat1);

@@ -287,17 +287,18 @@ public abstract class Model {
 		
 		for(int idx=0;idx<noOutputs;++idx)
 		{
-			trainingReal[idx] = data.getTrainingSet(category[idx]);
-			trainingForecast[idx] = new double[trainingReal.length];
-			trainingDates[idx] = data.getTrainingDates(category[idx]);
+			int cat = idx / noPersAhead.length;
+			trainingReal[idx] = data.getTrainingSet(category[cat]);
+			trainingForecast[idx] = new double[trainingReal[idx].length];
+			trainingDates[idx] = data.getTrainingDates(category[cat]);
 
-			validationReal[idx] = data.getValidationSet(category[idx]);
-			validationForecast[idx] = new double[validationReal.length];
-			validationDates[idx] = data.getValidationDates(category[idx]);
+			validationReal[idx] = data.getValidationSet(category[cat]);
+			validationForecast[idx] = new double[validationReal[idx].length];
+			validationDates[idx] = data.getValidationDates(category[cat]);
 
-			testingReal[idx] = data.getTestingSet(category[idx]);
-			testingForecast[idx] = new double[testingReal.length];
-			testingDates[idx] = data.getTestingDates(category[idx]);
+			testingReal[idx] = data.getTestingSet(category[cat]);
+			testingForecast[idx] = new double[testingReal[idx].length];
+			testingDates[idx] = data.getTestingDates(category[cat]);
 		}
 	}
 
