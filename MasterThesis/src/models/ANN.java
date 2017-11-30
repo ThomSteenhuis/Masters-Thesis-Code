@@ -178,7 +178,7 @@ public class ANN extends Model {
 			for(int idx2=(X.length+Matrix.max(noPersAhead)-1);idx2<trainingReal[idx1].length;++idx2)
 				trainingForecast[idx1][idx2] = destandardize(Y_hat[idx1][idx2-(X.length+Matrix.max(noPersAhead)-1)],cat1);
 		
-			for(int idx2=0;idx2<validationReal.length;++idx2)
+			for(int idx2=0;idx2<validationReal[idx1].length;++idx2)
 			{
 				double[] x = new double[noInputs];
 
@@ -192,7 +192,7 @@ public class ANN extends Model {
 				validationForecast[idx1][idx2] = destandardize(predict(x)[idx1],cat1);
 			}
 			
-			for(int idx2=0;idx2<testingReal.length;++idx2)
+			for(int idx2=0;idx2<testingReal[idx1].length;++idx2)
 			{
 				double[] x = new double[noInputs];
 
@@ -339,8 +339,8 @@ public class ANN extends Model {
 		{
 			for(int idx2=0;idx2<Y.length;++idx2) 
 			{
-				int cat = data.getIndexFromCat(category[idx2/noPersAhead.length]);
-				int noPers = noPersAhead[idx2 % category.length];
+				int cat = data.getIndexFromCat(category[idx2 / noPersAhead.length]);
+				int noPers = noPersAhead[idx2 % noPersAhead.length];
 				Y[idx2][idx1] = standardize(data.getVolumes()[idx1 + data.getTrainingFirstIndex()[cat] + (int) (parameters[0]) + noPers - 1][cat],cat);
 			}
 			

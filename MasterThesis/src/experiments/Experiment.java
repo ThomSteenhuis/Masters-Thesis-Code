@@ -441,7 +441,7 @@ public class Experiment {
 			
 			int noPars = instances.get(index).getPerformanceMeasures().getModel().getNoParameters();
 			int cat = idx1/instances.get(index).getPerformanceMeasures().getModel().getNoPeriodsAhead().length;
-			int pers = idx1%instances.get(index).getPerformanceMeasures().getModel().getCategory().length;
+			int pers = idx1%instances.get(index).getPerformanceMeasures().getModel().getNoPeriodsAhead().length;
 			
 			outcomes[2*idx1+1] = new String[9+noPars];
 			outcomes[2*idx1+1][0] = instances.get(index).getPerformanceMeasures().getModel().getName();

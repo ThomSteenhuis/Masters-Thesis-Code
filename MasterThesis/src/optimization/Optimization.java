@@ -88,9 +88,13 @@ public abstract class Optimization {
 		}
 		else
 		{
-			if( !optimized || (performance > measures.getRMSE() ) )
+			double currentMeasure = 0;
+			for(int idx=0;idx<measures.getModel().getNoOutputs();++idx) currentMeasure += measures.getRMSE()[idx];
+			currentMeasure = currentMeasure / measures.getModel().getNoOutputs();
+			
+			if( !optimized || (performance > currentMeasure ) )
 			{
-				performance = measures.getRMSE();
+				performance = currentMeasure;
 				optPars = measures.getModel().getParameters();
 				optimized = true;
 			}

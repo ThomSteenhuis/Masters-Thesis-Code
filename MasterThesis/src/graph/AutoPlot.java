@@ -322,7 +322,7 @@ public class AutoPlot {
 				}
 				else
 				{
-					if(lines.get(idx1).equals("Instance "+instance+" was successful"))
+					if(lines.get(idx1).equals("Instance "+instance+" was successful") || lines.get(idx1).equals(""))
 						data = true;
 					else
 						instance ++;
