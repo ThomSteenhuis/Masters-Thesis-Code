@@ -198,6 +198,16 @@ public abstract class Model {
 	{
 		return noConstants;
 	}
+	
+	public int getNoOutputs()
+	{
+		return noOutputs;
+	}
+	
+	public int getNoInputs()
+	{
+		return noInputs;
+	}
 
 	public boolean[] isForecasted()
 	{

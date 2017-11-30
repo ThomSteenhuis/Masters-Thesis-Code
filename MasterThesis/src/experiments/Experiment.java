@@ -257,8 +257,9 @@ public class Experiment {
 	
 	private static Model initializeES(String[] line,String cat,Data data) throws NumberFormatException
 	{		
-		ExponentialSmoothing es = new ExponentialSmoothing(line[0],Integer.parseInt(line[3]),data);
-		es.setCategory(cat);
+		int[] periods = {Integer.parseInt(line[3])};
+		String[] category = {cat};
+		ExponentialSmoothing es = new ExponentialSmoothing(data,periods,category,r);
 		
 		if(line[0].contains("TES") || line[0].equals("four") )
 		{
@@ -271,28 +272,35 @@ public class Experiment {
 	
 	private Model initializeARIMA(String[] line,String cat,Data data) throws NumberFormatException
 	{		
-		ARIMA arma = new ARIMA(data,Integer.parseInt(line[3]),r);
-		arma.setCategory(cat);
-			
+		int[] periods = {Integer.parseInt(line[3])};
+		String[] category = {cat};
+		ARIMA arma = new ARIMA(data,periods,category,r);
 		return arma;
 	}
 	
 	private Model initializeANN(String[] line,String cat,Data data) throws NumberFormatException
 	{		
-		ANN ann = new ANN(data,Integer.parseInt(line[3]),r);
-		ann.setCategory(cat);
-			
-		//double[] constants = {Double.parseDouble(line[4]),Double.parseDouble(line[5])};
-		//ann.setConstants(constants);
-		
-		return ann;
+		if(cat.equals("complete"))
+		{
+			int[] periods = {1,3,6};
+			String[] category = {"2200EVO","8800FCQ, RFID"};
+			ANN ann = new ANN(data,periods,category,r);
+			return ann;
+		}
+		else 
+		{
+			int[] periods = {Integer.parseInt(line[3])};
+			String[] category = {cat}; 
+			ANN ann = new ANN(data,periods,category,r);
+			return ann;
+		}		
 	}
 	
 	private Model initializeSVR(String[] line,String cat,Data data) throws NumberFormatException
 	{		
-		SVR svr = new SVR(data,Integer.parseInt(line[3]),r);
-		svr.setCategory(cat);
-		
+		int[] periods = {Integer.parseInt(line[3])};
+		String[] category = {cat};
+		SVR svr = new SVR(data,periods,category,r);		
 		return svr;
 	}
 	
@@ -410,89 +418,46 @@ public class Experiment {
 	
 	private void createOutcomes(int index)
 	{
-		outcomes = new String[2][];
-		outcomes[0] = new String[10];
-		outcomes[0][0] = "Model name";
-		outcomes[0][1] = "Machine name";
-		outcomes[0][2] = "Optimization name";
-		outcomes[0][3] = "No periods ahead";
-		outcomes[0][4] = "Runtime (seconds)";
-		outcomes[0][5] = "RMSE";
-		outcomes[0][6] = "MAPE";
-		outcomes[0][7] = "MAE";
-		outcomes[0][8] = "ME";
-		outcomes[0][9] = "Best parameters";
+		int noOutputs = instances.get(index).getPerformanceMeasures().getModel().getNoOutputs();
+		outcomes = new String[2*noOutputs][];
 		
-		int noPars = instances.get(index).getPerformanceMeasures().getModel().getNoParameters();
-		outcomes[1] = new String[9+noPars];
-		outcomes[1][0] = instances.get(index).getPerformanceMeasures().getModel().getName();
-		outcomes[1][1] = instances.get(index).getPerformanceMeasures().getModel().getCategory();
-		outcomes[1][2] = instances.get(index).getName();
-		outcomes[1][3] = Integer.toString(instances.get(index).getPerformanceMeasures().getModel().getNoPeriodsAhead());
-		
-		if(success[index])
+		for(int idx1 = 0;idx1<noOutputs;++idx1)
 		{
-			outcomes[1][4] = Double.toString(runTimes[index]);
-			outcomes[1][5] = Double.toString(instances.get(index).getPerformanceMeasures().getRMSE());
-			outcomes[1][6] = Double.toString(instances.get(index).getPerformanceMeasures().getMAPE());
-			outcomes[1][7] = Double.toString(instances.get(index).getPerformanceMeasures().getMAE());
-			outcomes[1][8] = Double.toString(instances.get(index).getPerformanceMeasures().getME());
+			outcomes[2*idx1] = new String[10];
+			outcomes[2*idx1][0] = "Model name";
+			outcomes[2*idx1][1] = "Machine name";
+			outcomes[2*idx1][2] = "Optimization name";
+			outcomes[2*idx1][3] = "No periods ahead";
+			outcomes[2*idx1][4] = "Runtime (seconds)";
+			outcomes[2*idx1][5] = "RMSE";
+			outcomes[2*idx1][6] = "MAPE";
+			outcomes[2*idx1][7] = "MAE";
+			outcomes[2*idx1][8] = "ME";
+			outcomes[2*idx1][9] = "Best parameters";
 			
-			for(int idx2=0;idx2<noPars;++idx2)
-			{
-				outcomes[1][9+idx2] = Double.toString(instances.get(index).getOptimalParameters()[idx2]);
-			}
-		}
-		else
-		{
-			outcomes[1][4] = "Instance failed";
-		}
-	}
-	
-	private void createOutcomes()
-	{
-		outcomes = new String[instances.size()+1][];
-		outcomes[0] = new String[10];
-		outcomes[0][0] = "Model name";
-		outcomes[0][1] = "Machine name";
-		outcomes[0][2] = "Optimization name";
-		outcomes[0][3] = "No periods ahead";
-		outcomes[0][4] = "Runtime (seconds)";
-		outcomes[0][5] = "RMSE";
-		outcomes[0][6] = "MAPE";
-		outcomes[0][7] = "MAE";
-		outcomes[0][8] = "ME";
-		outcomes[0][9] = "Best parameters";
-		
-		for(int idx1=0;idx1<instances.size();++idx1)
-		{
-			int noPars = instances.get(idx1).getPerformanceMeasures().getModel().getNoParameters();
-			outcomes[idx1+1] = new String[9+noPars];
-			outcomes[idx1+1][0] = instances.get(idx1).getPerformanceMeasures().getModel().getName();
-			outcomes[idx1+1][1] = instances.get(idx1).getPerformanceMeasures().getModel().getCategory();
-			outcomes[idx1+1][2] = instances.get(idx1).getName();
-			outcomes[idx1+1][3] = Integer.toString(instances.get(idx1).getPerformanceMeasures().getModel().getNoPeriodsAhead());
+			int noPars = instances.get(index).getPerformanceMeasures().getModel().getNoParameters();
+			int cat = idx1/instances.get(index).getPerformanceMeasures().getModel().getNoPeriodsAhead().length;
+			int pers = idx1%instances.get(index).getPerformanceMeasures().getModel().getCategory().length;
 			
-			if(success[idx1])
+			outcomes[2*idx1+1] = new String[9+noPars];
+			outcomes[2*idx1+1][0] = instances.get(index).getPerformanceMeasures().getModel().getName();
+			outcomes[2*idx1+1][1] = instances.get(index).getPerformanceMeasures().getModel().getCategory()[cat];
+			outcomes[2*idx1+1][2] = instances.get(index).getName();
+			outcomes[2*idx1+1][3] = Integer.toString(instances.get(index).getPerformanceMeasures().getModel().getNoPeriodsAhead()[pers]);
+			
+			if(success[index])
 			{
-				outcomes[idx1+1][4] = Double.toString(runTimes[idx1]);
-				outcomes[idx1+1][5] = Double.toString(instances.get(idx1).getPerformanceMeasures().getRMSE());
-				outcomes[idx1+1][6] = Double.toString(instances.get(idx1).getPerformanceMeasures().getMAPE());
-				outcomes[idx1+1][7] = Double.toString(instances.get(idx1).getPerformanceMeasures().getMAE());
-				outcomes[idx1+1][8] = Double.toString(instances.get(idx1).getPerformanceMeasures().getME());
+				outcomes[2*idx1+1][4] = Double.toString(runTimes[index]/noOutputs);
+				outcomes[2*idx1+1][5] = Double.toString(instances.get(index).getPerformanceMeasures().getRMSE());
+				outcomes[2*idx1+1][6] = Double.toString(instances.get(index).getPerformanceMeasures().getMAPE());
+				outcomes[2*idx1+1][7] = Double.toString(instances.get(index).getPerformanceMeasures().getMAE());
+				outcomes[2*idx1+1][8] = Double.toString(instances.get(index).getPerformanceMeasures().getME());
 				
-				for(int idx2=0;idx2<noPars;++idx2)
-				{
-					outcomes[idx1+1][9+idx2] = Double.toString(instances.get(idx1).getOptimalParameters()[idx2]);
-				}
+				for(int idx2=0;idx2<noPars;++idx2) outcomes[2*idx1+1][9+idx2] = Double.toString(instances.get(index).getOptimalParameters()[idx2]);
 			}
-			else
-			{
-				outcomes[idx1+1][4] = "Instance failed";
-			}
+			else outcomes[2*idx1+1][4] = "Instance failed";
 		}
-	}
-	
+	}	
 	
 	private void createForecasts(int index)
 	{
@@ -536,52 +501,5 @@ public class Experiment {
 				forecasts[0][8][idx2] = Double.toString(instances.get(index).getPerformanceMeasures().getModel().getTestingForecast()[idx2]);
 			}
 		}	
-	}
-	
-	private void createForecasts()
-	{
-		forecasts = new String[instances.size()][9][];
-		
-		for(int idx1=0;idx1<instances.size();idx1++)
-		{
-			if(success[idx1])
-			{
-				int trainingLength = instances.get(idx1).getPerformanceMeasures().getModel().getTrainingReal().length;
-				forecasts[idx1][0] = new String[trainingLength];
-				forecasts[idx1][1] = new String[trainingLength];
-				forecasts[idx1][2] = new String[trainingLength];
-				
-				for(int idx2=0;idx2<trainingLength;idx2++)
-				{
-					forecasts[idx1][0][idx2] = instances.get(idx1).getPerformanceMeasures().getModel().getTrainingDates()[idx2];
-					forecasts[idx1][1][idx2] = Double.toString(instances.get(idx1).getPerformanceMeasures().getModel().getTrainingReal()[idx2]);
-					forecasts[idx1][2][idx2] = Double.toString(instances.get(idx1).getPerformanceMeasures().getModel().getTrainingForecast()[idx2]);
-				}
-				
-				int validationLength = instances.get(idx1).getPerformanceMeasures().getModel().getValidationReal().length;
-				forecasts[idx1][3] = new String[validationLength];
-				forecasts[idx1][4] = new String[validationLength];
-				forecasts[idx1][5] = new String[validationLength];
-				
-				for(int idx2=0;idx2<validationLength;idx2++)
-				{
-					forecasts[idx1][3][idx2] = instances.get(idx1).getPerformanceMeasures().getModel().getValidationDates()[idx2];
-					forecasts[idx1][4][idx2] = Double.toString(instances.get(idx1).getPerformanceMeasures().getModel().getValidationReal()[idx2]);
-					forecasts[idx1][5][idx2] = Double.toString(instances.get(idx1).getPerformanceMeasures().getModel().getValidationForecast()[idx2]);
-				}
-				
-				int testingLength = instances.get(idx1).getPerformanceMeasures().getModel().getTestingReal().length;
-				forecasts[idx1][6] = new String[testingLength];
-				forecasts[idx1][7] = new String[testingLength];
-				forecasts[idx1][8] = new String[testingLength];
-				
-				for(int idx2=0;idx2<testingLength;idx2++)
-				{
-					forecasts[idx1][6][idx2] = instances.get(idx1).getPerformanceMeasures().getModel().getTestingDates()[idx2];
-					forecasts[idx1][7][idx2] = Double.toString(instances.get(idx1).getPerformanceMeasures().getModel().getTestingReal()[idx2]);
-					forecasts[idx1][8][idx2] = Double.toString(instances.get(idx1).getPerformanceMeasures().getModel().getTestingForecast()[idx2]);
-				}
-			}			
-		}
 	}
 }
