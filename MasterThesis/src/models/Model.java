@@ -26,17 +26,15 @@ public abstract class Model {
 	protected double AIC;
 	protected double BIC;
 
-	protected boolean[] trainingForecasted;
+	protected boolean[] forecasted;
 	protected double[][] trainingForecast;
 	protected double[][] trainingReal;
 	protected String[][] trainingDates;
 
-	protected boolean[] validationForecasted;
 	protected double[][] validationForecast;
 	protected double[][] validationReal;
 	protected String[][] validationDates;
 
-	protected boolean[] testingForecasted;
 	protected double[][] testingForecast;
 	protected double[][] testingReal;
 	protected String[][] testingDates;
@@ -55,9 +53,7 @@ public abstract class Model {
 			setCategory(cat);
 			noPersAhead = periods;
 			noOutputs = category.length*noPersAhead.length;
-			trainingForecasted = new boolean[noOutputs];
-			validationForecasted = new boolean[noOutputs];
-			testingForecasted = new boolean[noOutputs];
+			forecasted = new boolean[noOutputs];
 		}
 	}
 
@@ -97,6 +93,11 @@ public abstract class Model {
 			System.out.println("Error (setConstants): number of constants inadequate");
 		}
 	}
+	
+	public void setNoInputs(int no)
+	{
+		noInputs = no;
+	}
 
 	public abstract boolean train();
 
@@ -113,7 +114,7 @@ public abstract class Model {
 		{
 			case "training":
 			{
-				if(!trainingForecasted[forecastNo])
+				if(!forecasted[forecastNo])
 				{
 					modelError("plotForecast","train model first");
 					return;
@@ -128,7 +129,7 @@ public abstract class Model {
 			}
 			case "validation":
 			{
-				if(!validationForecasted[forecastNo])
+				if(!forecasted[forecastNo])
 				{
 					modelError("plotForecast","validate model first");
 					return;
@@ -143,7 +144,7 @@ public abstract class Model {
 			}
 			case "testing":
 			{
-				if(!testingForecasted[forecastNo])
+				if(!forecasted[forecastNo])
 				{
 					modelError("plotForecast","test model first");
 					return;
@@ -198,9 +199,9 @@ public abstract class Model {
 		return noConstants;
 	}
 
-	public boolean[] isTrainingForecasted()
+	public boolean[] isForecasted()
 	{
-		return trainingForecasted;
+		return forecasted;
 	}
 
 	public String[] getCategory()

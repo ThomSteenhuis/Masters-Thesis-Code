@@ -406,6 +406,25 @@ public class Matrix {
 		
 		return output;
 	}
+	
+	public static int max(int[] array)
+	{
+		if(array.length == 0)
+		{
+			System.out.println("Error (mean): array has 0 length");
+			return 0;
+		}
+		
+		int output = array[0];
+		
+		for(int idx=1;idx<array.length;++idx)
+		{
+			if(array[idx] > output)
+				output = array[idx];
+		}			
+		
+		return output;
+	}
 
 	public static void print(double[][] matrix)
 	{

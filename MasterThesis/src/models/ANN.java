@@ -32,9 +32,9 @@ public class ANN extends Model {
 	private final double maxInitBounds = 0.01;
 	private final int epochMultiplyer = 1000;
 
-	public ANN(Data data,int noPeriods,Random R)
+	public ANN(Data data,int[] noPeriods,String[] cats,Random R)
 	{
-		super(data,noPeriods);
+		super(data,noPeriods,cats);
 		noParameters = 2;
 		noConstants = 0;
 		name = "ANN";
@@ -60,19 +60,17 @@ public class ANN extends Model {
 			System.out.println("Error (ANN): parameters have invalid value");
 			return false;
 		}
-		category = "complete";
+
+		setNoInputs( ( (int) parameters[0])*category.length);
 		initializeData();
 		
 		//backpropagation();
 		if(!nelderMead()) return false;
 		
-		category = "2200EVO";
 		initializeSets();
 		forecast();
 
-		trainingForecasted = true;
-		validationForecasted = true;
-		testingForecasted = true;
+		for(int idx=0;idx<noOutputs;++idx) forecasted[idx] = true; 
 		return true;
 	}
 
@@ -170,38 +168,43 @@ public class ANN extends Model {
 	
 	private void forecast()
 	{
-		int index = data.getIndexFromCat("2200EVO");
-
-		for(int idx=0;idx<(X.length+noPersAhead-1);++idx)
-			trainingForecast[idx] = trainingReal[idx];
-
-		for(int idx=(X.length+noPersAhead-1);idx<trainingReal.length;++idx)
-			trainingForecast[idx] = destandardize(Y_hat[0][idx-X.length-noPersAhead+1],0);
-
-		for(int idx=0;idx<validationReal.length;++idx)
+		for(int idx1=0;idx1<noOutputs;++idx1)
 		{
-			double[] x = new double[(int)parameters[0]*2];
+			int cat1 = idx1 / noPersAhead.length;
+			
+			for(int idx2=0;idx2<(X.length+Matrix.max(noPersAhead)-1);++idx2)
+				trainingForecast[idx1][idx2] = trainingReal[idx1][idx2];
 
-			for(int idx2=0;idx2<parameters[0];++idx2)
+			for(int idx2=(X.length+Matrix.max(noPersAhead)-1);idx2<trainingReal[idx1].length;++idx2)
+				trainingForecast[idx1][idx2] = destandardize(Y_hat[idx1][idx2-(X.length+Matrix.max(noPersAhead)-1)],cat1);
+		
+			for(int idx2=0;idx2<validationReal.length;++idx2)
 			{
-				x[idx2] = standardize(data.getVolumes()[data.getValidationFirstIndex()[index]+idx+idx2-x.length-noPersAhead+1][index],0);
-				x[idx2+(int)parameters[0]] = standardize(data.getVolumes()[data.getValidationFirstIndex()[index]+idx+idx2-x.length-noPersAhead+1][1],1);
+				double[] x = new double[noInputs];
+
+				for(int idx3=0;idx3<noInputs;++idx3)
+				{
+					int cat2 = idx3 / (int)parameters[0];
+					x[idx3] = standardize(data.getVolumes()[data.getValidationFirstIndex()[cat2] + idx2 + idx3%category.length 
+					                                        - (X.length + Matrix.max(noPersAhead) - 1)][cat2],cat2);
+				}
+				
+				validationForecast[idx1][idx2] = destandardize(predict(x)[idx1],cat1);
 			}
 			
-			validationForecast[idx] = destandardize(predict(x)[0],0);
-		}
-
-		for(int idx=0;idx<testingReal.length;++idx)
-		{
-			double[] x = new double[(int)parameters[0]*2];
-
-			for(int idx2=0;idx2<parameters[0];++idx2)
+			for(int idx2=0;idx2<testingReal.length;++idx2)
 			{
-				x[idx2] = standardize(data.getVolumes()[data.getTestingFirstIndex()[index]+idx+idx2-x.length-noPersAhead+1][index],0);
-				x[idx2+(int)parameters[0]] = standardize(data.getVolumes()[data.getTestingFirstIndex()[index]+idx+idx2-x.length-noPersAhead+1][1],1);
+				double[] x = new double[noInputs];
+
+				for(int idx3=0;idx3<noInputs;++idx3)
+				{
+					int cat2 = idx3 / (int)parameters[0];
+					x[idx3] = standardize(data.getVolumes()[data.getTestingFirstIndex()[cat2] + idx2 + idx3%category.length 
+					                                        - (X.length + Matrix.max(noPersAhead) - 1)][cat2],cat2);
+				}
+				
+				testingForecast[idx1][idx2] = destandardize(predict(x)[idx1],cat1);
 			}
-			
-			testingForecast[idx] = destandardize(predict(x)[0],0);
 		}
 	}
 	
@@ -279,6 +282,34 @@ public class ANN extends Model {
 			alr = constants[1]*alr;
 
 		error = newError;
+	}
+	
+	private void initializeWeights()
+	{
+		upperWeights = new double[ (int)parameters[1] ][noOutputs];
+		lowerWeights = new double[ (int)parameters[1] ][noInputs];
+		lowerBias = new double[(int)parameters[1]];
+		upperBias = new double[noOutputs]; 
+		
+		for(int idx=0;idx<upperBias.length;++idx) 
+			upperBias[idx] = calculateInitWeight(main.Run.r.nextDouble());
+
+		for(int idx=0;idx<lowerBias.length;++idx)
+			lowerBias[idx] = calculateInitWeight(main.Run.r.nextDouble());
+
+		for(int idx1=0;idx1<upperWeights.length;++idx1)
+		{
+			for(int idx2=0;idx2<upperWeights[idx1].length;++idx2) 
+				upperWeights[idx1][idx2] = calculateInitWeight(main.Run.r.nextDouble());
+
+			for(int idx2=0;idx2<lowerWeights[idx1].length;++idx2)
+				lowerWeights[idx1][idx2] = calculateInitWeight(main.Run.r.nextDouble());
+		}
+	}
+	
+	private double calculateInitWeight(double input)
+	{
+		return 2*maxInitBounds*(input - 1);
 	}*/
 	
 	private double standardize(double input,int index)
@@ -293,102 +324,31 @@ public class ANN extends Model {
 
 	private void initializeData()
 	{
-		if(category.equals("complete"))
+		int[] index = new int[category.length]; 
+		
+		for(int idx=0;idx<index.length;++idx) index[idx] = data.getIndexFromCat(category[idx]); 
+		
+		mean = new double[index.length]; max = new double[index.length];
+		for(int idx=0;idx<index.length;++idx) {mean[idx] = Matrix.mean(data.getTrainingSet(category[idx])); max[idx] = Matrix.max(data.getTrainingSet(category[idx]));}
+
+		N = data.getValidationFirstIndex()[index[0]] - data.getTrainingFirstIndex()[index[0]] - (int) (parameters[0]) - Matrix.max(noPersAhead) + 1;
+		X = new double[noInputs][N];
+		Y = new double[noOutputs][N];
+		
+		for(int idx1=0;idx1<N;++idx1)
 		{
-			int[] index = new int[2]; index[0] = data.getIndexFromCat("2200EVO"); index[1] = data.getIndexFromCat("8800FCQ, RFID");
-			mean = new double[2]; max = new double[2];
-			mean[0] = Matrix.mean(data.getTrainingSet("2200EVO")); mean[1] = Matrix.mean(data.getTestingSet("8800FCQ, RFID"));
-			max[0] = Matrix.max(data.getTrainingSet("2200EVO")); max[1] = Matrix.max(data.getTrainingSet("8800FCQ, RFID"));
-			N = data.getValidationFirstIndex()[index[0]] - data.getTrainingFirstIndex()[index[0]] - (int) (parameters[0]) - noPersAhead + 1;
-			X = new double[(int) parameters[0] * 2][N];
-			Y = new double[6][N];
-
-			for(int idx=0;idx<N;++idx)
+			for(int idx2=0;idx2<Y.length;++idx2) 
 			{
-				Y[0][idx] = standardize(data.getVolumes()[idx + data.getTrainingFirstIndex()[index[0]] + (int) (parameters[0]) + 1 - 1][index[0]],0);
-				Y[1][idx] = standardize(data.getVolumes()[idx + data.getTrainingFirstIndex()[index[0]] + (int) (parameters[0]) + 3 - 1][index[0]],0);
-				Y[2][idx] = standardize(data.getVolumes()[idx + data.getTrainingFirstIndex()[index[0]] + (int) (parameters[0]) + 6 - 1][index[0]],0);
-				Y[3][idx] = standardize(data.getVolumes()[idx + data.getTrainingFirstIndex()[index[1]] + (int) (parameters[0]) + 1 - 1][index[1]],1);
-				Y[4][idx] = standardize(data.getVolumes()[idx + data.getTrainingFirstIndex()[index[1]] + (int) (parameters[0]) + 3 - 1][index[1]],1);
-				Y[5][idx] = standardize(data.getVolumes()[idx + data.getTrainingFirstIndex()[index[1]] + (int) (parameters[0]) + 6 - 1][index[1]],1);
+				int cat = data.getIndexFromCat(category[idx2/noPersAhead.length]);
+				int noPers = noPersAhead[idx2 % category.length];
+				Y[idx2][idx1] = standardize(data.getVolumes()[idx1 + data.getTrainingFirstIndex()[cat] + (int) (parameters[0]) + noPers - 1][cat],cat);
 			}
-
-			for(int idx1=0;idx1<Y.length;++idx1)
-			{
-				for(int idx2=0;idx2<(int) parameters[0];++idx2)
-				{
-					X[idx2][idx1] = standardize(data.getVolumes()[idx1 + idx2 + data.getTrainingFirstIndex()[index[0]]][index[0]],0);
-					X[(int) parameters[0] + idx2][idx1] = standardize(data.getVolumes()[idx1 + idx2 + data.getTrainingFirstIndex()[index[1]]][index[1]],1);
-				}
-			}
-		}
-		else
-		{
-			int index = data.getIndexFromCat(category);
-			mean = new double[1]; max = new double[1];
-			mean[0] = Matrix.mean(data.getTrainingSet(category));
-			max[0] = Matrix.max(data.getTrainingSet(category));
-			N = data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index] - (int) (parameters[0]) - noPersAhead + 1;
-			X = new double[(int) parameters[0] ][N];
-			Y = new double[1][N];
-
-			for(int idx=0;idx<N;++idx)
-				Y[0][idx] = standardize(data.getVolumes()[idx + data.getTrainingFirstIndex()[index] + (int) (parameters[0]) + noPersAhead - 1][index],0);
-
-			for(int idx1=0;idx1<Y.length;++idx1)
-			{
-				for(int idx2=0;idx2<X.length;++idx2)
-					X[idx2][idx1] = standardize(data.getVolumes()[idx1 + idx2 + data.getTrainingFirstIndex()[index]][index],0);
-			}
-		}			
-	}
-
-	private void initializeWeights()
-	{
-		if(category.equals("complete"))
-		{
-			upperWeights = new double[ (int)parameters[1] ][6];
-			lowerWeights = new double[ (int)parameters[1] ][ (int)parameters[0] * 2 ];
-			lowerBias = new double[(int)parameters[1]];
-			upperBias = new double[6]; 
 			
-			for(int idx=0;idx<upperBias.length;++idx) 
-				upperBias[idx] = calculateInitWeight(main.Run.r.nextDouble());
-
-			for(int idx=0;idx<lowerBias.length;++idx)
-				lowerBias[idx] = calculateInitWeight(main.Run.r.nextDouble());
-
-			for(int idx1=0;idx1<upperWeights.length;++idx1)
+			for(int idx2=0;idx2<X.length;++idx2) 
 			{
-				for(int idx2=0;idx2<upperWeights[idx1].length;++idx2) 
-					upperWeights[idx1][idx2] = calculateInitWeight(main.Run.r.nextDouble());
-
-				for(int idx2=0;idx2<lowerWeights[idx1].length;++idx2)
-					lowerWeights[idx1][idx2] = calculateInitWeight(main.Run.r.nextDouble());
+				int cat = data.getIndexFromCat(category[idx2/(int)parameters[0]]);
+				X[idx2][idx1] = standardize(data.getVolumes()[idx1 + idx2%(int)parameters[0] + data.getTrainingFirstIndex()[cat]][cat],cat);
 			}
-		}
-		else
-		{
-			upperWeights = new double[ (int)parameters[1] ][1];
-			lowerWeights = new double[ (int)parameters[1] ][ (int)parameters[0] ];
-			lowerBias = new double[(int)parameters[1]];
-			upperBias = new double[1]; upperBias[0] = calculateInitWeight(main.Run.r.nextDouble());
-
-			for(int idx=0;idx<lowerBias.length;++idx)
-				lowerBias[idx] = calculateInitWeight(main.Run.r.nextDouble());
-
-			for(int idx1=0;idx1<upperWeights.length;++idx1)
-			{
-				upperWeights[idx1][0] = calculateInitWeight(main.Run.r.nextDouble());
-
-				for(int idx2=0;idx2<lowerWeights[idx1].length;++idx2)
-					lowerWeights[idx1][idx2] = calculateInitWeight(main.Run.r.nextDouble());
-			}
-		}
-	}
-
-	private double calculateInitWeight(double input)
-	{
-		return 2*maxInitBounds*(input - 1);
+		}		
 	}
 }
