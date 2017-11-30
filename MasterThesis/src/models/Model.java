@@ -16,6 +16,8 @@ public abstract class Model {
 	protected String name;
 	protected int noParameters;
 	protected int noConstants;
+	protected int noInputs;
+	protected int noOutputs;
 
 	protected String[] category;
 	protected int[] noPersAhead;
@@ -34,38 +36,41 @@ public abstract class Model {
 	protected double[][] validationReal;
 	protected String[][] validationDates;
 
-	protected boolean testingForecasted;
-	protected double[] testingForecast;
-	protected double[] testingReal;
-	protected String[] testingDates;
+	protected boolean[] testingForecasted;
+	protected double[][] testingForecast;
+	protected double[][] testingReal;
+	protected String[][] testingDates;
 
-	public Model(Data dataset, int periods)
+	public Model(Data dataset, int[] periods, String[] cat)
 	{
-		if( (periods <= 0) || periods >= (dataset.getNoObs()) )
-		{
-			throw new IllegalArgumentException();
-		}
+		if( (periods.length == 0) || (cat.length == 0) ) throw new IllegalArgumentException();
 		else
 		{
+			for(int idx=0;idx<periods.length;++idx)
+			{
+				if( (periods[idx] <= 0) || (periods[idx] >= (dataset.getNoObs() ) ) ) throw new IllegalArgumentException();
+			}
+			
 			data = dataset;
-			category = "";
+			setCategory(cat);
 			noPersAhead = periods;
-			trainingForecasted = false;
-			validationForecasted = false;
-			testingForecasted = false;
+			noOutputs = category.length*noPersAhead.length;
+			trainingForecasted = new boolean[noOutputs];
+			validationForecasted = new boolean[noOutputs];
+			testingForecasted = new boolean[noOutputs];
 		}
 	}
 
-	public void setCategory(String cat)
+	public void setCategory(String[] cat)
 	{
-		/*try{
-			data.getIndexFromCat(cat);
+		try{
+			for(int idx=0;idx<cat.length;++idx) data.getIndexFromCat(cat[idx]);
 		}
 		catch(NullPointerException e)
 		{
 			System.out.println("Error (setCategory): category not recognized");
 			return;
-		}*/
+		}
 		category = cat;
 	}
 
@@ -95,29 +100,27 @@ public abstract class Model {
 
 	public abstract boolean train();
 
-	public void plotForecast(String mode)
+	public void plotForecast(String mode,int forecastNo)
 	{
 		String[][] cats = new String[1][2];
 		String[][] lbls = new String[1][];
 		String[][] dts = new String[1][];
-		cats[0][0] = category;
+		cats[0][0] = category[forecastNo];
 		cats[0][1] = "Forecast";
-		lbls[0] = data.getLabels();
-		
-		
+		lbls[0] = data.getLabels();		
 
 		switch (mode)
 		{
 			case "training":
 			{
-				if(!trainingForecasted)
+				if(!trainingForecasted[forecastNo])
 				{
 					modelError("plotForecast","train model first");
 					return;
 				}
 
-				double[][][] vols = merge(trainingReal,trainingForecast);
-				dts[0] = trainingDates;
+				double[][][] vols = merge(trainingReal[forecastNo],trainingForecast[forecastNo]);
+				dts[0] = trainingDates[forecastNo];
 				
 				LineGraph lg = new LineGraph(vols,dts,cats,lbls);
 				lg.plot();
@@ -125,14 +128,14 @@ public abstract class Model {
 			}
 			case "validation":
 			{
-				if(!validationForecasted)
+				if(!validationForecasted[forecastNo])
 				{
 					modelError("plotForecast","validate model first");
 					return;
 				}
 
-				double[][][] vols = merge(validationReal,validationForecast);
-				dts[0] = validationDates;
+				double[][][] vols = merge(validationReal[forecastNo],validationForecast[forecastNo]);
+				dts[0] = validationDates[forecastNo];
 				
 				LineGraph lg = new LineGraph(vols,dts,cats,lbls);
 				lg.plot();
@@ -140,14 +143,14 @@ public abstract class Model {
 			}
 			case "testing":
 			{
-				if(!testingForecasted)
+				if(!testingForecasted[forecastNo])
 				{
 					modelError("plotForecast","test model first");
 					return;
 				}
 
-				double[][][] vols = merge(testingReal,testingForecast);
-				dts[0] = testingDates;
+				double[][][] vols = merge(testingReal[forecastNo],testingForecast[forecastNo]);
+				dts[0] = testingDates[forecastNo];
 
 				LineGraph lg = new LineGraph(vols,dts,cats,lbls);
 				lg.plot();
@@ -165,7 +168,7 @@ public abstract class Model {
 		return data;
 	}
 
-	public int getNoPeriodsAhead()
+	public int[] getNoPeriodsAhead()
 	{
 		return noPersAhead;
 	}
@@ -195,12 +198,12 @@ public abstract class Model {
 		return noConstants;
 	}
 
-	public boolean isTrainingForecasted()
+	public boolean[] isTrainingForecasted()
 	{
 		return trainingForecasted;
 	}
 
-	public String getCategory()
+	public String[] getCategory()
 	{
 		return category;
 	}
@@ -220,64 +223,71 @@ public abstract class Model {
 		return BIC;
 	}
 
-	public double[] getTrainingForecast()
+	public double[][] getTrainingForecast()
 	{
 		return trainingForecast;
 	}
 
-	public double[] getTrainingReal()
+	public double[][] getTrainingReal()
 	{
 		return trainingReal;
 	}
 
-	public String[] getTrainingDates()
+	public String[][] getTrainingDates()
 	{
 		return trainingDates;
 	}
 
-	public double[] getValidationForecast()
+	public double[][] getValidationForecast()
 	{
 		return validationForecast;
 	}
 
-	public double[] getValidationReal()
+	public double[][] getValidationReal()
 	{
 		return validationReal;
 	}
 
-	public String[] getValidationDates()
+	public String[][] getValidationDates()
 	{
 		return validationDates;
 	}
 
-	public double[] getTestingForecast()
+	public double[][] getTestingForecast()
 	{
 		return testingForecast;
 	}
 
-	public double[] getTestingReal()
+	public double[][] getTestingReal()
 	{
 		return testingReal;
 	}
 
-	public String[] getTestingDates()
+	public String[][] getTestingDates()
 	{
 		return testingDates;
 	}
 
 	protected void initializeSets()
 	{
-		trainingReal = data.getTrainingSet(category);
-		trainingForecast = new double[trainingReal.length];
-		trainingDates = data.getTrainingDates(category);
+		trainingReal = new double[noOutputs][]; trainingForecast = new double[noOutputs][]; trainingDates = new String[noOutputs][];
+		validationReal = new double[noOutputs][]; validationForecast = new double[noOutputs][]; validationDates = new String[noOutputs][];
+		testingReal = new double[noOutputs][]; testingForecast = new double[noOutputs][]; testingDates = new String[noOutputs][];
+		
+		for(int idx=0;idx<noOutputs;++idx)
+		{
+			trainingReal[idx] = data.getTrainingSet(category[idx]);
+			trainingForecast[idx] = new double[trainingReal.length];
+			trainingDates[idx] = data.getTrainingDates(category[idx]);
 
-		validationReal = data.getValidationSet(category);
-		validationForecast = new double[validationReal.length];
-		validationDates = data.getValidationDates(category);
+			validationReal[idx] = data.getValidationSet(category[idx]);
+			validationForecast[idx] = new double[validationReal.length];
+			validationDates[idx] = data.getValidationDates(category[idx]);
 
-		testingReal = data.getTestingSet(category);
-		testingForecast = new double[testingReal.length];
-		testingDates = data.getTestingDates(category);
+			testingReal[idx] = data.getTestingSet(category[idx]);
+			testingForecast[idx] = new double[testingReal.length];
+			testingDates[idx] = data.getTestingDates(category[idx]);
+		}
 	}
 
 	protected static void modelError(String model, String txt)
