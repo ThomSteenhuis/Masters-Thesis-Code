@@ -119,6 +119,24 @@ public class Matrix {
 
 		return output;
 	}
+	
+	public static double sum(double[][] matrix)
+	{
+		if(matrix.length == 0)
+		{
+			System.out.println("Error (sum): array has 0 length");
+			return 0;
+		}
+
+		double output = 0;
+
+		for(int idx1=0;idx1<matrix.length;++idx1)
+		{
+			for(int idx2=0;idx2<matrix[idx1].length;++idx2) output += matrix[idx1][idx2];
+		}
+
+		return output;
+	}
 
 	public static double[] addition(double[] array1, double[] array2)
 	{

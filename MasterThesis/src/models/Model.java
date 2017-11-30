@@ -9,7 +9,7 @@ public abstract class Model {
 
 	protected Random r;
 	protected Data data;
-	protected int noPersAhead;
+	
 	protected double[] parameters;
 	protected double[] constants;
 
@@ -17,21 +17,22 @@ public abstract class Model {
 	protected int noParameters;
 	protected int noConstants;
 
-	protected String category;
-
+	protected String[] category;
+	protected int[] noPersAhead;
+	
 	protected double logLikelihood;
 	protected double AIC;
 	protected double BIC;
 
-	protected boolean trainingForecasted;
-	protected double[] trainingForecast;
-	protected double[] trainingReal;
-	protected String[] trainingDates;
+	protected boolean[] trainingForecasted;
+	protected double[][] trainingForecast;
+	protected double[][] trainingReal;
+	protected String[][] trainingDates;
 
-	protected boolean validationForecasted;
-	protected double[] validationForecast;
-	protected double[] validationReal;
-	protected String[] validationDates;
+	protected boolean[] validationForecasted;
+	protected double[][] validationForecast;
+	protected double[][] validationReal;
+	protected String[][] validationDates;
 
 	protected boolean testingForecasted;
 	protected double[] testingForecast;
@@ -57,14 +58,14 @@ public abstract class Model {
 
 	public void setCategory(String cat)
 	{
-		try{
+		/*try{
 			data.getIndexFromCat(cat);
 		}
 		catch(NullPointerException e)
 		{
 			System.out.println("Error (setCategory): category not recognized");
 			return;
-		}
+		}*/
 		category = cat;
 	}
 
