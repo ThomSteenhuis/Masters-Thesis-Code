@@ -383,7 +383,11 @@ public class Genetic extends Optimization {
 				return false;
 			
 			measures.calculateMeasures("validation");
-			fitness = 1/measures.getRMSE();
+			
+			double currentMeasure = 0.001;
+			for(int idx=0;idx<measures.getModel().getNoOutputs();++idx) currentMeasure += measures.getRMSE()[idx];
+			
+			fitness = 1/currentMeasure;
 			
 			return true;
 		}
