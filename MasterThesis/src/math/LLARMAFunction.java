@@ -44,7 +44,7 @@ public class LLARMAFunction extends Function {
 		double[] error = arima.calculateErrors(input[0],input1,input2);
 
 		for(int idx1=p;idx1<error.length;++idx1)
-			variable2 += Math.pow(error[idx1], 2);
+			variable2 += error[idx1]* error[idx1];
 
 		variable2 = 0.5 * variable2 / input3;
 

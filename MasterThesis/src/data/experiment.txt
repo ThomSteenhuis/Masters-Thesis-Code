@@ -1,2 +1,10 @@
 SES	complete	GridSearch	6	0.01	1	50	linear	2
 SES	complete	Genetic	6	0.01	1	real	linear	2
+aDES	complete	GridSearch	6	0.01	1	50	linear	2	0.01	1	50	linear	2
+aDES	complete	Genetic	6	0.01	1	50	linear	2	0.01	1	50	linear	2
+mDES	complete	GridSearch	6	0.01	1	50	linear	2	0.01	1	50	linear	2
+mDES	complete	Genetic	6	0.01	1	50	linear	2	0.01	1	50	linear	2
+aDESd	complete	GridSearch	6	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aDESd	complete	Genetic	6	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mDESd	complete	GridSearch	6	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mDESd	complete	Genetic	6	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2

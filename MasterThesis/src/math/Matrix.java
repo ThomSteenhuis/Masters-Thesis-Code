@@ -1,7 +1,5 @@
 package math;
 
-import input.Data;
-
 public class Matrix {
 
 	public static double innerProduct(double[] array1, double[] array2)
@@ -243,7 +241,7 @@ public class Matrix {
 
 		for(int idx=0;idx<array.length;++idx)
 		{
-			output += Math.pow(array[idx],2);
+			output += array[idx] * array[idx];
 		}
 
 		return Math.sqrt(output);

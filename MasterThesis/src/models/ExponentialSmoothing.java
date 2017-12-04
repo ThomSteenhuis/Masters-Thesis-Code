@@ -225,7 +225,7 @@ public class ExponentialSmoothing extends Model{
 			int firstIndex = data.getTrainingFirstIndex()[index];
 			int noData1 = data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index];
 			int noData2 = data.getTestingFirstIndex()[index] - data.getValidationFirstIndex()[index];
-			int noData3 = data.getNoObs() - data.getTestingFirstIndex()[index] - 1;
+			int noData3 = data.getNoObs() - data.getTestingFirstIndex()[index];
 			
 			double[] avals = new double[noData1+noData2+noData3];
 			
@@ -260,103 +260,105 @@ public class ExponentialSmoothing extends Model{
 	
 	private boolean train_val_testDES()
 	{		
-		int idx1 = data.getIndexFromCat(category);
-		
-		if( (data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1]) < noPersAhead)
-		{
-			modelError("trainDES","data is of length smaller than the number of periods");
-			return false;
-		}
-		
 		double[][] dataset = data.getVolumes();
-		
-		int firstIndex = data.getTrainingFirstIndex()[idx1];
-		int noData1 = data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1];
-		int noData2 = data.getTestingFirstIndex()[idx1] - data.getValidationFirstIndex()[idx1];
-		int noData3 = data.getNoObs() - data.getTestingFirstIndex()[idx1] - 1;
-		
 		initializeSets();
 		
-		double[] avals = new double[data.getNoObs() - data.getTrainingFirstIndex()[idx1] - 1];
-		double[] bvals = new double[avals.length];
-		
-		avals[1] = dataset[firstIndex+1][idx1];
-		
-		if(additive)
-			bvals[1] = dataset[firstIndex+1][idx1] - dataset[firstIndex][idx1];
-		else
-			bvals[1] = dataset[firstIndex+1][idx1] / dataset[firstIndex][idx1];
+		for(int idx1=0;idx1<noOutputs;++idx1)
+		{
+			int cat = idx1 / noPersAhead.length;
+			int per = idx1 % noPersAhead.length;
+			int index = data.getIndexFromCat(category[cat]);
+			
+			if( (data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index]) < noPersAhead[per])
+			{
+				modelError("trainDES","data is of length smaller than the number of periods");
+				return false;
+			}
+			
+			int firstIndex = data.getTrainingFirstIndex()[index];
+			int noData1 = data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index];
+			int noData2 = data.getTestingFirstIndex()[index] - data.getValidationFirstIndex()[index];
+			int noData3 = data.getNoObs() - data.getTestingFirstIndex()[index];			
+			
+			double[] avals = new double[data.getNoObs() - data.getTrainingFirstIndex()[index] - 1];
+			double[] bvals = new double[avals.length];
+			
+			avals[1] = dataset[firstIndex+1][index];
+			
+			if(additive)
+				bvals[1] = dataset[firstIndex+1][index] - dataset[firstIndex][index];
+			else
+				bvals[1] = dataset[firstIndex+1][index] / dataset[firstIndex][index];
+					
+			for(int idx2=2;idx2<(avals.length);idx2++)
+			{
+				if(additive)
+				{
+					if(damped)
+					{
+						avals[idx2] = parameters[0] * dataset[firstIndex+idx2][index] + (1 - parameters[0]) * (avals[idx2-1] + parameters[2] * bvals[idx2-1]);
+						bvals[idx2] = parameters[1] * (avals[idx2] - avals[idx2-1]) + (1 - parameters[1]) * parameters[2] * bvals[idx2-1];
+					}
+					else
+					{
+						avals[idx2] = parameters[0] * dataset[firstIndex+idx2][index] + (1 - parameters[0]) * (avals[idx2-1] + bvals[idx2-1]);
+						bvals[idx2] = parameters[1] * (avals[idx2] - avals[idx2-1]) + (1 - parameters[1]) * bvals[idx2-1];
+					}
+				}
+				else
+				{
+					if(damped)
+					{
+						avals[idx2] = parameters[0] * dataset[firstIndex+idx2][index] + (1 - parameters[0]) * avals[idx2-1] * Math.pow(bvals[idx2-1] , parameters[2]);
+						bvals[idx2] = parameters[1] * avals[idx2] / avals[idx2-1] + (1 - parameters[1]) * Math.pow(bvals[idx2-1] , parameters[2]);
+					}
+					else
+					{
+						avals[idx2] = parameters[0] * dataset[firstIndex+idx2][index] + (1 - parameters[0]) * avals[idx2-1] * bvals[idx2-1];
+						bvals[idx2] = parameters[1] * avals[idx2] / avals[idx2-1] + (1 - parameters[1]) * bvals[idx2-1];
+					}
+				}
+			}
+			
+			for(int idx2=0;idx2<Math.max(2,noPersAhead[per]);++idx2)
+				trainingForecast[idx1][idx2] = dataset[firstIndex+idx2][index];
+			
+			double dampingValue = noPersAhead[per];
 				
-		for(int idx2=2;idx2<(avals.length);idx2++)
-		{
-			if(additive)
+			if(damped)
 			{
-				if(damped)
-				{
-					avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * (avals[idx2-1] + parameters[2] * bvals[idx2-1]);
-					bvals[idx2] = parameters[1] * (avals[idx2] - avals[idx2-1]) + (1 - parameters[1]) * parameters[2] * bvals[idx2-1];
-				}
-				else
-				{
-					avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * (avals[idx2-1] + bvals[idx2-1]);
-					bvals[idx2] = parameters[1] * (avals[idx2] - avals[idx2-1]) + (1 - parameters[1]) * bvals[idx2-1];
-				}
-			}
-			else
+				dampingValue = 0;
+				
+				for(int idx=0;idx<noPersAhead[per];++idx)
+					dampingValue += Math.pow(parameters[2],idx+1);
+			}	
+			
+			for(int idx2=Math.max(2,noPersAhead[per]);idx2<noData1;++idx2)
 			{
-				if(damped)
-				{
-					avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * avals[idx2-1] * Math.pow(bvals[idx2-1] , parameters[2]);
-					bvals[idx2] = parameters[1] * avals[idx2] / avals[idx2-1] + (1 - parameters[1]) * Math.pow(bvals[idx2-1] , parameters[2]);
-				}
+				if(additive)
+					trainingForecast[idx1][idx2] = avals[idx2-noPersAhead[per]] + dampingValue * bvals[idx2-noPersAhead[per]];
 				else
-				{
-					avals[idx2] = parameters[0] * dataset[firstIndex+idx2][idx1] + (1 - parameters[0]) * avals[idx2-1] * bvals[idx2-1];
-					bvals[idx2] = parameters[1] * avals[idx2] / avals[idx2-1] + (1 - parameters[1]) * bvals[idx2-1];
-				}
+					trainingForecast[idx1][idx2] = avals[idx2-noPersAhead[per]] + Math.pow(bvals[idx2-noPersAhead[per]] , dampingValue);
 			}
-		}
-		
-		for(int idx2=0;idx2<Math.max(2,noPersAhead);++idx2)
-			trainingForecast[idx2] = dataset[firstIndex+idx2][idx1];
-		
-		double dampingValue = noPersAhead;
 			
-		if(damped)
-		{
-			dampingValue = 0;
+			for(int idx2=0;idx2<noData2;++idx2)
+			{
+				if(additive)
+					validationForecast[idx1][idx2] = avals[idx2+noData1-noPersAhead[per]] + dampingValue * bvals[idx2+noData1-noPersAhead[per]];
+				else
+					validationForecast[idx1][idx2] = avals[idx2+noData1-noPersAhead[per]] + Math.pow(bvals[idx2+noData1-noPersAhead[per]] , dampingValue);
+			}
 			
-			for(int idx=0;idx<noPersAhead;++idx)
-				dampingValue += Math.pow(parameters[2],idx+1);
-		}	
-		
-		for(int idx2=Math.max(2,noPersAhead);idx2<noData1;++idx2)
-		{
-			if(additive)
-				trainingForecast[idx2] = avals[idx2-noPersAhead] + dampingValue * bvals[idx2-noPersAhead];
-			else
-				trainingForecast[idx2] = avals[idx2-noPersAhead] + Math.pow(bvals[idx2-noPersAhead] , dampingValue);
+			for(int idx2=0;idx2<noData3;++idx2)
+			{
+				if(additive)
+					testingForecast[idx1][idx2] = avals[idx2+noData1+noData2-noPersAhead[per]] + dampingValue * bvals[idx2+noData1+noData2-noPersAhead[per]];
+				else
+					testingForecast[idx1][idx2] = avals[idx2+noData1+noData2-noPersAhead[per]] + Math.pow(bvals[idx2+noData1+noData2-noPersAhead[per]] , dampingValue);
+			}
+			
+			forecasted[idx1] = true;
 		}
-		
-		for(int idx2=0;idx2<noData2;++idx2)
-		{
-			if(additive)
-				validationForecast[idx2] = avals[idx2+noData1-noPersAhead] + dampingValue * bvals[idx2+noData1-noPersAhead];
-			else
-				validationForecast[idx2] = avals[idx2+noData1-noPersAhead] + Math.pow(bvals[idx2+noData1-noPersAhead] , dampingValue);
-		}
-		
-		for(int idx2=0;idx2<noData3;++idx2)
-		{
-			if(additive)
-				testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead] + dampingValue * bvals[idx2+noData1+noData2-noPersAhead];
-			else
-				testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead] + Math.pow(bvals[idx2+noData1+noData2-noPersAhead] , dampingValue);
-		}
-		
-		trainingForecasted = true;
-		validationForecasted = true;
-		testingForecasted = true;
 		
 		return true;
 	}

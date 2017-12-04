@@ -145,6 +145,8 @@ public class AutoPlot {
 				}
 				case "testing":
 				{
+					System.out.println(realTestingDates.length);
+					System.out.println(index);
 					tmp[idx2] = new double[realTestingDates[index].length];
 					
 					if(idx2 == 0)

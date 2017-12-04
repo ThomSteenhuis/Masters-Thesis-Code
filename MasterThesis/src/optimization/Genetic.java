@@ -1,14 +1,14 @@
 package optimization;
 
-import math.Matrix;
 import performance.PerformanceMeasures;
 
 public class Genetic extends Optimization {
 	
-	private final int popSizeMultiplyer = 10;
-	private final int noOffspringMultiplyer = 2;
-	private final int noEpochs = 1000;
-	private final int neighborhoodSize = 10;
+	private final int popSizeMultiplyer = 20;
+	private final int noOffspringMultiplyer = 1;
+	private final int maxNoEpochs = 1000;
+	private final int maxNoEpochsNoImprovement = 50;
+	private final int neighborhoodSize = 2;
 	private final double mutationProb = 0.2;
 	private final double randomParentProb = 0.2;
 	private final double mixingGeneProb = 0.5;
@@ -21,6 +21,7 @@ public class Genetic extends Optimization {
 	private double[][] parameterBounds;
 	private boolean[] exponentialSteps;
 	private double[] exponentialBase;
+	private int noEpochsNoImprovement;
 	
 	private Member[] population;
 	private boolean initialized;
@@ -50,16 +51,19 @@ public class Genetic extends Optimization {
 		if(!initialized)
 			return false;
 		
-		for(int idx=0;idx<noEpochs;++idx)
+		for(int idx=0;idx<maxNoEpochs;++idx)
 		{
 			if(!epoch())
 				return false;
 
+			if(checkStoppingCriterium())
+				break;
+			
 			if(!silent)
 			{
-				if( ( ( (100*idx) % noEpochs ) < 100) && ( (100*idx) >= noEpochs ) && ( ( (100*idx) / noEpochs) < 100 ) )
+				if( ( ( (100*idx) % maxNoEpochs ) < 100) && ( (100*idx) >= maxNoEpochs ) && ( ( (100*idx) / maxNoEpochs) < 100 ) )
 				{
-					System.out.printf("Completed %d%% of %d epochs\n",(100*idx) / noEpochs,noEpochs);
+					System.out.printf("Completed %d%% of %d epochs\n",(100*idx) / maxNoEpochs,maxNoEpochs);
 				}
 			}	
 		}
@@ -71,6 +75,7 @@ public class Genetic extends Optimization {
 	{
 		for(int idx=0;idx<population.length;++idx)
 			System.out.println(population[idx].fitness);
+		System.out.println();
 	}
 	
 	public boolean[] getIntegerType()
@@ -132,25 +137,27 @@ public class Genetic extends Optimization {
 	private boolean epoch()
 	{
 		Member[] offsprings = new Member[noOffspring];
+		boolean improvement = false;
 		
 		for(int idx=0;idx<noOffspring;++idx)
 		{
 			int[] parents = selectParents();
-			offsprings[idx] = createOffspring(population[parents[0]],population[parents[1]]);
+			offsprings[idx] = createOffspring(population[parents[0]],population[parents[1]]);		
 			
-			updateBest();			
-			compare(offsprings[idx]);
+			if(compare(offsprings[idx])) {updateBest(); improvement = true;}				
 		}
+		
+		if(!improvement) noEpochsNoImprovement++;
 		
 		return true;
 	}
 	
-	private void compare(Member m)
+	private boolean compare(Member m)
 	{
 		int idx1=0;
 		double f = m.getFitness();
 		
-		while(f > population[idx1].fitness)
+		while(f < population[idx1].fitness)
 		{
 			idx1++;
 			
@@ -165,6 +172,8 @@ public class Genetic extends Optimization {
 			population[idx2] = population[idx2-1];
 		
 		population[idx1] = m;
+		
+		if(idx1 == 0) return true; else return false;
 	}
 	
 	private Member createOffspring(Member parent1,Member parent2)
@@ -286,6 +295,12 @@ public class Genetic extends Optimization {
 
 		sort(0,populationSize-1);
 		return true;
+	}
+	
+	private boolean checkStoppingCriterium()
+	{
+		if(noEpochsNoImprovement > maxNoEpochsNoImprovement) return true;
+		else return false;
 	}
 	
 	private void sort(int indexL,int indexR)

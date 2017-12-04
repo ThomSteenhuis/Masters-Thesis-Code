@@ -32,7 +32,7 @@ public class FFANNErrorFunction extends Function {
 		for(int idx2=0;idx2<output[0].length;++idx2) 
 		{
 			double[] forecast = calculateForecast(idx2,weights);
-			for(int idx1=0;idx1<output.length;++idx1) output[idx1][idx2] = Math.pow(Y[idx1][idx2] - forecast[idx1], 2);
+			for(int idx1=0;idx1<output.length;++idx1) output[idx1][idx2] = (Y[idx1][idx2] - forecast[idx1]) * (Y[idx1][idx2] - forecast[idx1]);
 		}
 		
 		return output;
