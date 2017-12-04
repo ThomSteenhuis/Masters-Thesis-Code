@@ -280,7 +280,7 @@ public class ExponentialSmoothing extends Model{
 			int noData2 = data.getTestingFirstIndex()[index] - data.getValidationFirstIndex()[index];
 			int noData3 = data.getNoObs() - data.getTestingFirstIndex()[index];			
 			
-			double[] avals = new double[data.getNoObs() - data.getTrainingFirstIndex()[index] - 1];
+			double[] avals = new double[data.getNoObs() - data.getTrainingFirstIndex()[index]];
 			double[] bvals = new double[avals.length];
 			
 			avals[1] = dataset[firstIndex+1][index];
@@ -365,80 +365,82 @@ public class ExponentialSmoothing extends Model{
 	
 	private boolean train_val_testTES()
 	{		
-		int idx1 = data.getIndexFromCat(category);
-		
-		if( (data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1]) < (constants[0]+noPersAhead) )
-		{
-			modelError("trainTES","data is of length smaller than the number of periods");
-			return false;
-		}
-		
-		if(constants[0]<1)
-		{
-			modelError("trainTES","L should be larger than 0");
-			return false;
-		}
-		
 		double[][] dataset = data.getVolumes();
-		
-		int firstIndex = data.getTrainingFirstIndex()[idx1];
-		int noData1 = data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1];
-		int noData2 = data.getTestingFirstIndex()[idx1] - data.getValidationFirstIndex()[idx1];
-		int noData3 = data.getNoObs() - data.getTestingFirstIndex()[idx1] - 1;
-		int L = (int) constants[0];
-		int noCycles = data.getNoObs() / L;
-		
 		initializeSets();
 		
-		double[] avals = new double[data.getNoObs() - data.getTrainingFirstIndex()[idx1] - 1];
-		double[] bvals = new double[avals.length];
-		double[] cvals = new double[avals.length];
-		double[] Avals = new double[noCycles];
-		
-		avals[0] = dataset[firstIndex][idx1];
-		bvals[0] = 0;
-		
-		for(int idx2=0;idx2<L;++idx2)
+		for(int idx1=0;idx1<noOutputs;++idx1)
 		{
-			bvals[0] += ( (dataset[idx2+L][idx1] - dataset[idx2][idx1]) / L );
-			cvals[idx2] = 0;
+			int cat = idx1 / noPersAhead.length;
+			int per = idx1 % noPersAhead.length;
+			int index = data.getIndexFromCat(category[cat]);
 			
-			for(int idx3=0;idx3<noCycles;++idx3)
+			if( (data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index]) < (constants[0]+noPersAhead[per]) )
 			{
-				Avals[idx3] = 0;
-				
-				for(int idx4=0;idx4<L;++idx4)
-					Avals[idx3] += dataset[idx3*L+idx4][idx1];
-				
-				Avals[idx3] = Avals[idx3] / L;
-				
-				cvals[idx2] += dataset[idx3*L+idx2][idx1] / Avals[idx3];
+				modelError("trainTES","data is of length smaller than the number of periods");
+				return false;
 			}
 			
-			cvals[idx2] = cvals[idx2] / noCycles;
+			if(constants[0]<1)
+			{
+				modelError("trainTES","L should be larger than 0");
+				return false;
+			}
+			
+			int firstIndex = data.getTrainingFirstIndex()[index];
+			int noData1 = data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index];
+			int noData2 = data.getTestingFirstIndex()[index] - data.getValidationFirstIndex()[index];
+			int noData3 = data.getNoObs() - data.getTestingFirstIndex()[index];
+			int L = (int) constants[0];
+			int noCycles = data.getNoObs() / L;
+			
+			double[] avals = new double[data.getNoObs() - data.getTrainingFirstIndex()[index]];
+			double[] bvals = new double[avals.length];
+			double[] cvals = new double[avals.length];
+			double[] Avals = new double[noCycles];
+			
+			avals[0] = dataset[firstIndex][index];
+			bvals[0] = 0;
+			
+			for(int idx2=0;idx2<L;++idx2)
+			{
+				bvals[0] += ( (dataset[idx2+L][index] - dataset[idx2][index]) / L );
+				cvals[idx2] = 0;
+				
+				for(int idx3=0;idx3<noCycles;++idx3)
+				{
+					Avals[idx3] = 0;
+					
+					for(int idx4=0;idx4<L;++idx4)
+						Avals[idx3] += dataset[idx3*L+idx4][index];
+					
+					Avals[idx3] = Avals[idx3] / L;
+					
+					cvals[idx2] += dataset[idx3*L+idx2][index] / Avals[idx3];
+				}
+				
+				cvals[idx2] = cvals[idx2] / noCycles;
+			}
+			
+			bvals[0] = bvals[0] / L;
+			
+			if(modelNo == 3)
+				train_val_testFour(dataset,idx1,per,index,firstIndex,avals,bvals,cvals,L,noData1,noData2,noData3);
+			else if(additive && !damped)
+				train_val_testTESadditive(dataset,idx1,per,index,firstIndex,avals,bvals,cvals,L,noData1,noData2,noData3);
+			else if(!additive && !damped)
+				train_val_testTESmultiplicative(dataset,idx1,per,index,firstIndex,avals,bvals,cvals,L,noData1,noData2,noData3);
+			else if(additive && damped)
+				train_val_testTESdampedAdditive(dataset,idx1,per,index,firstIndex,avals,bvals,cvals,L,noData1,noData2,noData3);
+			else
+				train_val_testTESdampedMultiplicative(dataset,idx1,per,index,firstIndex,avals,bvals,cvals,L,noData1,noData2,noData3);
+			
+			forecasted[idx1] = true;
 		}
-		
-		bvals[0] = bvals[0] / L;
-		
-		if(modelNo == 3)
-			train_val_testFour(dataset,idx1,firstIndex,avals,bvals,cvals,L,noData1,noData2,noData3);
-		else if(additive && !damped)
-			train_val_testTESadditive(dataset,idx1,firstIndex,avals,bvals,cvals,L,noData1,noData2,noData3);
-		else if(!additive && !damped)
-			train_val_testTESmultiplicative(dataset,idx1,firstIndex,avals,bvals,cvals,L,noData1,noData2,noData3);
-		else if(additive && damped)
-			train_val_testTESdampedAdditive(dataset,idx1,firstIndex,avals,bvals,cvals,L,noData1,noData2,noData3);
-		else
-			train_val_testTESdampedMultiplicative(dataset,idx1,firstIndex,avals,bvals,cvals,L,noData1,noData2,noData3);
-		
-		trainingForecasted = true;
-		validationForecasted = true;
-		testingForecasted = true;
 		
 		return true;
 	}
 	
-	private void train_val_testFour(double[][] dataset,int index,int firstIndex,double[] avals,double[] bvals,double[] cvals,int L,int noData1,int noData2,int noData3)
+	private void train_val_testFour(double[][] dataset,int idx1,int per,int index,int firstIndex,double[] avals,double[] bvals,double[] cvals,int L,int noData1,int noData2,int noData3)
 	{
 		for(int idx=1;idx<L;++idx)
 		{
@@ -453,20 +455,20 @@ public class ExponentialSmoothing extends Model{
 			cvals[idx] = parameters[2] * (dataset[firstIndex+idx][index] - avals[idx-1] - bvals[idx-1]) + (1 - parameters[2]) * cvals[idx-L];
 		}
 		
-		for(int idx=0;idx<(L+noPersAhead);++idx)
-			trainingForecast[idx] = dataset[firstIndex+idx][index];
+		for(int idx=0;idx<(L+noPersAhead[per]);++idx)
+			trainingForecast[idx1][idx] = dataset[firstIndex+idx][index];
 		
-		for(int idx=(L+noPersAhead);idx<noData1;idx++)
-			trainingForecast[idx] = avals[idx-noPersAhead] + noPersAhead*bvals[idx-noPersAhead] + cvals[idx-noPersAhead-L+1+( (noPersAhead-1) % L)];
+		for(int idx=(L+noPersAhead[per]);idx<noData1;idx++)
+			trainingForecast[idx1][idx] = avals[idx-noPersAhead[per]] + noPersAhead[per]*bvals[idx-noPersAhead[per]] + cvals[idx-noPersAhead[per]-L+1+( (noPersAhead[per]-1) % L)];
 				
 		for(int idx=0;idx<noData2;idx++)
-			validationForecast[idx] = avals[idx+noData1-noPersAhead] + noPersAhead*bvals[idx+noData1-noPersAhead] + cvals[idx+noData1-noPersAhead-L+1+( (noPersAhead-1) % L)];
+			validationForecast[idx1][idx] = avals[idx+noData1-noPersAhead[per]] + noPersAhead[per]*bvals[idx+noData1-noPersAhead[per]] + cvals[idx+noData1-noPersAhead[per]-L+1+( (noPersAhead[per]-1) % L)];
 				
 		for(int idx=0;idx<noData3;idx++)
-			testingForecast[idx] = avals[idx+noData1+noData2-noPersAhead] + noPersAhead*bvals[idx+noData1+noData2-noPersAhead] + cvals[idx+noData1+noData2-noPersAhead-L+1+( (noPersAhead-1) % L)];
+			testingForecast[idx1][idx] = avals[idx+noData1+noData2-noPersAhead[per]] + noPersAhead[per]*bvals[idx+noData1+noData2-noPersAhead[per]] + cvals[idx+noData1+noData2-noPersAhead[per]-L+1+( (noPersAhead[per]-1) % L)];
 	}
 	
-	private void train_val_testTESadditive(double[][] dataset,int index,int firstIndex,double[] avals,double[] bvals,double[] cvals,int L,int noData1,int noData2,int noData3)
+	private void train_val_testTESadditive(double[][] dataset,int idx1,int per,int index,int firstIndex,double[] avals,double[] bvals,double[] cvals,int L,int noData1,int noData2,int noData3)
 	{
 		for(int idx=1;idx<L;++idx)
 		{
@@ -481,20 +483,20 @@ public class ExponentialSmoothing extends Model{
 			cvals[idx] = parameters[2] * (dataset[firstIndex+idx][index] - avals[idx-1] - bvals[idx-1]) + (1 - parameters[2]) * cvals[idx-L];
 		}
 		
-		for(int idx=0;idx<(L+noPersAhead);++idx)
-			trainingForecast[idx] = dataset[firstIndex+idx][index];
+		for(int idx=0;idx<(L+noPersAhead[per]);++idx)
+			trainingForecast[idx1][idx] = dataset[firstIndex+idx][index];
 				
-		for(int idx=(L+noPersAhead);idx<noData1;idx++)
-			trainingForecast[idx] = avals[idx-noPersAhead] + noPersAhead*bvals[idx-noPersAhead] + cvals[idx-noPersAhead-L+1+( (noPersAhead-1) % L)];
+		for(int idx=(L+noPersAhead[per]);idx<noData1;idx++)
+			trainingForecast[idx1][idx] = avals[idx-noPersAhead[per]] + noPersAhead[per]*bvals[idx-noPersAhead[per]] + cvals[idx-noPersAhead[per]-L+1+( (noPersAhead[per]-1) % L)];
 				
 		for(int idx=0;idx<noData2;idx++)
-			validationForecast[idx] = avals[idx+noData1-noPersAhead] + noPersAhead*bvals[idx+noData1-noPersAhead] + cvals[idx+noData1-noPersAhead-L+1+( (noPersAhead-1) % L)];
+			validationForecast[idx1][idx] = avals[idx+noData1-noPersAhead[per]] + noPersAhead[per]*bvals[idx+noData1-noPersAhead[per]] + cvals[idx+noData1-noPersAhead[per]-L+1+( (noPersAhead[per]-1) % L)];
 				
 		for(int idx=0;idx<noData3;idx++)
-			testingForecast[idx] = avals[idx+noData1+noData2-noPersAhead] + noPersAhead*bvals[idx+noData1+noData2-noPersAhead] + cvals[idx+noData1+noData2-noPersAhead-L+1+( (noPersAhead-1) % L)];
+			testingForecast[idx1][idx] = avals[idx+noData1+noData2-noPersAhead[per]] + noPersAhead[per]*bvals[idx+noData1+noData2-noPersAhead[per]] + cvals[idx+noData1+noData2-noPersAhead[per]-L+1+( (noPersAhead[per]-1) % L)];
 	}
 	
-	private void train_val_testTESmultiplicative(double[][] dataset,int index,int firstIndex,double[] avals,double[] bvals,double[] cvals,int L,int noData1,int noData2,int noData3)
+	private void train_val_testTESmultiplicative(double[][] dataset,int idx1,int per,int index,int firstIndex,double[] avals,double[] bvals,double[] cvals,int L,int noData1,int noData2,int noData3)
 	{
 		for(int idx=1;idx<L;++idx)
 		{
@@ -509,20 +511,20 @@ public class ExponentialSmoothing extends Model{
 			cvals[idx] = parameters[2] * dataset[firstIndex+idx][index] / (avals[idx-1] + bvals[idx-1]) + (1 - parameters[2]) * cvals[idx-L];
 		}
 		
-		for(int idx=0;idx<(L+noPersAhead);++idx)
-			trainingForecast[idx] = dataset[firstIndex+idx][index];
+		for(int idx=0;idx<(L+noPersAhead[per]);++idx)
+			trainingForecast[idx1][idx] = dataset[firstIndex+idx][index];
 				
-		for(int idx=(L+noPersAhead);idx<noData1;idx++)
-			trainingForecast[idx] = (avals[idx-noPersAhead] + noPersAhead*bvals[idx-noPersAhead]) * cvals[idx-noPersAhead-L+1+( (noPersAhead-1) % L)];
+		for(int idx=(L+noPersAhead[per]);idx<noData1;idx++)
+			trainingForecast[idx1][idx] = (avals[idx-noPersAhead[per]] + noPersAhead[per]*bvals[idx-noPersAhead[per]]) * cvals[idx-noPersAhead[per]-L+1+( (noPersAhead[per]-1) % L)];
 				
 		for(int idx=0;idx<noData2;idx++)
-			validationForecast[idx] = (avals[idx+noData1-noPersAhead] + noPersAhead*bvals[idx+noData1-noPersAhead]) * cvals[idx+noData1-noPersAhead-L+1+( (noPersAhead-1) % L)];
+			validationForecast[idx1][idx] = (avals[idx+noData1-noPersAhead[per]] + noPersAhead[per]*bvals[idx+noData1-noPersAhead[per]]) * cvals[idx+noData1-noPersAhead[per]-L+1+( (noPersAhead[per]-1) % L)];
 				
 		for(int idx=0;idx<noData3;idx++)
-			testingForecast[idx] = (avals[idx+noData1+noData2-noPersAhead] + noPersAhead*bvals[idx+noData1+noData2-noPersAhead]) * cvals[idx+noData1+noData2-noPersAhead-L+1+( (noPersAhead-1) % L)];
+			testingForecast[idx1][idx] = (avals[idx+noData1+noData2-noPersAhead[per]] + noPersAhead[per]*bvals[idx+noData1+noData2-noPersAhead[per]]) * cvals[idx+noData1+noData2-noPersAhead[per]-L+1+( (noPersAhead[per]-1) % L)];
 	}
 	
-	private void train_val_testTESdampedAdditive(double[][] dataset,int index,int firstIndex,double[] avals,double[] bvals,double[] cvals,int L,int noData1,int noData2,int noData3)
+	private void train_val_testTESdampedAdditive(double[][] dataset,int idx1,int per,int index,int firstIndex,double[] avals,double[] bvals,double[] cvals,int L,int noData1,int noData2,int noData3)
 	{
 		for(int idx=1;idx<L;++idx)
 		{
@@ -537,25 +539,25 @@ public class ExponentialSmoothing extends Model{
 			cvals[idx] = parameters[2] * (dataset[firstIndex+idx][index] - avals[idx-1] - parameters[3] * bvals[idx-1]) + (1 - parameters[2]) * cvals[idx-L];
 		}
 		
-		for(int idx=0;idx<(L+noPersAhead);++idx)
-			trainingForecast[idx] = dataset[firstIndex+idx][index];
+		for(int idx=0;idx<(L+noPersAhead[per]);++idx)
+			trainingForecast[idx1][idx] = dataset[firstIndex+idx][index];
 				
 		double dampingValue = 0;
 		
-		for(int idx=0;idx<noPersAhead;++idx)
+		for(int idx=0;idx<noPersAhead[per];++idx)
 			dampingValue += Math.pow(parameters[3],idx+1);
 		
-		for(int idx=(L+noPersAhead);idx<noData1;idx++)
-			trainingForecast[idx] = avals[idx-noPersAhead] + dampingValue*bvals[idx-noPersAhead] + cvals[idx-noPersAhead-L+1+( (noPersAhead-1) % L)];
+		for(int idx=(L+noPersAhead[per]);idx<noData1;idx++)
+			trainingForecast[idx1][idx] = avals[idx-noPersAhead[per]] + dampingValue*bvals[idx-noPersAhead[per]] + cvals[idx-noPersAhead[per]-L+1+( (noPersAhead[per]-1) % L)];
 				
 		for(int idx=0;idx<noData2;idx++)
-			validationForecast[idx] = avals[idx+noData1-noPersAhead] + dampingValue*bvals[idx+noData1-noPersAhead] + cvals[idx+noData1-noPersAhead-L+1+( (noPersAhead-1) % L)];
+			validationForecast[idx1][idx] = avals[idx+noData1-noPersAhead[per]] + dampingValue*bvals[idx+noData1-noPersAhead[per]] + cvals[idx+noData1-noPersAhead[per]-L+1+( (noPersAhead[per]-1) % L)];
 				
 		for(int idx=0;idx<noData3;idx++)
-			testingForecast[idx] = avals[idx+noData1+noData2-noPersAhead] + dampingValue*bvals[idx+noData1+noData2-noPersAhead] + cvals[idx+noData1+noData2-noPersAhead-L+1+( (noPersAhead-1) % L)];
+			testingForecast[idx1][idx] = avals[idx+noData1+noData2-noPersAhead[per]] + dampingValue*bvals[idx+noData1+noData2-noPersAhead[per]] + cvals[idx+noData1+noData2-noPersAhead[per]-L+1+( (noPersAhead[per]-1) % L)];
 	}
 	
-	private void train_val_testTESdampedMultiplicative(double[][] dataset,int index,int firstIndex,double[] avals,double[] bvals,double[] cvals,int L,int noData1,int noData2,int noData3)
+	private void train_val_testTESdampedMultiplicative(double[][] dataset,int idx1,int per,int index,int firstIndex,double[] avals,double[] bvals,double[] cvals,int L,int noData1,int noData2,int noData3)
 	{
 		for(int idx=1;idx<L;++idx)
 		{
@@ -570,21 +572,21 @@ public class ExponentialSmoothing extends Model{
 			cvals[idx] = parameters[2] * dataset[firstIndex+idx][index] / (avals[idx-1] + parameters[3] * bvals[idx-1]) + (1 - parameters[2]) * cvals[idx-L];
 		}
 		
-		for(int idx=0;idx<(L+noPersAhead);++idx)
-			trainingForecast[idx] = dataset[firstIndex+idx][index];
+		for(int idx=0;idx<(L+noPersAhead[per]);++idx)
+			trainingForecast[idx1][idx] = dataset[firstIndex+idx][index];
 				
 		double dampingValue = 0;
 		
-		for(int idx=0;idx<noPersAhead;++idx)
+		for(int idx=0;idx<noPersAhead[per];++idx)
 			dampingValue += Math.pow(parameters[3],idx+1);
 		
-		for(int idx=(L+noPersAhead);idx<noData1;idx++)
-			trainingForecast[idx] = (avals[idx-noPersAhead] + dampingValue*bvals[idx-noPersAhead]) * cvals[idx-noPersAhead-L+1+( (noPersAhead-1) % L)];
+		for(int idx=(L+noPersAhead[per]);idx<noData1;idx++)
+			trainingForecast[idx1][idx] = (avals[idx-noPersAhead[per]] + dampingValue*bvals[idx-noPersAhead[per]]) * cvals[idx-noPersAhead[per]-L+1+( (noPersAhead[per]-1) % L)];
 				
 		for(int idx=0;idx<noData2;idx++)
-			validationForecast[idx] = (avals[idx+noData1-noPersAhead] + dampingValue*bvals[idx+noData1-noPersAhead]) * cvals[idx+noData1-noPersAhead-L+1+( (noPersAhead-1) % L)];
+			validationForecast[idx1][idx] = (avals[idx+noData1-noPersAhead[per]] + dampingValue*bvals[idx+noData1-noPersAhead[per]]) * cvals[idx+noData1-noPersAhead[per]-L+1+( (noPersAhead[per]-1) % L)];
 				
 		for(int idx=0;idx<noData3;idx++)
-			testingForecast[idx] = (avals[idx+noData1+noData2-noPersAhead] + dampingValue*bvals[idx+noData1+noData2-noPersAhead]) * cvals[idx+noData1+noData2-noPersAhead-L+1+( (noPersAhead-1) % L)];
+			testingForecast[idx1][idx] = (avals[idx+noData1+noData2-noPersAhead[per]] + dampingValue*bvals[idx+noData1+noData2-noPersAhead[per]]) * cvals[idx+noData1+noData2-noPersAhead[per]-L+1+( (noPersAhead[per]-1) % L)];
 	}
 }

@@ -8,3 +8,13 @@ aDESd	complete	GridSearch	6	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	line
 aDESd	complete	Genetic	6	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
 mDESd	complete	GridSearch	6	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
 mDESd	complete	Genetic	6	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aTES	complete	GridSearch	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aTES	complete	Genetic	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mTES	complete	GridSearch	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mTES	complete	Genetic	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aTESd	complete	GridSearch	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aTESd	complete	Genetic	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mTESd	complete	GridSearch	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+mTESd	complete	Genetic	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+four	complete	GridSearch	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+four	complete	Genetic	6	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
