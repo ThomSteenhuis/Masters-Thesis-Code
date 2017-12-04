@@ -13,6 +13,7 @@ import models.ANN;
 import models.ARIMA;
 import models.ExponentialSmoothing;
 import models.Model;
+import models.Naive;
 import models.SVR;
 import optimization.Genetic;
 import optimization.GridSearch;
@@ -79,7 +80,9 @@ public class Experiment {
 				
 				for(String idx2:categories)
 				{
-					if(isExponentialSmoothing(experiments.get(idx1)[0]))
+					if(isNaive(experiments.get(idx1)[0]))
+						model = initializeNaive(experiments.get(idx1),idx2,data);
+					else if(isExponentialSmoothing(experiments.get(idx1)[0]))
 						model = initializeES(experiments.get(idx1),idx2,data);
 					else if(isARIMA(experiments.get(idx1)[0]))
 						model = initializeARIMA(experiments.get(idx1),idx2,data);
@@ -95,20 +98,28 @@ public class Experiment {
 
 					PerformanceMeasures pm = new PerformanceMeasures(model);
 					
-					if(experiments.get(idx1)[2].equals("GridSearch") )
-					{	
-						Optimization opt = initializeGS(experiments.get(idx1),pm);
-						instances.add(opt);
-					}
-					else if(experiments.get(idx1)[2].equals("Genetic") )
+					if(model.getNoParameters() == 0)
 					{
-						Optimization opt = initializeGA(experiments.get(idx1),pm);
+						Optimization opt = initializeGS(experiments.get(idx1),pm);
 						instances.add(opt);
 					}
 					else
 					{
-						System.out.println("Error (Experiment): optimization algorithm not recognized");
-						continue;
+						if(experiments.get(idx1)[2].equals("GridSearch") )
+						{	
+							Optimization opt = initializeGS(experiments.get(idx1),pm);
+							instances.add(opt);
+						}
+						else if(experiments.get(idx1)[2].equals("Genetic") )
+						{
+							Optimization opt = initializeGA(experiments.get(idx1),pm);
+							instances.add(opt);
+						}
+						else
+						{
+							System.out.println("Error (Experiment): optimization algorithm not recognized");
+							continue;
+						}
 					}
 				}
 			}
@@ -259,6 +270,26 @@ public class Experiment {
 		return outcomes;
 	}
 	
+	private static Model initializeNaive(String[] line,String cat,Data data)
+	{
+		Naive naive;
+		
+		if(cat.equals("complete"))
+		{
+			int[] periods = {1,3,6};
+			String[] category = {"2200EVO","8800FCQ, RFID"};
+			naive = new Naive(data,periods,category);
+		}
+		else
+		{
+			int[] periods = {Integer.parseInt(line[3])};
+			String[] category = {cat};
+			naive = new Naive(data,periods,category);
+		}
+		
+		return naive;
+	}
+	
 	private static Model initializeES(String[] line,String cat,Data data) throws NumberFormatException
 	{	
 		ExponentialSmoothing es;
@@ -375,6 +406,12 @@ public class Experiment {
 		}
 		
 		return new GridSearch(pm,parBounds,expBounds,expBase,noSteps);
+	}
+	
+	private static boolean isNaive(String modelName)
+	{
+		if(modelName.equals("Naive")) return true;
+		else return false;
 	}
 	
 	private static boolean isExponentialSmoothing(String modelName)
