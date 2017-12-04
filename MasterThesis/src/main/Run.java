@@ -55,6 +55,30 @@ public class Run {
 			e1.printStackTrace();
 		}
 		
+		String[] cat = {"2200EVO","8800FCQ, RFID"};
+		int[] pers = {1,3,6};
+		ANN test = new ANN(data,pers,cat,r);
+		PerformanceMeasures pm = new PerformanceMeasures(test);
+		double[] con = {0};
+		double[] par = {1,9};
+		test.setConstants(con);
+		test.setParameters(par);
+		test.train();
+		pm.calculateMeasures("testing");
+		System.out.println(pm.getRMSE()[0]);
+		Matrix.print(test.getTestingForecast());
+		
+		/*double[] x = new double[4];
+		x[0] = test.standardize(data.getVolumes()[60][0],0);
+		x[1] = test.standardize(data.getVolumes()[49][0],0);
+		x[2] = test.standardize(data.getVolumes()[60][1],1);
+		x[3] = test.standardize(data.getVolumes()[49][1],1);
+		Matrix.print(x);
+		double[] y_hat = test.predict(x);
+		for(int idx=0;idx<y_hat.length;++idx) y_hat[idx] = test.destandardize(y_hat[idx],idx/3);
+		Matrix.print(y_hat);
+		System.out.printf("%f\t%f\t%f\n",test.getTestingForecast()[0][61-data.getTestingFirstIndex()[0]],test.getTestingForecast()[1][63-data.getTestingFirstIndex()[0]],test.getTestingForecast()[2][66-data.getTestingFirstIndex()[0]]);
+		*/
 		/*ExponentialSmoothing des = new ExponentialSmoothing("mTESd",1,data);
 		des.setCategory("2200EVO");
 		double[] cons = {12};

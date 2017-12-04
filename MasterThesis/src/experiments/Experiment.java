@@ -326,20 +326,24 @@ public class Experiment {
 	
 	private Model initializeANN(String[] line,String cat,Data data) throws NumberFormatException
 	{		
+		ANN ann;
+		
 		if(cat.equals("complete"))
 		{
 			int[] periods = {1,3,6};
 			String[] category = {"2200EVO","8800FCQ, RFID"};
-			ANN ann = new ANN(data,periods,category,r);
-			return ann;
+			ann = new ANN(data,periods,category,r);
 		}
 		else 
 		{
 			int[] periods = {Integer.parseInt(line[3])};
 			String[] category = {cat}; 
-			ANN ann = new ANN(data,periods,category,r);
-			return ann;
+			ann = new ANN(data,periods,category,r);
 		}		
+		
+		double[] constants = {Double.parseDouble(line[4])};
+		ann.setConstants(constants);
+		return ann;
 	}
 	
 	private Model initializeSVR(String[] line,String cat,Data data) throws NumberFormatException
