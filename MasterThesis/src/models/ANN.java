@@ -35,7 +35,7 @@ public class ANN extends Model {
 	public ANN(Data data,int[] noPeriods,String[] cats,Random R)
 	{
 		super(data,noPeriods,cats);
-		noParameters = 2;
+		noParameters = 3;
 		noConstants = 0;
 		name = "ANN";
 		r = R;
@@ -55,13 +55,13 @@ public class ANN extends Model {
 			return false;
 		}*/
 		
-		if( ( (int)parameters[0] < 1) || ( (int)parameters[1] < 1) )
+		if( ( (int)parameters[0] < 1) || ( (int)parameters[1] < 1) && ( (int)parameters[2] != 0) && ( (int)parameters[2] != 1) )
 		{
 			System.out.println("Error (ANN): parameters have invalid value");
 			return false;
 		}
 
-		setNoInputs( ( (int) parameters[0])*category.length);
+		setNoInputs( ( (int) parameters[0] + (int) parameters[2])*category.length);
 		initializeData();
 		
 		//backpropagation();
@@ -331,7 +331,7 @@ public class ANN extends Model {
 		mean = new double[index.length]; max = new double[index.length];
 		for(int idx=0;idx<index.length;++idx) {mean[idx] = Matrix.mean(data.getTrainingSet(category[idx])); max[idx] = Matrix.max(data.getTrainingSet(category[idx]));}
 
-		N = data.getValidationFirstIndex()[index[0]] - data.getTrainingFirstIndex()[index[0]] - (int) (parameters[0]) - Matrix.max(noPersAhead) + 1;
+		N = data.getValidationFirstIndex()[index[0]] - data.getTrainingFirstIndex()[index[0]] - Math.max((int) (parameters[0]),(int) (parameters[0])*12) - Matrix.max(noPersAhead) + 1;
 		X = new double[noInputs][N];
 		Y = new double[noOutputs][N];
 		
@@ -341,14 +341,18 @@ public class ANN extends Model {
 			{
 				int cat = data.getIndexFromCat(category[idx2 / noPersAhead.length]);
 				int noPers = noPersAhead[idx2 % noPersAhead.length];
-				Y[idx2][idx1] = standardize(data.getVolumes()[idx1 + data.getTrainingFirstIndex()[cat] + (int) (parameters[0]) + noPers - 1][cat],cat);
+				Y[idx2][idx1] = standardize(data.getVolumes()[idx1 + data.getTrainingFirstIndex()[cat] + Math.max((int) (parameters[0]),(int) (parameters[0])*12) + noPers - 1][cat],cat);
 			}
 			
 			for(int idx2=0;idx2<X.length;++idx2) 
 			{
-				int cat = data.getIndexFromCat(category[idx2/(int)parameters[0]]);
-				X[idx2][idx1] = standardize(data.getVolumes()[idx1 + idx2%(int)parameters[0] + data.getTrainingFirstIndex()[cat]][cat],cat);
+				int cat = data.getIndexFromCat(category[idx2/((int)parameters[0]+(int)parameters[2])]);
+				
+				if( ( (int)parameters[2] == 1) && (idx2 % ((int)parameters[0]+(int)parameters[2]) == (idx2 % ((int)parameters[0]+(int)parameters[2]-1) ) ) )
+					X[idx2][idx1] = standardize(data.getVolumes()[idx1 + 11 + data.getTrainingFirstIndex()[cat]][cat],cat);
+				else
+					X[idx2][idx1] = standardize(data.getVolumes()[idx1 + idx2%((int)parameters[0]+(int)parameters[2]) + data.getTrainingFirstIndex()[cat]][cat],cat);
 			}
-		}		
+		}
 	}
 }
