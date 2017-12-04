@@ -8,10 +8,11 @@ public class ExponentialSmoothing extends Model{
 	private boolean damped;
 	private int modelNo;
 	
-	public ExponentialSmoothing(String model,int periods,Data dataset)
+	public ExponentialSmoothing(String model,int[] periods,String[] cats,Data dataset)
 	{
-		super(dataset,periods);
+		super(dataset,periods,cats);
 		name = model;
+		noOutputs = periods.length * cats.length;
 		
 		try{
 			switch(model)
@@ -206,53 +207,55 @@ public class ExponentialSmoothing extends Model{
 
 	private boolean train_val_testSES()
 	{			
-		int idx1 = data.getIndexFromCat(category);
-		
-		if( (data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1]) < noPersAhead)
-		{
-			modelError("trainSES","data is of length smaller than the number of periods");
-			return false;
-		}
-		
 		double[][] dataset = data.getVolumes();
-		
-		int firstIndex = data.getTrainingFirstIndex()[idx1];
-		int noData1 = data.getValidationFirstIndex()[idx1] - data.getTrainingFirstIndex()[idx1];
-		int noData2 = data.getTestingFirstIndex()[idx1] - data.getValidationFirstIndex()[idx1];
-		int noData3 = data.getNoObs() - data.getTestingFirstIndex()[idx1] - 1;
-		
 		initializeSets();
 		
-		double[] avals = new double[noData1+noData2+noData3];
-		
-		avals[0] = dataset[firstIndex][idx1];
-		
-		for(int idx2=1;idx2<noData1;idx2++)
-			avals[idx2] = parameters[0]*dataset[firstIndex+idx2][idx1] + (1-parameters[0])*avals[idx2-1];
-		
-		for(int idx2=0;idx2<noData2;idx2++)
-			avals[noData1+idx2] = parameters[0]*dataset[firstIndex+noData1+idx2][idx1] + (1-parameters[0])*avals[idx2+noData1-1];
-				
-		for(int idx2=0;idx2<noData3;idx2++)
-			avals[noData1+noData2+idx2] = parameters[0]*dataset[firstIndex+noData1+noData2+idx2][idx1] + (1-parameters[0])*avals[idx2+noData1+noData2-1];
-		
-		for(int idx2=0;idx2<noPersAhead;++idx2)
-			trainingForecast[idx2] = dataset[firstIndex+idx2][idx1];
-		
-		for(int idx2=noPersAhead;idx2<noData1;++idx2)
-			trainingForecast[idx2] = avals[idx2-noPersAhead];
-		
-		for(int idx2=0;idx2<noData2;++idx2)
-			validationForecast[idx2] = avals[idx2+noData1-noPersAhead];
-		
-		for(int idx2=0;idx2<noData3;++idx2)
-			testingForecast[idx2] = avals[idx2+noData1+noData2-noPersAhead];
-		
-		trainingForecasted = true;
-		validationForecasted = true;
-		testingForecasted = true;
-		
-		return true;
+		for(int idx1=0;idx1<noOutputs;++idx1)
+		{
+			int cat = idx1 / noPersAhead.length;
+			int per = idx1 % noPersAhead.length;
+			int index = data.getIndexFromCat(category[cat]);
+			
+			if( (data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index]) < noPersAhead[per])
+			{
+				modelError("trainSES","data is of length smaller than the number of periods");
+				return false;
+			}
+			
+			int firstIndex = data.getTrainingFirstIndex()[index];
+			int noData1 = data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index];
+			int noData2 = data.getTestingFirstIndex()[index] - data.getValidationFirstIndex()[index];
+			int noData3 = data.getNoObs() - data.getTestingFirstIndex()[index] - 1;
+			
+			double[] avals = new double[noData1+noData2+noData3];
+			
+			avals[0] = dataset[firstIndex][idx1];
+			
+			for(int idx2=1;idx2<noData1;idx2++)
+				avals[idx2] = parameters[0]*dataset[firstIndex+idx2][index] + (1-parameters[0])*avals[idx2-1];
+			
+			for(int idx2=0;idx2<noData2;idx2++)
+				avals[noData1+idx2] = parameters[0]*dataset[firstIndex+noData1+idx2][index] + (1-parameters[0])*avals[idx2+noData1-1];
+					
+			for(int idx2=0;idx2<noData3;idx2++)
+				avals[noData1+noData2+idx2] = parameters[0]*dataset[firstIndex+noData1+noData2+idx2][index] + (1-parameters[0])*avals[idx2+noData1+noData2-1];
+			
+			for(int idx2=0;idx2<noPersAhead[per];++idx2)
+				trainingForecast[idx1][idx2] = dataset[firstIndex+idx2][index];
+			
+			for(int idx2=noPersAhead[per];idx2<noData1;++idx2)
+				trainingForecast[idx1][idx2] = avals[idx2-noPersAhead[per]];
+			
+			for(int idx2=0;idx2<noData2;++idx2)
+				validationForecast[idx1][idx2] = avals[idx2+noData1-noPersAhead[per]];
+			
+			for(int idx2=0;idx2<noData3;++idx2)
+				testingForecast[idx1][idx2] = avals[idx2+noData1+noData2-noPersAhead[per]];
+			
+			forecasted[idx1] = true;
+		}
+
+		return true;		
 	}
 	
 	private boolean train_val_testDES()

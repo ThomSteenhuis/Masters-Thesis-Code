@@ -260,10 +260,21 @@ public class Experiment {
 	}
 	
 	private static Model initializeES(String[] line,String cat,Data data) throws NumberFormatException
-	{		
-		int[] periods = {Integer.parseInt(line[3])};
-		String[] category = {cat};
-		ExponentialSmoothing es = new ExponentialSmoothing(data,periods,category,r);
+	{	
+		ExponentialSmoothing es;
+		
+		if(cat.equals("complete"))
+		{
+			int[] periods = {1,3,6};
+			String[] category = {"2200EVO","8800FCQ, RFID"};
+			es = new ExponentialSmoothing(line[0],periods,category,data);
+		}
+		else
+		{
+			int[] periods = {Integer.parseInt(line[3])};
+			String[] category = {cat};
+			es = new ExponentialSmoothing(line[0],periods,category,data);
+		}
 		
 		if(line[0].contains("TES") || line[0].equals("four") )
 		{

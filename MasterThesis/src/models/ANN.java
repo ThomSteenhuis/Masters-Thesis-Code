@@ -133,13 +133,13 @@ public class ANN extends Model {
 	private void translateOptimalweights(double[] array)
 	{
 		lowerBias = new double[(int)parameters[1]];
-		for(int idx=0;idx<parameters[1];++idx) lowerBias[idx] = array[idx];
+		for(int idx=0;idx<lowerBias.length;++idx) lowerBias[idx] = array[idx];
 		
-		lowerWeights = new double[ (int)parameters[1] ][ (int)parameters[0] * 2 ];
-
-		for(int idx1=0;idx1<parameters[1];++idx1)
+		lowerWeights = new double[ (int)parameters[1] ][ (int)parameters[0] * category.length ];
+		
+		for(int idx1=0;idx1<lowerWeights.length;++idx1)
 		{
-			for(int idx2=0;idx2<(2*parameters[0]);++idx2)
+			for(int idx2=0;idx2<lowerWeights[idx1].length;++idx2)
 				lowerWeights[idx1][idx2] = array[(int)parameters[1] + idx2*(int)parameters[1] + idx1];
 		}
 		
