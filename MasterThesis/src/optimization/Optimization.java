@@ -1,15 +1,19 @@
 package optimization;
 
+import java.util.Random;
+
 import performance.PerformanceMeasures;
 
 public abstract class Optimization {
 	protected PerformanceMeasures measures;
 	protected double[][] bounds;
 	protected String name;
-	
+
 	protected boolean optimized;
 	protected double[] optPars;
 	protected double performance;
+
+	protected Random r;
 
 	public Optimization(PerformanceMeasures pm, double[][] parBounds)
 	{
@@ -24,17 +28,17 @@ public abstract class Optimization {
 			optimized = false;
 		}
 	}
-	
+
 	public void printBest()
 	{
 		if(optimized)
 		{
 			System.out.printf("RMSE\t= %s\n",performance);
 			System.out.print("Best parameters\t= ");
-			
+
 			for(int idx=0;idx<optPars.length;++idx)
 				System.out.printf("%s\t",optPars[idx]);
-			
+
 			System.out.println();
 		}
 		else
@@ -42,41 +46,41 @@ public abstract class Optimization {
 			System.out.println("Error (printBest): Optimization should be started first");
 		}
 	}
-	
+
 	public PerformanceMeasures getPerformanceMeasures()
 	{
 		return measures;
 	}
-	
+
 	public double[][] getBounds()
 	{
 		return bounds;
 	}
-	
+
 	public String getName()
 	{
 		return name;
 	}
-	
+
 	public boolean isOptimized()
 	{
 		return optimized;
 	}
-	
+
 	public double[] getOptimalParameters()
 	{
 		return optPars;
 	}
-	
+
 	public double getPerformance()
 	{
 		return performance;
 	}
-	
+
 	public abstract boolean optimize(boolean silent);
-	
+
 	protected void updateBest()
-	{		
+	{
 		if(measures.getModel().getName().equals("ARIMA"))
 		{
 			if( !optimized || (performance > measures.getModel().getAIC() ) )
@@ -91,7 +95,7 @@ public abstract class Optimization {
 			double currentMeasure = 0;
 			for(int idx=0;idx<measures.getModel().getNoOutputs();++idx) currentMeasure += measures.getRMSE()[idx];
 			currentMeasure = currentMeasure / measures.getModel().getNoOutputs();
-			
+
 			if( !optimized || (performance > currentMeasure ) )
 			{
 				performance = currentMeasure;
@@ -100,7 +104,7 @@ public abstract class Optimization {
 			}
 		}
 	}
-	
+
 	protected void optimizationError(String method, String msg)
 	{
 		System.out.printf("Error (%s): %s",method,msg);

@@ -15,7 +15,6 @@ import org.rosuda.REngine.Rserve.RserveException;
 
 import experiments.Experiment;
 import input.Data;
-import math.*;
 import math.Matrix;
 import models.ANN;
 import models.ARIMA;
@@ -28,19 +27,16 @@ import performance.PerformanceMeasures;
 
 public class Run {
 
-	public static Random r;
-
 	private static final int seed = 93439885;
 	private static final double propTraining = 0.6;
 	private static final double propValidation = 0.2;
 
 	public static void main(String[] args)
 	{
-		r = new Random(seed);
 		Data data = new Data("src/data/prepared_data.txt");
 		data.setDataIndices(propTraining, propValidation);
 
-		Experiment e = new Experiment(data,r,"src/data/experiment.txt","src/data/machine_list.txt");
+		Experiment e = new Experiment(data,seed,"src/data/experiment.txt","src/data/machine_list.txt");
 
 		try
 		{
@@ -54,20 +50,7 @@ public class Run {
 		{
 			e1.printStackTrace();
 		}
-		
-		String[] cat = {"2200EVO","8800FCQ, RFID"};
-		int[] pers = {1,3,6};
-		ANN test = new ANN(data,pers,cat,r);
-		PerformanceMeasures pm = new PerformanceMeasures(test);
-		double[] con = {0};
-		double[] par = {1,9};
-		test.setConstants(con);
-		test.setParameters(par);
-		test.train();
-		pm.calculateMeasures("testing");
-		System.out.println(pm.getRMSE()[0]);
-		Matrix.print(test.getTestingForecast());
-		
+
 		/*double[] x = new double[4];
 		x[0] = test.standardize(data.getVolumes()[60][0],0);
 		x[1] = test.standardize(data.getVolumes()[49][0],0);
@@ -97,7 +80,7 @@ public class Run {
 			pm.calculateMeasures("validation");
 			pm.printMeasures();
 		}
-		
+
 		ExponentialSmoothing des2 = new ExponentialSmoothing("mTESd",1,data);
 		des2.setCategory("2200EVO");
 		des2.setConstants(cons);
@@ -116,7 +99,7 @@ public class Run {
 			pm2.printMeasures();
 			des2.plotForecast("validation");
 		}*/
-		
+
 		/*ARIMA arma = new ARIMA(data,1,seed);
 		arma.setCategory("2200EVO");
 		double[] pars = {2,2};
@@ -129,8 +112,8 @@ public class Run {
 		System.out.println(arma.getConstants()[0]);
 		System.out.println(arma.getLogLikelihood());
 		System.out.println(arma.getAIC());
-		Matrix.print(arma.getTrainingForecast());	*/	
-		
+		Matrix.print(arma.getTrainingForecast());	*/
+
 		/*ExponentialSmoothing ses = new ExponentialSmoothing("SES",1,data);
 		ses.setCategory("2200EVO");
 		double[] pars = new double[1];
@@ -141,21 +124,21 @@ public class Run {
 		Matrix.print(ses.getValidationReal());
 		Matrix.print(ses.getValidationForecast());
 		ses.plotForecast("testing");*/
-		
-		
-		
+
+
+
 		/*System.out.println(data.getTrainingFirstIndex()[data.getIndexFromCat("2200EVO")]);
 		System.out.println(data.getValidationFirstIndex()[data.getIndexFromCat("2200EVO")]);
 		ANN ann = new ANN(data,1);
 		ann.setCategory("2200EVO");
 		double[] cons = {0.00001,0.95};
 		ann.setConstants(cons);
-		
+
 		int[] steps = {1,1,1,1};
 		double[][] bounds = {{1,3},{1,10},{0.001,0.003},{1,50}};
 		boolean[] exp = {false,false,false,false};
 		double[] expBase = {2,2,2,2};
-		
+
 		PerformanceMeasures pm = new PerformanceMeasures(ann);
 		GridSearch gs = new GridSearch(pm,bounds,exp,expBase,steps);
 		gs.optimize(false);
@@ -337,19 +320,19 @@ public class Run {
 
 		graph.Plot.initialize(mode, allData, dates, header, input.Run.labels);*/
 	}
-	
+
 	public static ArrayList<String> readFile(String location) throws FileNotFoundException
 	{
 		Scanner s = new Scanner(new File(location));
-		
+
 		ArrayList<String> output = new ArrayList<String>();
-		
-		
+
+
 		while(s.hasNextLine())
 			output.add(s.nextLine().trim());
-		
+
 		s.close();
-		
+
 		return output;
 	}
 
