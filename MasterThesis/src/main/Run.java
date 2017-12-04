@@ -27,21 +27,29 @@ import performance.PerformanceMeasures;
 
 public class Run {
 
-	private static final int seed = 93439885;
 	private static final double propTraining = 0.6;
 	private static final double propValidation = 0.2;
 
+	private static int seed;
+	private static String dataLocation;
+	private static String outcomeLocation;
+	private static String forecastLocation;
+	private static String experimentLocation;
+	private static String machineLocation;
+
 	public static void main(String[] args)
 	{
-		Data data = new Data("src/data/prepared_data.txt");
+		if(!argumentStore(args)) return;
+
+		Data data = new Data(dataLocation);
 		data.setDataIndices(propTraining, propValidation);
 
-		Experiment e = new Experiment(data,seed,"src/data/experiment.txt","src/data/machine_list.txt");
+		Experiment e = new Experiment(data,seed,experimentLocation,machineLocation);
 
 		try
 		{
-			PrintWriter p1 = new PrintWriter("src/data/outcomes.txt");
-			PrintWriter p2 = new PrintWriter("src/data/forecasts.txt");
+			PrintWriter p1 = new PrintWriter(outcomeLocation);
+			PrintWriter p2 = new PrintWriter(forecastLocation);
 			e.run(false,p1,p2);
 			p1.close();
 			p2.close();
@@ -334,6 +342,30 @@ public class Run {
 		s.close();
 
 		return output;
+	}
+
+	private static boolean argumentStore(String[] args)
+	{
+		if(!argumentCheck(args)) {System.out.println("Error: illegal input"); return false;}
+
+		seed = Integer.parseInt(args[0]);
+		dataLocation = args[1];
+		outcomeLocation = args[2];
+		forecastLocation = args[3];
+		experimentLocation = args[4];
+		machineLocation = args[5];
+
+		return true;
+	}
+
+	private static boolean argumentCheck(String[] args)
+	{
+		if(args.length != 6) return false;
+
+		try{Integer.parseInt(args[0]);if(Integer.parseInt(args[0])<1) return false;}
+		catch(NumberFormatException e) {return false;}
+
+		return true;
 	}
 
 	private static double[] initData(String set,double[] data)
