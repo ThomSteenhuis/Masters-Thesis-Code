@@ -4,9 +4,9 @@ import input.Data;
 
 public class Naive extends Model {
 
-	public Naive(Data data, int noPeriods)
+	public Naive(Data data, int[] noPeriods, String[] cat)
 	{
-		super(data,noPeriods);
+		super(data,noPeriods,cat);
 		noParameters = 0;
 		noConstants = 0;
 		name = "Naive";
@@ -21,26 +21,29 @@ public class Naive extends Model {
 	
 	private void forecast()
 	{
-		for(int idx=0;idx<noPersAhead;++idx)
-			trainingForecast[idx] = trainingReal[idx];
-		
-		for(int idx=noPersAhead;idx<trainingReal.length;++idx)
-			trainingForecast[idx] = trainingReal[idx-noPersAhead];
-		
-		for(int idx=0;idx<noPersAhead;++idx)
-			validationForecast[idx] = trainingReal[trainingReal.length-noPersAhead+idx];
-		
-		for(int idx=noPersAhead;idx<validationReal.length;++idx)
-			validationForecast[idx] = validationReal[idx-noPersAhead];
-		
-		for(int idx=0;idx<noPersAhead;++idx)
-			testingForecast[idx] = validationReal[validationReal.length-noPersAhead+idx];
-		
-		for(int idx=noPersAhead;idx<testingReal.length;++idx)
-			testingForecast[idx] = testingReal[idx-noPersAhead];
-		
-		trainingForecasted = true;
-		validationForecasted = true;
-		testingForecasted = true;
+		for(int idx1=0;idx1<noOutputs;++idx1)
+		{
+			int per = idx1 % noPersAhead.length;
+			
+			for(int idx2=0;idx2<noPersAhead[per];++idx2)
+				trainingForecast[idx1][idx2] = trainingReal[idx1][idx2];
+			
+			for(int idx2=noPersAhead[per];idx2<trainingReal[idx1].length;++idx2)
+				trainingForecast[idx1][idx2] = trainingReal[idx1][idx2-noPersAhead[per]];
+			
+			for(int idx2=0;idx2<noPersAhead[per];++idx2)
+				validationForecast[idx1][idx2] = trainingReal[idx1][trainingReal.length-noPersAhead[per]+idx2];
+			
+			for(int idx2=noPersAhead[per];idx2<validationReal[idx1].length;++idx2)
+				validationForecast[idx1][idx2] = validationReal[idx1][idx2-noPersAhead[per]];
+			
+			for(int idx2=0;idx2<noPersAhead[per];++idx2)
+				testingForecast[idx1][idx2] = validationReal[idx1][validationReal.length-noPersAhead[per]+idx2];
+			
+			for(int idx2=noPersAhead[per];idx2<testingReal[idx1].length;++idx2)
+				testingForecast[idx1][idx2] = testingReal[idx1][idx2-noPersAhead[per]];
+			
+			forecasted[idx1] = true;
+		}
 	}
 }
