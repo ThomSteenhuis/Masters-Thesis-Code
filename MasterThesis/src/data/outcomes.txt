@@ -1,0 +1,2 @@
+Model name	Machine name	Optimization name	No periods ahead	Runtime (seconds)	RMSE	MAPE	MAE	ME	Best parameters	
+SVR	2200EVO	GridSearch	1	0.184	30.973469356100015	60.72598111632528	24.168940484297462	-18.796588592786158	8.0	1.0	2.0	3.0	

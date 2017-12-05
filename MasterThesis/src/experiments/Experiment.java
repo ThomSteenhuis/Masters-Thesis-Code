@@ -350,7 +350,7 @@ public class Experiment {
 	{
 		int[] periods = {Integer.parseInt(line[3])};
 		String[] category = {cat};
-		SVR svr = new SVR(data,periods,category,r);
+		SVR svr = new SVR(data,periods,category,(seed*8)%92039029);
 		return svr;
 	}
 

@@ -8,8 +8,6 @@ import math.Matrix;
 
 public class SVR extends Model {
 	
-	private Random r;
-
 	private double[][] x_train;
 	private double[][] x_validate;
 	private double[][] x_test;
@@ -29,13 +27,13 @@ public class SVR extends Model {
 	
 	private final double stoppingError = 0.001;
 
-	public SVR(Data dataset, int periods, Random R)
+	public SVR(Data dataset, int[] periods, String[] cats, int s)
 	{
-		super(dataset, periods);
+		super(dataset, periods, cats);
 		name = "SVR";
 		noParameters = 4;
 		noConstants = 0;
-		r = R;
+		r = new Random(s);
 	}
 
 	public boolean train()
@@ -154,15 +152,15 @@ public class SVR extends Model {
 
 	private void initializeXY()
 	{
-		int index = data.getIndexFromCat(category);
+		int index = data.getIndexFromCat(category[0]);
 		
-		N_train = data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index] - (int) (parameters[3]) - noPersAhead + 1;
+		N_train = data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index] - (int) (parameters[3]) - noPersAhead[0] + 1;
 		x_train = new double[N_train][(int) (parameters[3])];
 		y_train = new double[N_train][1];
 
 		for(int idx1=0;idx1<N_train;++idx1)
 		{
-			y_train[idx1][0] = data.getVolumes()[idx1 + (int) (parameters[3]) + noPersAhead - 1][index];
+			y_train[idx1][0] = data.getVolumes()[idx1 + (int) (parameters[3]) + noPersAhead[0] - 1][index];
 
 			for(int idx2=0;idx2<x_train[idx1].length;++idx2)
 			{
@@ -176,7 +174,7 @@ public class SVR extends Model {
 
 		for(int idx1=0;idx1<N_validate;++idx1)
 		{
-			y_validate[idx1][0] = data.getVolumes()[idx1 + (int) (parameters[3]) + noPersAhead - 1 + N_train][index];
+			y_validate[idx1][0] = data.getVolumes()[idx1 + (int) (parameters[3]) + noPersAhead[0] - 1 + N_train][index];
 
 			for(int idx2=0;idx2<x_validate[idx1].length;++idx2)
 			{
@@ -190,7 +188,7 @@ public class SVR extends Model {
 
 		for(int idx1=0;idx1<N_test;++idx1)
 		{
-			y_test[idx1][0] = data.getVolumes()[idx1 + (int) (parameters[3]) + noPersAhead - 1 + N_train + N_validate][index];
+			y_test[idx1][0] = data.getVolumes()[idx1 + (int) (parameters[3]) + noPersAhead[0] - 1 + N_train + N_validate][index];
 
 			for(int idx2=0;idx2<x_test[idx1].length;++idx2)
 			{
@@ -203,36 +201,34 @@ public class SVR extends Model {
 	{
 		initializeSets();
 		
-		int index = data.getIndexFromCat(category);
-		for(int idx=0;idx<(int)parameters[3]+noPersAhead-1;++idx) trainingForecast[idx] = data.getVolumes()[data.getTrainingFirstIndex()[index]+idx][index];
+		int index = data.getIndexFromCat(category[0]);
+		for(int idx=0;idx<( (int)parameters[3]+noPersAhead[0]-1);++idx) trainingForecast[0][idx] = data.getVolumes()[data.getTrainingFirstIndex()[index]+idx][index];
 				
 		for(int idx=0;idx<N_train;++idx)
 		{
-			trainingForecast[(int)parameters[3]+noPersAhead-1+idx] = bias;
+			trainingForecast[0][(int)parameters[3]+noPersAhead[0]-1+idx] = bias;
 			
 			for(int idx2=0;idx2<x_train.length;++idx2)
-				trainingForecast[(int)parameters[3]+noPersAhead-1+idx] += (alpha[idx2] - alpha_ast[idx2]) * kernel(x_train[idx2],x_train[idx]);
+				trainingForecast[0][(int)parameters[3]+noPersAhead[0]-1+idx] += (alpha[idx2] - alpha_ast[idx2]) * kernel(x_train[idx2],x_train[idx]);
 		}
 		
 		for(int idx=0;idx<N_validate;++idx)
 		{
-			validationForecast[idx] = bias;
+			validationForecast[0][idx] = bias;
 			
 			for(int idx2=0;idx2<x_train.length;++idx2)
-				validationForecast[idx] += (alpha[idx2] - alpha_ast[idx2]) * kernel(x_train[idx2],x_validate[idx]);
+				validationForecast[0][idx] += (alpha[idx2] - alpha_ast[idx2]) * kernel(x_train[idx2],x_validate[idx]);
 		}
 		
 		for(int idx=0;idx<N_test;++idx)
 		{
-			testingForecast[idx] = bias;
+			testingForecast[0][idx] = bias;
 			
 			for(int idx2=0;idx2<x_train.length;++idx2)
-				testingForecast[idx] += (alpha[idx2] - alpha_ast[idx2]) * kernel(x_train[idx2],x_test[idx]);
+				testingForecast[0][idx] += (alpha[idx2] - alpha_ast[idx2]) * kernel(x_train[idx2],x_test[idx]);
 		}
 		
-		trainingForecasted = true;
-		validationForecasted = true;
-		testingForecasted = true;
+		forecasted[0] = true;
 	}
 	
 	private void calculateBias()
