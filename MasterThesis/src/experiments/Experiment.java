@@ -348,10 +348,20 @@ public class Experiment {
 
 	private Model initializeSVR(String[] line,String cat,Data data) throws NumberFormatException
 	{
-		int[] periods = {Integer.parseInt(line[3])};
-		String[] category = {cat};
-		SVR svr = new SVR(data,periods,category,(seed*8)%92039029);
-		return svr;
+		if(cat.equals("complete"))
+		{
+			int[] periods = {Integer.parseInt(line[3])};
+			String[] category = {"2200EVO","8800FCQ, RFID"};
+			SVR svr = new SVR(data,periods,category,(seed*8)%92039029);
+			return svr;
+		}
+		else
+		{
+			int[] periods = {Integer.parseInt(line[3])};
+			String[] category = {cat};
+			SVR svr = new SVR(data,periods,category,(seed*8)%92039029);
+			return svr;
+		}
 	}
 
 	private static Optimization initializeGA(String[] line,PerformanceMeasures pm) throws FileNotFoundException,NumberFormatException

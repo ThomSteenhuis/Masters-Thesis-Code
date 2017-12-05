@@ -14,6 +14,7 @@ public class Genetic extends Optimization {
 	private final double mutationProb = 0.2;
 	private final double randomParentProb = 0.2;
 	private final double mixingGeneProb = 0.5;
+	private final boolean localSearch = false;
 
 	private int populationSize;
 	private int noOffspring;
@@ -198,7 +199,7 @@ public class Genetic extends Optimization {
 
 		if(offspring.evaluateFitness())
 		{
-			offspring.localSearch();
+			if(localSearch) offspring.localSearch();
 			return offspring;
 		}
 		else

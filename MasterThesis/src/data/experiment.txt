@@ -1,1 +1,1 @@
-SVR	2200EVO	GridSearch	1	-5	10	14	exponential	2	-10	5	14	exponential	2	-10	10	19	exponential	2	1	6	5	linear	2
+SVR	complete	Genetic	1	-15	15	real	exponential	2	-15	15	real	exponential	2	-15	15	real	exponential	2	1	6	integer	linear	2
