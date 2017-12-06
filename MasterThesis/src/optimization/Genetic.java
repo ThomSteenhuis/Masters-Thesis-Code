@@ -6,7 +6,7 @@ import performance.PerformanceMeasures;
 
 public class Genetic extends Optimization {
 
-	private final int popSizeMultiplyer = 2;
+	private final int popSizeMultiplyer = 20;
 	private final int noOffspringMultiplyer = 1;
 	private final int maxNoEpochs = 1000;
 	private final int maxNoEpochsNoImprovement = 50;

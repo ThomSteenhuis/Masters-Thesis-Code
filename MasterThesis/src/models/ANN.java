@@ -351,19 +351,21 @@ public class ANN extends Model {
 		{
 			for(int idx2=0;idx2<Y.length;++idx2)
 			{
-				int cat = data.getIndexFromCat(category[idx2 / noPersAhead.length]);
+				int out = idx2 / noPersAhead.length;
+				int cat = data.getIndexFromCat(category[out]);
 				int noPers = noPersAhead[idx2 % noPersAhead.length];
-				Y[idx2][idx1] = standardize(data.getVolumes()[idx1 + data.getTrainingFirstIndex()[cat] + Math.max((int) (parameters[0]),(int) (constants[0])*12) + noPers - 1][cat],cat);
+				Y[idx2][idx1] = standardize(data.getVolumes()[idx1 + data.getTrainingFirstIndex()[cat] + Math.max((int) (parameters[0]),(int) (constants[0])*12) + noPers - 1][cat],out);
 			}
 
 			for(int idx2=0;idx2<X.length;++idx2)
 			{
-				int cat = data.getIndexFromCat(category[idx2/((int)parameters[0]+(int)constants[0])]);
+				int out = idx2 / ((int)parameters[0]+(int)constants[0]);
+				int cat = data.getIndexFromCat(category[out]);
 
 				if( ( (int)constants[0] == 1) && (idx2 % ((int)parameters[0]+(int)constants[0]) == ((int)parameters[0]+(int)constants[0]-1) ) )
-					X[idx2][idx1] = standardize(data.getVolumes()[idx1 + data.getTrainingFirstIndex()[cat]][cat],cat);
+					X[idx2][idx1] = standardize(data.getVolumes()[idx1 + data.getTrainingFirstIndex()[cat]][cat],out);
 				else
-					X[idx2][idx1] = standardize(data.getVolumes()[idx1 + idx2%((int)parameters[0]+(int)constants[0]) + (int)(constants[0])*(12 - (int)(parameters[0])) + data.getTrainingFirstIndex()[cat]][cat],cat);
+					X[idx2][idx1] = standardize(data.getVolumes()[idx1 + idx2%((int)parameters[0]+(int)constants[0]) + (int)(constants[0])*(12 - (int)(parameters[0])) + data.getTrainingFirstIndex()[cat]][cat],out);
 			}
 		}
 	}

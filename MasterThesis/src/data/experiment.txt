@@ -1,1 +1,1 @@
-ANN	complete	Genetic	6	0	1	11	integer	linear	2	1	50	integer	linear	2
+ANN	8800FCQ, RFID	GridSearch	1	0	1	11	10	linear	2	1	50	49	linear	2
