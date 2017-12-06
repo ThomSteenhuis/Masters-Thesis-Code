@@ -6,7 +6,7 @@ import performance.PerformanceMeasures;
 
 public class Genetic extends Optimization {
 
-	private final int popSizeMultiplyer = 20;
+	private final int popSizeMultiplyer = 2;
 	private final int noOffspringMultiplyer = 1;
 	private final int maxNoEpochs = 1000;
 	private final int maxNoEpochsNoImprovement = 50;
@@ -14,6 +14,7 @@ public class Genetic extends Optimization {
 	private final double mutationProb = 0.2;
 	private final double randomParentProb = 0.2;
 	private final double mixingGeneProb = 0.5;
+	private final boolean localSearch = true;
 
 	private int populationSize;
 	private int noOffspring;
@@ -50,7 +51,9 @@ public class Genetic extends Optimization {
 
 	public boolean optimize(boolean silent)
 	{
-		initialized = initialize();
+		initialize();
+
+		initialized = true;
 
 		if(!silent) System.out.println("Genetic population initialized");
 
@@ -198,7 +201,7 @@ public class Genetic extends Optimization {
 
 		if(offspring.evaluateFitness())
 		{
-			offspring.localSearch();
+			if(localSearch) offspring.localSearch();
 			return offspring;
 		}
 		else
@@ -284,7 +287,7 @@ public class Genetic extends Optimization {
 		return parents;
 	}
 
-	private boolean initialize()
+	private void initialize()
 	{
 		population = new Member[populationSize];
 
@@ -292,12 +295,10 @@ public class Genetic extends Optimization {
 		{
 			population[idx] = new Member(noParameters);
 
-			if(!population[idx].initialize(idx))
-				return false;
+			population[idx].initialize(idx);
 		}
 
 		sort(0,populationSize-1);
-		return true;
 	}
 
 	private boolean checkStoppingCriterium()
@@ -375,17 +376,16 @@ public class Genetic extends Optimization {
 			chromosome = new Gene[noGenes];
 		}
 
-		public boolean initialize(int index)
+		public void initialize(int index)
 		{
 			for(int idx=0;idx<chromosome.length;++idx)
 			{
 				chromosome[idx] = new Gene(integerType[idx]);
-
-				if(!chromosome[idx].initialize(idx))
-					return false;
+				chromosome[idx].initialize(idx);
 			}
 
-			return evaluateFitness();
+			if(!evaluateFitness())
+				initialize(index);
 		}
 
 		public boolean evaluateFitness()
@@ -484,7 +484,7 @@ public class Genetic extends Optimization {
 			value = v;
 		}
 
-		public boolean initialize(int idx)
+		public void initialize(int idx)
 		{
 			value = r.nextDouble()*(parameterBounds[idx][1]-parameterBounds[idx][0]) + parameterBounds[idx][0];
 
@@ -493,8 +493,6 @@ public class Genetic extends Optimization {
 
 			if(integerType)
 				value = (int)value;
-
-			return true;
 		}
 
 		public void setValue(double val)

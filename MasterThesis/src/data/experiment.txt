@@ -1,4 +1,1 @@
-ANN	complete	GridSearch	6	0	1	6	5	linear	2	1	10	9	linear	2
-ANN	complete	GridSearch	6	1	1	6	5	linear	2	1	10	9	linear	2
-ANN	complete	Genetic	6	0	1	6	integer	linear	2	1	10	integer	linear	2
-ANN	complete	Genetic	6	1	1	6	integer	linear	2	1	10	integer	linear	2
+ANN	complete	Genetic	6	0	1	11	integer	linear	2	1	50	integer	linear	2
