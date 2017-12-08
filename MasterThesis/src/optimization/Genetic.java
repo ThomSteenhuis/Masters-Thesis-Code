@@ -58,7 +58,7 @@ public class Genetic extends Optimization {
 		if(!silent) System.out.println("Genetic population initialized");
 
 		for(int idx=0;idx<maxNoEpochs;++idx)
-		{
+		{			
 			if(!epoch())
 				return false;
 
