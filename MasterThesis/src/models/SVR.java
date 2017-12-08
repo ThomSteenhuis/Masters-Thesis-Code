@@ -32,7 +32,7 @@ public class SVR extends Model {
 		super(dataset, periods, cats);
 		name = "SVR";
 		noParameters = 4;
-		noConstants = 1;
+		noConstants = 2;
 		noOutputs = 1;
 		bias = new double[noOutputs];
 		alpha = new double[noOutputs][];
@@ -163,27 +163,32 @@ public class SVR extends Model {
 	{
 		int index = data.getIndexFromCat(category[0]);
 		
-		N_train = data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index] - (int) (parameters[3]) - noPersAhead[0] + 1;
-		x_train = new double[N_train][(int) (parameters[3]) * category.length];
+		N_train = data.getValidationFirstIndex()[index] - data.getTrainingFirstIndex()[index] - Math.max((int) (parameters[3]),(int) (constants[1])*12) - noPersAhead[0] + 1;
+		x_train = new double[N_train][((int) (parameters[3]) + (int) (constants[1])) * category.length];
 		y_train = new double[N_train][1];
 		
 		N_validate = data.getTestingFirstIndex()[index] - data.getValidationFirstIndex()[index];
-		x_validate = new double[N_validate][(int) (parameters[3]) * category.length];
+		x_validate = new double[N_validate][((int) (parameters[3]) + (int) (constants[1])) * category.length];
 		y_validate = new double[N_validate][1];
 		
 		N_test = data.getNoObs() - data.getTestingFirstIndex()[index];
-		x_test = new double[N_test][(int) (parameters[3]) * category.length];
+		x_test = new double[N_test][((int) (parameters[3]) + (int) (constants[1])) * category.length];
 		y_test = new double[N_test][1];
 
 		for(int idx1=0;idx1<N_train;++idx1)
 		{
 			index = data.getIndexFromCat(category[(int)constants[0]]);
-			y_train[idx1][0] = data.getVolumes()[idx1 + data.getTrainingFirstIndex()[index] + (int) (parameters[3]) + noPersAhead[0] - 1][index];
+			y_train[idx1][0] = data.getVolumes()[idx1 + data.getTrainingFirstIndex()[index] + Math.max((int) (parameters[3]),(int) (constants[1])*12) + noPersAhead[0] - 1][index];
 							
 			for(int idx2=0;idx2<x_train[idx1].length;++idx2)
 			{
-				int lag = idx2 % (int)parameters[3];
-				index = data.getIndexFromCat(category[idx2 / (int)parameters[3]]);
+				int lag;
+				if( ( (int)(constants[1]) == 1) && (idx2 % ((int)(parameters[3]) + (int)(constants[1]) ) == ((int)(parameters[3]) + (int)(constants[1]) -1) ) )
+					lag = 0;
+				else
+					lag = (int)(constants[1])*(12 - (int)(parameters[3])) + idx2 % ((int)(parameters[3]) + (int)(constants[1]) );
+				
+				index = data.getIndexFromCat(category[idx2 / ( (int)(parameters[3]) + (int)(constants[1]) ) ] );
 				x_train[idx1][idx2] = data.getVolumes()[data.getTrainingFirstIndex()[index] + idx1 + lag][index];
 			}
 		}
@@ -195,8 +200,13 @@ public class SVR extends Model {
 						
 			for(int idx2=0;idx2<x_validate[idx1].length;++idx2)
 			{
-				int lag = idx2 % (int)parameters[3];
-				index = data.getIndexFromCat(category[idx2 / (int)parameters[3]]);
+				int lag;
+				if( ( (int)(constants[1]) == 1) && (idx2 % ((int)(parameters[3]) + (int)(constants[1]) ) == ((int)(parameters[3]) + (int)(constants[1]) -1) ) )
+					lag = 0;
+				else
+					lag = (int)(constants[1])*(12 - (int)(parameters[3])) + idx2 % ((int)(parameters[3]) + (int)(constants[1]) );
+				
+				index = data.getIndexFromCat(category[idx2 / ( (int)(parameters[3]) + (int)(constants[1]) ) ] );
 				x_validate[idx1][idx2] =  data.getVolumes()[idx1 + lag + N_train][index];
 			}
 		}
@@ -209,8 +219,13 @@ public class SVR extends Model {
 			
 			for(int idx2=0;idx2<x_test[idx1].length;++idx2)
 			{
-				int lag = idx2 % (int)parameters[3];
-				index = data.getIndexFromCat(category[idx2 / (int)parameters[3]]);
+				int lag;
+				if( ( (int)(constants[1]) == 1) && (idx2 % ((int)(parameters[3]) + (int)(constants[1]) ) == ((int)(parameters[3]) + (int)(constants[1]) -1) ) )
+					lag = 0;
+				else
+					lag = (int)(constants[1])*(12 - (int)(parameters[3])) + idx2 % ((int)(parameters[3]) + (int)(constants[1]) );
+				
+				index = data.getIndexFromCat(category[idx2 / ( (int)(parameters[3]) + (int)(constants[1]) ) ] );
 				x_test[idx1][idx2] =  data.getVolumes()[idx1 + lag + N_train + N_validate][index];
 			}
 		}
@@ -218,9 +233,9 @@ public class SVR extends Model {
 	
 	private void forecast()
 	{
-		initializeSets();
-		
 		int index = data.getIndexFromCat(category[(int)constants[0]]);
+		
+		initializeSet();
 		
 		for(int idx2=0;idx2<( (int)parameters[3]+noPersAhead[0]-1);++idx2) trainingForecast[0][idx2] = data.getVolumes()[data.getTrainingFirstIndex()[index]+idx2][index];
 		
@@ -249,6 +264,25 @@ public class SVR extends Model {
 		}
 		
 		forecasted[0] = true;
+	}
+	
+	private void initializeSet()
+	{
+		trainingReal = new double[1][]; trainingForecast = new double[1][]; trainingDates = new String[1][];
+		validationReal = new double[1][]; validationForecast = new double[1][]; validationDates = new String[1][];
+		testingReal = new double[1][]; testingForecast = new double[1][]; testingDates = new String[1][];
+		
+		trainingReal[0] = data.getTrainingSet(category[(int)constants[0]]);
+		trainingForecast[0] = new double[trainingReal[0].length];
+		trainingDates[0] = data.getTrainingDates(category[(int)constants[0]]);
+
+		validationReal[0] = data.getValidationSet(category[(int)constants[0]]);
+		validationForecast[0] = new double[validationReal[0].length];
+		validationDates[0] = data.getValidationDates(category[(int)constants[0]]);
+
+		testingReal[0] = data.getTestingSet(category[(int)constants[0]]);
+		testingForecast[0] = new double[testingReal[0].length];
+		testingDates[0] = data.getTestingDates(category[(int)constants[0]]);
 	}
 	
 	/*private void calculateBias()

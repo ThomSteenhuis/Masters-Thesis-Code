@@ -1,1 +1,1 @@
-SVR	complete	Genetic	6	1	-15	15	29	exponential	2	-15	15	29	exponential	2	-15	15	29	exponential	2	1	11	10	linear	2
+SVR	complete	Genetic	6	1	0	-15	15	29	exponential	2	-15	15	29	exponential	2	-15	15	29	exponential	2	1	11	10	linear	2

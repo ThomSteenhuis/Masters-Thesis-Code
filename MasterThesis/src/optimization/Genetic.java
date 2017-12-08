@@ -11,7 +11,7 @@ public class Genetic extends Optimization {
 	private final int popSizeMultiplyer = 20;
 	private final int noOffspringMultiplyer = 1;
 	private final int maxNoEpochs = 1000;
-	private final int maxNoEpochsNoImprovement = 10;
+	private final int maxNoEpochsNoImprovement = 50;
 	private final int neighborhoodSize = 2;
 	private final double mutationProb = 0.2;
 	private final double randomParentProb = 0.2;
@@ -61,6 +61,7 @@ public class Genetic extends Optimization {
 
 		for(int idx=0;idx<maxNoEpochs;++idx)
 		{			
+			printPopulationFitness();
 			if(!epoch())
 				return false;
 
@@ -325,6 +326,7 @@ public class Genetic extends Optimization {
 		}
 
 		sort(0,populationSize-1);
+		updateBest();
 	}
 
 	private boolean checkStoppingCriterium()
