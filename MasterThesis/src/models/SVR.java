@@ -220,38 +220,35 @@ public class SVR extends Model {
 	{
 		initializeSets();
 		
-		for(int idx1=0;idx1<noOutputs;++idx1)
+		int index = data.getIndexFromCat(category[(int)constants[0]]);
+		
+		for(int idx2=0;idx2<( (int)parameters[3]+noPersAhead[0]-1);++idx2) trainingForecast[0][idx2] = data.getVolumes()[data.getTrainingFirstIndex()[index]+idx2][index];
+		
+		for(int idx2=0;idx2<N_train;++idx2)
 		{
-			int index = data.getIndexFromCat(category[idx1]);
+			trainingForecast[0][(int)parameters[3]+noPersAhead[0]-1+idx2] = bias[0];
 			
-			for(int idx2=0;idx2<( (int)parameters[3]+noPersAhead[0]-1);++idx2) trainingForecast[idx1][idx2] = data.getVolumes()[data.getTrainingFirstIndex()[index]+idx2][index];
-			
-			for(int idx2=0;idx2<N_train;++idx2)
-			{
-				trainingForecast[idx1][(int)parameters[3]+noPersAhead[0]-1+idx2] = bias[idx1];
-				
-				for(int idx3=0;idx3<x_train.length;++idx3)
-					trainingForecast[idx1][(int)parameters[3]+noPersAhead[0]-1+idx2] += (alpha[idx1][idx3] - alpha_ast[idx1][idx3]) * kernel(x_train[idx2],x_train[idx3]);
-			}
-			
-			for(int idx2=0;idx2<N_validate;++idx2)
-			{
-				validationForecast[idx1][idx2] = bias[idx1];
-				
-				for(int idx3=0;idx3<x_train.length;++idx3)
-					validationForecast[idx1][idx2] += (alpha[idx1][idx3] - alpha_ast[idx1][idx3]) * kernel(x_train[idx3],x_validate[idx2]);
-			}
-			
-			for(int idx2=0;idx2<N_test;++idx2)
-			{
-				testingForecast[idx1][idx2] = bias[idx1];
-				
-				for(int idx3=0;idx3<x_train.length;++idx3)
-					testingForecast[idx1][idx2] += (alpha[idx1][idx3] - alpha_ast[idx1][idx3]) * kernel(x_train[idx3],x_test[idx2]);
-			}
-			
-			forecasted[idx1] = true;
+			for(int idx3=0;idx3<x_train.length;++idx3)
+				trainingForecast[0][(int)parameters[3]+noPersAhead[0]-1+idx2] += (alpha[0][idx3] - alpha_ast[0][idx3]) * kernel(x_train[idx2],x_train[idx3]);
 		}
+		
+		for(int idx2=0;idx2<N_validate;++idx2)
+		{
+			validationForecast[0][idx2] = bias[0];
+			
+			for(int idx3=0;idx3<x_train.length;++idx3)
+				validationForecast[0][idx2] += (alpha[0][idx3] - alpha_ast[0][idx3]) * kernel(x_train[idx3],x_validate[idx2]);
+		}
+		
+		for(int idx2=0;idx2<N_test;++idx2)
+		{
+			testingForecast[0][idx2] = bias[0];
+			
+			for(int idx3=0;idx3<x_train.length;++idx3)
+				testingForecast[0][idx2] += (alpha[0][idx3] - alpha_ast[0][idx3]) * kernel(x_train[idx3],x_test[idx2]);
+		}
+		
+		forecasted[0] = true;
 	}
 	
 	/*private void calculateBias()

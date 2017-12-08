@@ -506,12 +506,18 @@ public class Experiment {
 			outcomes[2*idx1][9] = "Best parameters";
 
 			int noPars = instances.get(index).getPerformanceMeasures().getModel().getNoParameters();
-			int cat = idx1/instances.get(index).getPerformanceMeasures().getModel().getNoPeriodsAhead().length;
+			int cat; 
 			int pers = idx1%instances.get(index).getPerformanceMeasures().getModel().getNoPeriodsAhead().length;
 
+			
 			outcomes[2*idx1+1] = new String[9+noPars];
 			outcomes[2*idx1+1][0] = instances.get(index).getPerformanceMeasures().getModel().getName();
+			
+			if(isSVR(outcomes[2*idx1+1][0])) cat = (int)instances.get(index).getPerformanceMeasures().getModel().getConstants()[0]; 
+			else cat = idx1/instances.get(index).getPerformanceMeasures().getModel().getNoPeriodsAhead().length;
+			
 			outcomes[2*idx1+1][1] = instances.get(index).getPerformanceMeasures().getModel().getCategory()[cat];
+			
 			outcomes[2*idx1+1][2] = instances.get(index).getName();
 			outcomes[2*idx1+1][3] = Integer.toString(instances.get(index).getPerformanceMeasures().getModel().getNoPeriodsAhead()[pers]);
 
