@@ -1,7 +1,9 @@
 package optimization;
 
+import java.util.ArrayList;
 import java.util.Random;
 
+import math.Matrix;
 import performance.PerformanceMeasures;
 
 public class Genetic extends Optimization {
@@ -59,6 +61,9 @@ public class Genetic extends Optimization {
 
 		for(int idx=0;idx<maxNoEpochs;++idx)
 		{			
+			printPopulationFitness();
+			System.out.println(idx);
+			System.out.println(noEpochsNoImprovement);
 			if(!epoch())
 				return false;
 
@@ -153,7 +158,7 @@ public class Genetic extends Optimization {
 			if(compare(offsprings[idx])) {updateBest(); improvement = true;}
 		}
 
-		if(!improvement) noEpochsNoImprovement++;
+		if(!improvement) noEpochsNoImprovement++; else noEpochsNoImprovement = 0;
 
 		return true;
 	}
@@ -208,7 +213,7 @@ public class Genetic extends Optimization {
 			return createOffspring(parent1,parent2);
 	}
 
-	private int[] selectParents()
+	/*private int[] selectParents()
 	{
 		int[] parents = new int[2];
 		double v = r.nextDouble();
@@ -285,6 +290,30 @@ public class Genetic extends Optimization {
 
 		parents[1] = idx;
 		return parents;
+	}*/
+	
+	private int[] selectParents()
+	{
+		int[] parents = new int[2];
+		ArrayList<Double> fitness = new ArrayList<Double>();
+		for(int idx=0;idx<populationSize;++idx) fitness.add(population[idx].fitness);
+		parents[0] = drawRandom(fitness);
+		fitness.remove(parents[0]);
+		parents[1] = drawRandom(fitness);
+		if(parents[1] >= parents[0]) parents[1]++;
+		return parents;
+	}
+	
+	private int drawRandom(ArrayList<Double> list)
+	{
+		double sum = 0;
+		for(double idx:list) sum+=idx;
+		double w = r.nextDouble()*sum;
+		boolean cont = true;
+		sum = 0;
+		int cnt = 0;
+		while(cont) {sum += list.get(cnt); if(w <= sum) break; cnt++;}
+		return cnt;
 	}
 
 	private void initialize()
