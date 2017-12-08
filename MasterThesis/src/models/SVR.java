@@ -34,6 +34,9 @@ public class SVR extends Model {
 		noParameters = 4;
 		noConstants = 0;
 		noOutputs = category.length;
+		bias = new double[noOutputs];
+		alpha = new double[noOutputs][];
+		alpha_ast = new double[noOutputs][];
 		r = new Random(s);
 	}
 
@@ -244,7 +247,7 @@ public class SVR extends Model {
 				validationForecast[idx1][idx2] = bias[idx1];
 				
 				for(int idx3=0;idx3<x_train.length;++idx3)
-					validationForecast[idx1][idx2] += (alpha[idx1][idx3] - alpha_ast[idx1][idx3]) * kernel(x_train[idx2],x_validate[idx3]);
+					validationForecast[idx1][idx2] += (alpha[idx1][idx3] - alpha_ast[idx1][idx3]) * kernel(x_train[idx3],x_validate[idx2]);
 			}
 			
 			for(int idx2=0;idx2<N_test;++idx2)
@@ -252,7 +255,7 @@ public class SVR extends Model {
 				testingForecast[idx1][idx2] = bias[idx1];
 				
 				for(int idx3=0;idx3<x_train.length;++idx3)
-					testingForecast[idx1][idx2] += (alpha[idx1][idx3] - alpha_ast[idx1][idx3]) * kernel(x_train[idx2],x_test[idx3]);
+					testingForecast[idx1][idx2] += (alpha[idx1][idx3] - alpha_ast[idx1][idx3]) * kernel(x_train[idx3],x_test[idx2]);
 			}
 			
 			forecasted[idx1] = true;
@@ -515,9 +518,9 @@ public class SVR extends Model {
 			
 			while((numChanged > 0) || examineAll)
 			{
-				//lpCnt++;
+				lpCnt++;
 				
-				//if(lpCnt > 10000) {System.out.println(parameters[0]);System.out.println(evaluateObjective(alph,alph_ast));Matrix.print(alph);Matrix.print(alph_ast);}
+				if(lpCnt > 10000) {System.out.println(parameters[0]);System.out.println(evaluateObjective(index,alph,alph_ast));Matrix.print(alph);Matrix.print(alph_ast);}
 				//System.out.println(lpCnt);
 				
 				
@@ -609,6 +612,7 @@ public class SVR extends Model {
 				//System.out.printf("%f\t%f\t%f\t%f\t%f\n",delta_phi,alpha1,alpha1_ast,alpha2,alpha2_ast);
 				if( case1 && (alpha1 > 0 || (alpha1_ast == 0 && delta_phi > 0) ) && (alpha2 > 0 || (alpha2_ast == 0 && delta_phi < 0) ) )
 				{
+					//System.out.println("case 1");
 					double[] LH = computeLH(1,alpha1,alpha2);
 					if( (LH[1] - LH[0]) > tol)
 					{
@@ -621,11 +625,13 @@ public class SVR extends Model {
 							double[] LVec_ast = new double[alph.length];
 							double[] HVec_ast = new double[alph.length];
 							for(int idx=0;idx<LVec.length;++idx){LVec[idx] = alph[idx];HVec[idx] = alph[idx];LVec_ast[idx] = alph_ast[idx];HVec_ast[idx] = alph_ast[idx];}
-							LVec[exampleNo2] = LH[0]; HVec[exampleNo2] = LH[1]; LVec[exampleNo1] -= (LH[0]-alpha2); HVec[exampleNo1] -= (LH[1]-alpha2);
+							LVec[exampleNo2] = LH[0]; HVec[exampleNo2] = LH[1]; LVec[exampleNo1] -= (LH[0]-alph[exampleNo2]); HVec[exampleNo1] -= (LH[1]-alph[exampleNo2]);
+							LVec_ast[exampleNo2] = alpha2_ast; HVec_ast[exampleNo2] = alpha2_ast; LVec_ast[exampleNo1] = alpha1_ast; HVec_ast[exampleNo1] = alpha1_ast;
 							double LObj = evaluateObjective(cat,LVec,LVec_ast); double HObj = evaluateObjective(cat,HVec,HVec_ast);
 							if(LObj > HObj + tol) a2 = LH[0]; else if(HObj > LObj + tol) a2 = LH[1]; else a2 = alpha2;
 						}
 						a1 = alpha1 - (a2 - alpha2);
+						//if( (a1 > parameters[0]) || (a2 > parameters[0]) )  System.out.printf("case 1 %d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",exampleNo1,exampleNo2,parameters[0],a1,a2,alpha1,alpha2,eta,delta_phi);
 						
 						if(Math.abs(a2-alpha2) > tol) {delta_phi += eta*(a1-alpha1); alpha2 = a2; alpha1 = a1;} 
 					}
@@ -634,6 +640,7 @@ public class SVR extends Model {
 				}
 				else if( case2 && (alpha1 > 0 || (alpha1_ast == 0 && delta_phi > (2*parameters[1]) ) ) && (alpha2_ast > 0 || (alpha2 == 0 && delta_phi > (2*parameters[1]) ) ) )
 				{
+					//System.out.println("case 2");
 					double[] LH = computeLH(2,alpha1,alpha2_ast);
 					if( (LH[1] - LH[0]) > tol)
 					{
@@ -645,12 +652,13 @@ public class SVR extends Model {
 							double[] LVec_ast = new double[alph.length];
 							double[] HVec_ast = new double[alph.length];
 							for(int idx=0;idx<LVec.length;++idx){LVec[idx] = alph[idx];HVec[idx] = alph[idx];LVec_ast[idx] = alph_ast[idx];HVec_ast[idx] = alph_ast[idx];}
-							LVec_ast[exampleNo2] = LH[0]; HVec_ast[exampleNo2] = LH[1]; LVec[exampleNo1] += (LH[0]-alpha2_ast); HVec[exampleNo1] += (LH[1]-alpha2_ast);
+							LVec_ast[exampleNo2] = LH[0]; HVec_ast[exampleNo2] = LH[1]; LVec[exampleNo1] += (LH[0]-alph_ast[exampleNo2]); HVec[exampleNo1] += (LH[1]-alph_ast[exampleNo2]);
+							LVec[exampleNo2] = alpha2; HVec[exampleNo2] = alpha2; LVec_ast[exampleNo1] = alpha1_ast; HVec_ast[exampleNo1] = alpha1_ast;
 							double LObj = evaluateObjective(cat,LVec,LVec_ast);double HObj = evaluateObjective(cat,HVec,HVec_ast);
-							if(LObj > HObj + tol) a2 = LH[0]; else if(HObj > LObj + tol) a2 = LH[1]; else a2 = alpha2;
+							if(LObj > HObj + tol) a2 = LH[0]; else if(HObj > LObj + tol) a2 = LH[1]; else a2 = alpha2_ast;
 						}
 						a1 = alpha1 + (a2 - alpha2_ast); 
-						//System.out.printf("%d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\n",exampleNo1,exampleNo2,a1,a2,alpha1,alpha2_ast,eta,delta_phi);
+						//if( (a1 > parameters[0]) || (a2 > parameters[0]) ) System.out.printf("case 2 %d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",exampleNo1,exampleNo2,parameters[0],a1,a2,alpha1,alpha2_ast,eta,delta_phi);
 						/*double[] vec1 = alph;
 						double[] vec2 = alph_ast;
 						double[] vec3 = alph;
@@ -669,6 +677,7 @@ public class SVR extends Model {
 				}
 				else if( case3 && (alpha1_ast > 0 || (alpha1 == 0 && delta_phi < (-2*parameters[1]) ) ) && (alpha2 > 0 || (alpha2_ast == 0 && delta_phi < (-2*parameters[1]) ) ) )
 				{
+					//System.out.println("case 3");
 					double[] LH = computeLH(2,alpha1_ast,alpha2);
 					if( (LH[1] - LH[0]) > tol)
 					{
@@ -680,12 +689,13 @@ public class SVR extends Model {
 							double[] LVec_ast = new double[alph.length];
 							double[] HVec_ast = new double[alph.length];
 							for(int idx=0;idx<LVec.length;++idx){LVec[idx] = alph[idx];HVec[idx] = alph[idx];LVec_ast[idx] = alph_ast[idx];HVec_ast[idx] = alph_ast[idx];}
-							LVec[exampleNo2] = LH[0]; HVec[exampleNo2] = LH[1]; LVec_ast[exampleNo1] += (LH[0]-alpha2); HVec_ast[exampleNo1] += (LH[1]-alpha2);
+							LVec[exampleNo2] = LH[0]; HVec[exampleNo2] = LH[1]; LVec_ast[exampleNo1] += (LH[0]-alph[exampleNo2]); HVec_ast[exampleNo1] += (LH[1]-alph[exampleNo2]);
+							LVec_ast[exampleNo2] = alpha2_ast; HVec_ast[exampleNo2] = alpha2_ast; LVec[exampleNo1] = alpha1; HVec[exampleNo1] = alpha1;
 							double LObj = evaluateObjective(cat,LVec,LVec_ast);double HObj = evaluateObjective(cat,HVec,HVec_ast);
 							if(LObj > HObj + tol) a2 = LH[0]; else if(HObj > LObj + tol) a2 = LH[1]; else a2 = alpha2;
 						}
 						a1 = alpha1_ast + (a2 - alpha2); if(Math.abs(a2-alpha2) > tol) {delta_phi -= eta*(a1-alpha1_ast); alpha2 = a2; alpha1_ast = a1;} 
-						//System.out.printf("%d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\n",exampleNo1,exampleNo2,a1,a2,alpha1_ast,alpha2,eta,delta_phi);
+						//if( (a1 > parameters[0]) || (a2 > parameters[0]) ) System.out.printf("case 3 %d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",exampleNo1,exampleNo2,parameters[0],a1,a2,alpha1_ast,alpha2,eta,delta_phi);
 						/*double[] vec1 = alph;
 						double[] vec2 = alph_ast;
 						double[] vec3 = alph;
@@ -700,11 +710,11 @@ public class SVR extends Model {
 						//System.out.printf("%f\t%f\n",evaluateObjective(vec1,vec2),evaluateObjective(vec3,vec4));
 					}
 					else finished = true;
-					
 					case3 = false;
 				}
 				else if( case4 && (alpha1_ast > 0 || (alpha1 == 0 && delta_phi < 0 ) ) && (alpha2_ast > 0 || (alpha2 == 0 && delta_phi > 0 ) ) )
 				{
+					//System.out.printf("case 4 %f %f %f %f %f %f\n",alpha1,alpha2,alpha1_ast,alpha2_ast,delta_phi,eta);
 					double[] LH = computeLH(1,alpha1_ast,alpha2_ast);
 					if( (LH[1] - LH[0]) > tol)
 					{
@@ -716,11 +726,15 @@ public class SVR extends Model {
 							double[] LVec_ast = new double[alph.length];
 							double[] HVec_ast = new double[alph.length];
 							for(int idx=0;idx<LVec.length;++idx){LVec[idx] = alph[idx];HVec[idx] = alph[idx];LVec_ast[idx] = alph_ast[idx];HVec_ast[idx] = alph_ast[idx];}
-							LVec_ast[exampleNo2] = LH[0]; HVec_ast[exampleNo2] = LH[1]; LVec_ast[exampleNo1] -= (LH[0]-alpha2_ast); HVec_ast[exampleNo1] -= (LH[1]-alpha2_ast);
+							LVec_ast[exampleNo2] = LH[0]; HVec_ast[exampleNo2] = LH[1]; LVec_ast[exampleNo1] -= (LH[0]-alph_ast[exampleNo2]); HVec_ast[exampleNo1] -= (LH[1]-alph_ast[exampleNo2]);
+							LVec[exampleNo2] = alpha2; HVec[exampleNo2] = alpha2; LVec[exampleNo1] = alpha1; HVec[exampleNo1] = alpha1;
 							double LObj = evaluateObjective(cat,LVec,LVec_ast);double HObj = evaluateObjective(cat,HVec,HVec_ast);
-							if(LObj > HObj + tol) a2 = LH[0]; else if(HObj > LObj + tol) a2 = LH[1]; else a2 = alpha2;
+							//Matrix.print(LVec_ast); Matrix.print(HVec_ast); System.out.printf("%f %f\n",LH[0],LH[1]);
+							if(LObj > HObj + tol) a2 = LH[0]; else if(HObj > LObj + tol) a2 = LH[1]; else a2 = alpha2_ast;
 						}
 						a1 = alpha1_ast - (a2 - alpha2_ast); 
+						//if( (a1 > parameters[0]) || (a2 > parameters[0]) )  {System.out.printf("case 4 %d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",exampleNo1,exampleNo2,parameters[0],a1,a2,alpha1_ast,alpha2_ast,eta,delta_phi);  }
+						
 						/*double[] vec1 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec1[idx]=alph[idx];
 						double[] vec2 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec2[idx]=alph_ast[idx];
 						double[] vec3 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec3[idx]=alph[idx];
