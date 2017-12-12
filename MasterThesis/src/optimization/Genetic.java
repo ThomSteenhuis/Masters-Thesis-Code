@@ -3,7 +3,6 @@ package optimization;
 import java.util.ArrayList;
 import java.util.Random;
 
-import math.Matrix;
 import performance.PerformanceMeasures;
 
 public class Genetic extends Optimization {
@@ -132,10 +131,14 @@ public class Genetic extends Optimization {
 
 		if(w < mixingGeneProb)
 		{
+			double output;
 			if(exponentialSteps[idx])
-				return Math.pow(exponentialBase[idx],v*Math.log(parent1.getChromosome()[idx].getValue())/Math.log(exponentialBase[idx]) +(1-v)*Math.log(parent2.getChromosome()[idx].getValue())/Math.log(exponentialBase[idx]) );
+				output = Math.pow(exponentialBase[idx],v*Math.log(parent1.getChromosome()[idx].getValue())/Math.log(exponentialBase[idx]) +(1-v)*Math.log(parent2.getChromosome()[idx].getValue())/Math.log(exponentialBase[idx]) );
 			else
-				return v*parent1.getChromosome()[idx].getValue() +(1-v)*parent2.getChromosome()[idx].getValue();
+				output = v*parent1.getChromosome()[idx].getValue() +(1-v)*parent2.getChromosome()[idx].getValue();
+			
+			if(integerType[idx]) return (int) output;
+			else return output;
 		}
 		else if(w < 0.5 + 0.5*mixingGeneProb )
 			return parent1.getChromosome()[idx].getValue();
@@ -304,8 +307,12 @@ public class Genetic extends Optimization {
 	
 	private int drawRandom(ArrayList<Double> list)
 	{
+		double u = r.nextDouble();
+		if(u < randomParentProb) return r.nextInt(list.size());
+		
 		double sum = 0;
 		for(double idx:list) sum+=idx;
+
 		double w = r.nextDouble()*sum;
 		boolean cont = true;
 		sum = 0;

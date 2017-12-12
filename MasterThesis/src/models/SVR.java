@@ -19,6 +19,7 @@ public class SVR extends Model {
 	private int N_test;
 	
 	private double[][] Kernel;
+	private int[][] KernelOrdering;
 	private double[][] alpha;
 	private double[][] alpha_ast;
 	private double error;
@@ -151,11 +152,33 @@ public class SVR extends Model {
 	private void initializeKernel()
 	{
 		Kernel = new double[N_train][N_train];
+		KernelOrdering = new int[N_train][N_train-1];
 		
-		for(int idx1=0;idx1<Kernel.length;++idx1)
+		for(int idx1=1;idx1<Kernel.length;++idx1)
 		{
 			for(int idx2=0;idx2<idx1;++idx2) {Kernel[idx1][idx2] = kernel(x_train[idx1],x_train[idx2]); Kernel[idx2][idx1] = Kernel[idx1][idx2];}
 			Kernel[idx1][idx1] = 1;
+		}
+		
+		for(int idx1=0;idx1<Kernel.length;++idx1)
+		{
+			int cnt = 0;
+			for(int idx2=0;idx2<Kernel[idx1].length;++idx2) {if(idx2 != idx1) {KernelOrdering[idx1][cnt] = idx2; cnt++; } }
+			
+			for(int idx2=1;idx2<KernelOrdering[idx1].length;++idx2)
+			{
+				for(int idx3=idx2-1;idx3>=0;--idx3)
+				{
+					if(Kernel[idx1][KernelOrdering[idx1][idx3+1]] > Kernel[idx1][KernelOrdering[idx1][idx3]])
+					{
+						int temp = KernelOrdering[idx1][idx3+1];
+						KernelOrdering[idx1][idx3+1] = KernelOrdering[idx1][idx3];
+						KernelOrdering[idx1][idx3] = temp;
+					}
+					else break;
+				}
+			}
+
 		}
 	}
 
@@ -527,6 +550,9 @@ public class SVR extends Model {
 		private ArrayList<Integer> nonBound;
 		private ArrayList<Integer> nonBound_ast;
 		
+		private double[] errorCache;
+		private int[] errorCacheOrder;
+		
 		public SMO(int noObs)
 		{
 			initializeAlpha(noObs);
@@ -601,7 +627,13 @@ public class SVR extends Model {
 			if( (phi2 > (parameters[1] + tol) && alpha2_ast < parameters[0]) || (phi2 < (parameters[1] - tol) && alpha2_ast > 0) 
 					|| (phi2 > (-parameters[1]+tol) && alpha2 > 0) || (phi2 < (-parameters[1] - tol) && alpha2 < parameters[0])  )
 			{
-				int[] permuteNonBound = getPermutation(nonBound.size());
+				int[] permuteNonBound = getNonBoundPermutation();
+				if(permuteNonBound.length > 0)
+				{
+					int ex2 = secondChoiceHeuristic(exampleNo);
+					if(takeStep(cat,ex2,exampleNo,alpha2,alpha2_ast,phi2) ) return 1;
+				}
+				
 				for(int idx:permuteNonBound) 
 				{
 					if(takeStep(cat,idx,exampleNo,alpha2,alpha2_ast,phi2) ) return 1;
@@ -613,6 +645,7 @@ public class SVR extends Model {
 					if(takeStep(cat,idx,exampleNo,alpha2,alpha2_ast,phi2) ) return 1;
 				}
 			}
+			
 			return 0;
 		}
 		
@@ -839,6 +872,12 @@ public class SVR extends Model {
 			}			
 		}
 		
+		private int secondChoiceHeuristic(int ex1)
+		{
+			for(int idx=0;idx<KernelOrdering[ex1].length;++idx) {if(nonBound.contains(KernelOrdering[ex1][idx]) || nonBound_ast.contains(KernelOrdering[ex1][idx])) return idx; }
+			return ex1;
+		}
+		
 		private void updateNonBound()
 		{
 			nonBound.clear();
@@ -922,6 +961,35 @@ public class SVR extends Model {
 			return objective;			
 		}
 		
+		private int[] getNonBoundPermutation()
+		{
+			ArrayList<Integer> nb = new ArrayList<Integer>();
+			
+			for(int idx=0;idx<alph.length;++idx) {if(nonBound.contains(idx) || nonBound_ast.contains(idx)) nb.add(idx); }
+			
+			int[] output = new int[nb.size()];
+			boolean[] used = new boolean[output.length];
+			
+			for(int idx1=0;idx1<output.length;++idx1)
+			{
+				int n = r.nextInt(output.length-idx1);
+				int cnt = 0;
+				int idx2 = 0;
+				
+				while(cnt<=n)
+				{
+					if(used[idx2]) idx2++; 
+					else {cnt++;idx2++;}
+				}
+				
+				--idx2;
+				output[idx1] = nb.get(idx2);
+				used[idx2] = true;
+			}
+			
+			return output;
+		}
+		
 		private int[] getPermutation(int max)
 		{
 			int[] output = new int[max];
@@ -952,16 +1020,5 @@ public class SVR extends Model {
 			alph = new double[noObs];
 			alph_ast = new double[noObs];
 		}
-		
-
-	}
-	
-	public static void main(String[] args)
-	{
-		Random R = new Random(3493);
-		double[] A = new double[10];
-		for(int idx=0;idx<10;idx++)
-			A[idx] = idx;
-		
 	}
 }

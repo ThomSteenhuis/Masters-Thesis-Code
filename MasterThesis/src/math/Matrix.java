@@ -434,6 +434,17 @@ public class Matrix {
 			System.out.println();
 		}
 	}
+	
+	public static void print(int[][] matrix)
+	{
+		for(int idx1=0;idx1<matrix.length;++idx1)
+		{
+			for(int idx2=0;idx2<matrix[idx1].length;++idx2)
+				System.out.printf("%d\t", matrix[idx1][idx2]);
+
+			System.out.println();
+		}
+	}
 
 	public static void print(double[] array)
 	{
