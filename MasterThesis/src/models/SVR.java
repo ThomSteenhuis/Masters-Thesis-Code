@@ -708,7 +708,7 @@ public class SVR extends Model {
 							System.out.println((calculateOutput(exampleNo2,alpha2,alpha2_ast)-y_train[exampleNo2][cat])-(calculateOutput(exampleNo1,alpha1,alpha1_ast)-y_train[exampleNo1][cat]));
 							System.out.printf("%f\t%f\t%f\n",evaluateObjective(cat,vec1,vec2),evaluateObjective(cat,vec3,vec4),evaluateObjective(cat,vec5,vec6));
 						}
-						if(Math.abs(a2-alpha2) > tol) {delta_phi -= eta*(a2-alpha2); alpha2 = a2; alpha1 = a1;} 
+						if(Math.abs(a2-alpha2) > tol) {alpha2 = a2; alpha1 = a1;} 
 					}
 					else finished = true;
 					case1 = false;
@@ -748,7 +748,7 @@ public class SVR extends Model {
 							
 							System.out.printf("%f\t%f\n",evaluateObjective(cat,vec1,vec2),evaluateObjective(cat,vec3,vec4));
 						}
-						if(Math.abs(a2-alpha2_ast) > tol) {delta_phi += eta*(a2-alpha2_ast); alpha2_ast = a2; alpha1 = a1;} 
+						if(Math.abs(a2-alpha2_ast) > tol) {alpha2_ast = a2; alpha1 = a1;} 
 						//System.out.printf("%f\t%f\n",evaluateObjective(vec1,vec2),evaluateObjective(vec3,vec4));
 					}
 					else finished = true;
@@ -788,7 +788,7 @@ public class SVR extends Model {
 							
 							System.out.printf("%f\t%f\n",evaluateObjective(cat,vec1,vec2),evaluateObjective(cat,vec3,vec4));
 						}
-						if(Math.abs(a2-alpha2) > tol) {delta_phi -= eta*(a2-alpha2); alpha2 = a2; alpha1_ast = a1;} 
+						if(Math.abs(a2-alpha2) > tol) {alpha2 = a2; alpha1_ast = a1;} 
 						//System.out.printf("%f\t%f\n",evaluateObjective(vec1,vec2),evaluateObjective(vec3,vec4));
 					}
 					else finished = true;
@@ -830,13 +830,14 @@ public class SVR extends Model {
 							
 							System.out.printf("%f\t%f\n",evaluateObjective(cat,vec1,vec2),evaluateObjective(cat,vec3,vec4));
 						}
-						if(Math.abs(a2-alpha2_ast) > tol) {delta_phi += eta*(a2-alpha2_ast); alpha2_ast = a2; alpha1_ast = a1;} 
+						if(Math.abs(a2-alpha2_ast) > tol) {alpha2_ast = a2; alpha1_ast = a1;} 
 					}
 					else finished = true;
 					case4 = false;
 					//delta_phi -= eta*( (alpha2-alpha2_ast) - (alph[exampleNo2] - alph_ast[exampleNo2]) );
 				}
 				else finished = true;
+				delta_phi -= eta*( (alpha2-alpha2_ast) - (alph[exampleNo2] - alph_ast[exampleNo2]) );
 			}
 			
 			//System.out.printf("%d\t%b\t%d\t%b\t%f\t%f\t%f\t%f\t%f\t\n",exampleNo1,ast1,exampleNo2,ast2,alpha1,alpha2,a1,a2,eta);
