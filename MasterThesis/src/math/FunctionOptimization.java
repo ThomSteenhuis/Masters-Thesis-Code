@@ -9,11 +9,12 @@ public abstract class FunctionOptimization {
 	protected int noIterations;
 	protected boolean converged;
 	
-	protected final int maxNoIterations = 100000;
+	protected int maxNoIterations;
 	
-	public FunctionOptimization(Function f)
+	public FunctionOptimization(Function f,int maxIters)
 	{
 		function = f;
+		maxNoIterations = maxIters;
 	}
 	
 	public abstract boolean optimize();

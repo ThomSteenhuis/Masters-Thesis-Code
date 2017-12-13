@@ -690,7 +690,7 @@ public class SVR extends Model {
 						}
 						a1 = alpha1 - (a2 - alpha2);
 						//if( (a1 > parameters[0]) || (a2 > parameters[0]) )  System.out.printf("case 1 %d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",exampleNo1,exampleNo2,parameters[0],a1,a2,alpha1,alpha2,eta,delta_phi);
-						double[] vec1 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec1[idx]=alph[idx];
+						/*double[] vec1 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec1[idx]=alph[idx];
 						double[] vec2 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec2[idx]=alph_ast[idx];
 						double[] vec3 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec3[idx]=alph[idx];
 						double[] vec4 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec4[idx]=alph_ast[idx];
@@ -707,7 +707,7 @@ public class SVR extends Model {
 							System.out.printf("case 1 %d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\n",exampleNo1,exampleNo2,a1,a2,alpha1,alpha2,eta,delta_phi);
 							System.out.println((calculateOutput(exampleNo2,alpha2,alpha2_ast)-y_train[exampleNo2][cat])-(calculateOutput(exampleNo1,alpha1,alpha1_ast)-y_train[exampleNo1][cat]));
 							System.out.printf("%f\t%f\t%f\n",evaluateObjective(cat,vec1,vec2),evaluateObjective(cat,vec3,vec4),evaluateObjective(cat,vec5,vec6));
-						}
+						}*/
 						if(Math.abs(a2-alpha2) > tol) {alpha2 = a2; alpha1 = a1;} 
 					}
 					else finished = true;
@@ -734,7 +734,7 @@ public class SVR extends Model {
 						}
 						a1 = alpha1 + (a2 - alpha2_ast); 
 						//if( (a1 > parameters[0]) || (a2 > parameters[0]) ) System.out.printf("case 2 %d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",exampleNo1,exampleNo2,parameters[0],a1,a2,alpha1,alpha2_ast,eta,delta_phi);
-						double[] vec1 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec1[idx]=alph[idx];
+						/*double[] vec1 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec1[idx]=alph[idx];
 						double[] vec2 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec2[idx]=alph_ast[idx];
 						double[] vec3 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec3[idx]=alph[idx];
 						double[] vec4 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec4[idx]=alph_ast[idx];
@@ -747,7 +747,7 @@ public class SVR extends Model {
 							System.out.println((calculateOutput(exampleNo2,alpha2,alpha2_ast)-y_train[exampleNo2][cat])-(calculateOutput(exampleNo1,alpha1,alpha1_ast)-y_train[exampleNo1][cat]));
 							
 							System.out.printf("%f\t%f\n",evaluateObjective(cat,vec1,vec2),evaluateObjective(cat,vec3,vec4));
-						}
+						}*/
 						if(Math.abs(a2-alpha2_ast) > tol) {alpha2_ast = a2; alpha1 = a1;} 
 						//System.out.printf("%f\t%f\n",evaluateObjective(vec1,vec2),evaluateObjective(vec3,vec4));
 					}
@@ -775,7 +775,7 @@ public class SVR extends Model {
 						}
 						a1 = alpha1_ast + (a2 - alpha2); if(Math.abs(a2-alpha2) > tol) {delta_phi -= eta*(a1-alpha1_ast); alpha2 = a2; alpha1_ast = a1;} 
 						//if( (a1 > parameters[0]) || (a2 > parameters[0]) ) System.out.printf("case 3 %d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",exampleNo1,exampleNo2,parameters[0],a1,a2,alpha1_ast,alpha2,eta,delta_phi);
-						double[] vec1 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec1[idx]=alph[idx];
+						/*double[] vec1 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec1[idx]=alph[idx];
 						double[] vec2 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec2[idx]=alph_ast[idx];
 						double[] vec3 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec3[idx]=alph[idx];
 						double[] vec4 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec4[idx]=alph_ast[idx];
@@ -787,7 +787,7 @@ public class SVR extends Model {
 							System.out.printf("case 3 %d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\n",exampleNo1,exampleNo2,a1,a2,alpha1_ast,alpha2,eta,delta_phi);
 							
 							System.out.printf("%f\t%f\n",evaluateObjective(cat,vec1,vec2),evaluateObjective(cat,vec3,vec4));
-						}
+						}*/
 						if(Math.abs(a2-alpha2) > tol) {alpha2 = a2; alpha1_ast = a1;} 
 						//System.out.printf("%f\t%f\n",evaluateObjective(vec1,vec2),evaluateObjective(vec3,vec4));
 					}
@@ -817,7 +817,7 @@ public class SVR extends Model {
 						a1 = alpha1_ast - (a2 - alpha2_ast); 
 						//if( (a1 > parameters[0]) || (a2 > parameters[0]) )  {System.out.printf("case 4 %d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",exampleNo1,exampleNo2,parameters[0],a1,a2,alpha1_ast,alpha2_ast,eta,delta_phi);  }
 						
-						double[] vec1 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec1[idx]=alph[idx];
+						/*double[] vec1 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec1[idx]=alph[idx];
 						double[] vec2 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec2[idx]=alph_ast[idx];
 						double[] vec3 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec3[idx]=alph[idx];
 						double[] vec4 = new double[alph.length]; for(int idx=0;idx<alph.length;++idx) vec4[idx]=alph_ast[idx];
@@ -829,7 +829,7 @@ public class SVR extends Model {
 							System.out.printf("case 4 %d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\n",exampleNo1,exampleNo2,a1,a2,alpha1_ast,alpha2_ast,eta,delta_phi);
 							
 							System.out.printf("%f\t%f\n",evaluateObjective(cat,vec1,vec2),evaluateObjective(cat,vec3,vec4));
-						}
+						}*/
 						if(Math.abs(a2-alpha2_ast) > tol) {alpha2_ast = a2; alpha1_ast = a1;} 
 					}
 					else finished = true;

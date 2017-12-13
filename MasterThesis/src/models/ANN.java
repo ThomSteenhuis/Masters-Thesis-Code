@@ -20,27 +20,29 @@ public class ANN extends Model {
 	private double[][] Z;
 	private double[][] WTX;
 
-	public double[][] Y;
-	public double[][] X;
-	public int N;
-	public double[] mean;
-	public double[] max;
+	private double[][] Y;
+	private double[][] X;
+	private int N;
+	private double[] mean;
+	private double[] max;
 
 	public double alr;
 	public int noTrainingEpochs;
 
 	private int seed;
+	private int maxNoIterations;
 
 	private final double maxInitBounds = 0.01;
 	private final int epochMultiplyer = 1000;
 
-	public ANN(Data data,int[] noPeriods,String[] cats,int s)
+	public ANN(Data data,int[] noPeriods,String[] cats,int s,int maxIters)
 	{
 		super(data,noPeriods,cats);
 		noParameters = 1;
 		noConstants = 2;
 		name = "ANN";
 		seed = s;
+		maxNoIterations = maxIters;
 	}
 
 	public boolean train()
@@ -152,9 +154,9 @@ public class ANN extends Model {
 	private boolean nelderMead()
 	{
 		FFANNErrorFunction f = new FFANNErrorFunction((int)parameters[0],X,Y);
-		NelderMead nm = new NelderMead(f,seed);
+		NelderMead nm = new NelderMead(f,seed,maxNoIterations);
 
-		if(!nm.optimize()) return false;
+		nm.optimize();
 
 		translateOptimalweights(nm.getOptimalIntput());
 		calculateYHat();
@@ -318,12 +320,12 @@ public class ANN extends Model {
 		return 2*maxInitBounds*(input - 1);
 	}*/
 
-	public double standardize(double input,int index)
+	private double standardize(double input,int index)
 	{
 		return ( (input-mean[index])/(max[index]-mean[index]) );
 	}
 
-	public double destandardize(double input,int index)
+	private double destandardize(double input,int index)
 	{
 		return ((max[index]-mean[index])*input+mean[index]);
 	}

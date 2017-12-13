@@ -279,13 +279,13 @@ public class Experiment {
 		{
 			int[] periods = {1,3,6};
 			String[] category = {"2200EVO","8800FCQ, RFID"};
-			naive = new Naive(data,periods,category);
+			naive = new Naive(1,data,periods,category);
 		}
 		else
 		{
 			int[] periods = {Integer.parseInt(line[3])};
 			String[] category = {cat};
-			naive = new Naive(data,periods,category);
+			naive = new Naive(1,data,periods,category);
 		}
 
 		return naive;
@@ -333,13 +333,13 @@ public class Experiment {
 		{
 			int[] periods = {1,3,6};
 			String[] category = {"2200EVO","8800FCQ, RFID"};
-			ann = new ANN(data,periods,category,(seed*34)%343094039);
+			ann = new ANN(data,periods,category,(seed*34)%343094039,100000);
 		}
 		else
 		{
 			int[] periods = {Integer.parseInt(line[3])};
 			String[] category = {cat};
-			ann = new ANN(data,periods,category,(seed*34)%343094039);
+			ann = new ANN(data,periods,category,(seed*34)%343094039,100000);
 		}
 
 		double[] constants = {Double.parseDouble(line[4]),Double.parseDouble(line[5])};
@@ -510,9 +510,11 @@ public class Experiment {
 			outcomes[2*idx1][7] = "MAE";
 			outcomes[2*idx1][8] = "ME";
 			outcomes[2*idx1][9] = "Constants";
-			outcomes[2*idx1][9+noConsts] = "Best parameters";			
+			for(int idx2=10;idx2<(9+noConsts);++idx2) outcomes[2*idx1][idx2] = "";
+			outcomes[2*idx1][9+noConsts] = "Best parameters";
+			for(int idx2=10+noConsts;idx2<outcomes[2*idx1].length;++idx2) outcomes[2*idx1][idx2] = "";
 			
-			outcomes[2*idx1+1] = new String[9+noPars];
+			outcomes[2*idx1+1] = new String[9+noConsts+noPars];
 			outcomes[2*idx1+1][0] = instances.get(index).getPerformanceMeasures().getModel().getName();
 			
 			if(isSVR(outcomes[2*idx1+1][0])) cat = (int)instances.get(index).getPerformanceMeasures().getModel().getConstants()[0]; 

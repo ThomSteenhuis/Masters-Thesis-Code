@@ -5,31 +5,45 @@ import java.util.Random;
 public class NelderMead extends FunctionOptimization {
 
 	private Random r;
+	private final int itersBetweenRestarts = 5000;
 
-	public NelderMead(Function f, int s)
+	public NelderMead(Function f, int s,int maxIters)
 	{
-		super(f);
+		super(f,maxIters);
 		r = new Random(s);
 	}
 
 	public boolean optimize()
 	{
-		Simplex S = new Simplex(function.getNoInputs() );
-		S.initialize();
-
+		int restarts = 0;
 		int iter = 0;
 		boolean stop = false;
-
-		while((!stop) && (iter < maxNoIterations) )
+		
+		double[] xBasis = new double[function.getNoInputs()];
+		for(int idx=0;idx<xBasis.length;++idx) xBasis[idx] = 2 * r.nextDouble() - 1;
+		
+		while( (restarts < (maxNoIterations/itersBetweenRestarts) ) && !stop )
 		{
-			stop = S.iterate();
-			iter ++;
-		}
+			Simplex S = new Simplex(function.getNoInputs() );
+			
+			S.initialize(xBasis);
 
-		noIterations = iter;
-		optimalValue = S.getBestValue();
-		optimalInput =  S.getBestVector();
+			iter = 0;
 
+			while((!stop) && (iter < itersBetweenRestarts ) )
+			{			
+				System.out.printf("%d\t%f\n",restarts*itersBetweenRestarts+iter,S.xValues[0]);
+				stop = S.iterate();
+				iter ++;
+			}
+
+			if(!stop) {restarts++; for(int idx2=0;idx2<S.dimension;++idx2) xBasis[idx2] = S.xVectors[0][idx2];}
+	
+			noIterations = iter;
+			optimalValue = S.getBestValue();
+			optimalInput =  S.getBestVector();
+		}		
+		
 		if(stop){ converged = true; return true;}
 		else{ converged = false; return false;}
 	}
@@ -53,6 +67,7 @@ public class NelderMead extends FunctionOptimization {
 
 		private double[][] xVectors;
 		private double[] xValues;
+		private double[] centroid;
 
 		/*private int bestVector;
 		private double bestValue;
@@ -71,24 +86,19 @@ public class NelderMead extends FunctionOptimization {
 			dimension = dim;
 		}
 
-		public void initialize()
+		public void initialize(double[] vector)
 		{
-			double[] xBasis = new double[dimension];
 			xVectors = new double[dimension+1][dimension];
 			double eta = r.nextDouble();
 
-			for(int idx=0;idx<dimension;++idx)
-			{
-				xBasis[idx] = 2 * r.nextDouble() - 1;
-				xVectors[0][idx] = xBasis[idx];
-			}
+			for(int idx=0;idx<dimension;++idx) xVectors[0][idx] = vector[idx];
 
 			for(int idx1=0;idx1<dimension;++idx1)
 			{
 				for(int idx2=0;idx2<dimension;++idx2)
-					xVectors[idx1+1][idx2] = xBasis[idx2];
+					xVectors[idx1+1][idx2] = vector[idx2];
 
-				xVectors[idx1+1][idx1] = xVectors[idx1][idx1] + eta;
+				xVectors[idx1+1][idx1] += eta;
 			}
 
 			xValues = new double[dimension+1];
@@ -97,19 +107,11 @@ public class NelderMead extends FunctionOptimization {
 				xValues[idx] = function.evaluate(xVectors[idx]);
 
 			sort(0,dimension);
+			calculateCentroid();
 		}
 
 		public boolean iterate()
 		{
-			double[] centroid = new double[dimension];
-
-			for(int idx1=0;idx1<dimension;++idx1)
-			{
-				for(int idx2=0;idx2<dimension;++idx2) centroid[idx1] = centroid[idx1] + xVectors[idx2][idx1];
-
-				centroid[idx1] = centroid[idx1] / dimension;
-			}
-
 			double[] newVector = new double[dimension];
 
 			for(int idx=0;idx<dimension;++idx)
@@ -149,12 +151,15 @@ public class NelderMead extends FunctionOptimization {
 
 					tempValue = function.evaluate(newVector2);
 
-					if(tempValue > xValues[dimension])
+					if(tempValue >= xValues[dimension])
 					{
 						for(int idx1=1;idx1<=dimension;++idx1)
 						{
 							for(int idx2=0;idx2<dimension;++idx2)
+							{
 								xVectors[idx1][idx2] = 0.5*(xVectors[idx1][idx2] + xVectors[0][idx2]);
+								centroid[idx2] = 0.5*(centroid[idx2] + xVectors[0][idx2]);
+							}
 
 							xValues[idx1] = function.evaluate(xVectors[idx1]);
 						}
@@ -173,12 +178,15 @@ public class NelderMead extends FunctionOptimization {
 
 					tempValue = function.evaluate(newVector2);
 
-					if(tempValue > xValues[dimension])
+					if(tempValue >= xValues[dimension])
 					{
 						for(int idx1=1;idx1<=dimension;++idx1)
 						{
 							for(int idx2=0;idx2<dimension;++idx2)
+							{
 								xVectors[idx1][idx2] = 0.5*(xVectors[idx1][idx2] + xVectors[0][idx2]);
+								centroid[idx2] = 0.5*(centroid[idx2] + xVectors[0][idx2]);
+							}
 
 							xValues[idx1] = function.evaluate(xVectors[idx1]);
 						}
@@ -204,6 +212,32 @@ public class NelderMead extends FunctionOptimization {
 		public double[] getBestVector()
 		{
 			return xVectors[0];
+		}
+		
+		private void calculateCentroid()
+		{
+			centroid = new double[dimension];
+
+			for(int idx1=0;idx1<dimension;++idx1)
+			{
+				for(int idx2=0;idx2<dimension;++idx2) centroid[idx1] += xVectors[idx2][idx1];
+
+				centroid[idx1] = centroid[idx1] / dimension;
+			}
+		}
+		
+		private double[] calculateC()
+		{
+			double[] c = new double[dimension];
+
+			for(int idx1=0;idx1<dimension;++idx1)
+			{
+				for(int idx2=0;idx2<dimension;++idx2) c[idx1] += xVectors[idx2][idx1];
+
+				c[idx1] = c[idx1] / dimension;
+			}
+			
+			return c;
 		}
 
 		private void sort(int indexL,int indexR)
@@ -328,18 +362,24 @@ public class NelderMead extends FunctionOptimization {
 				xValues[idx1] = xValues[idx1-1];
 			}
 
-			for(int idx2=0;idx2<dimension;++idx2) xVectors[0][idx2] = vector[idx2];
+			for(int idx2=0;idx2<dimension;++idx2) 
+			{
+				xVectors[0][idx2] = vector[idx2];
+				centroid[idx2] += (vector[idx2]-xVectors[dimension][idx2])/dimension; 
+			}
+			
 			xValues[0] = value;
 		}
 
 		private void insertVector(double[] vector, double value)
 		{
-			int idx = 0;
+			int idx = dimension;
 
-			while( (value < xValues[idx]) && (idx < dimension) ) idx++;
-
-			if( (idx < dimension) || (value < xValues[idx]) )
+			if(value < xValues[0]) insertNewBestVector(vector,value);
+			else
 			{
+				while(value < xValues[idx-1]) idx--; 
+
 				for(int idx1=dimension;idx1>idx;--idx1)
 				{
 					for(int idx2=0;idx2<dimension;++idx2) xVectors[idx1][idx2] = xVectors[idx1-1][idx2];
@@ -348,6 +388,11 @@ public class NelderMead extends FunctionOptimization {
 
 				for(int idx2=0;idx2<dimension;++idx2) xVectors[idx][idx2] = vector[idx2];
 				xValues[idx] = value;
+				
+				if(idx < dimension) 
+				{
+					for(int idx2=0;idx2<dimension;++idx2) centroid[idx2] += (vector[idx2]-xVectors[dimension][idx2])/dimension; 
+				}
 			}
 		}
 

@@ -1,1 +1,1 @@
-ANN	8800FCQ, RFID	GridSearch	1	0	3	2	50	24	linear	2
+ANN	complete	GridSearch	1	1	6	2	4	1	linear	2

@@ -1,0 +1,12 @@
+Model name	Machine name	Optimization name	No periods ahead	Runtime (seconds)	RMSE	MAPE	MAE	ME	Constants		Best parameters	
+ANN	2200EVO	GridSearch	1	5.1386666666666665	22.704308901758175	46.233589222387586	18.40096851051026	-14.103727313981823	1.0	6.0	2.0	
+Model name	Machine name	Optimization name	No periods ahead	Runtime (seconds)	RMSE	MAPE	MAE	ME	Constants		Best parameters	
+ANN	2200EVO	GridSearch	3	5.1386666666666665	17.262554685215793	38.1171600617582	15.170629704579763	-6.670432772322566	1.0	6.0	2.0	
+Model name	Machine name	Optimization name	No periods ahead	Runtime (seconds)	RMSE	MAPE	MAE	ME	Constants		Best parameters	
+ANN	2200EVO	GridSearch	6	5.1386666666666665	25.512339890871523	54.86828775061875	21.837578524746263	-6.694960826361265	1.0	6.0	2.0	
+Model name	Machine name	Optimization name	No periods ahead	Runtime (seconds)	RMSE	MAPE	MAE	ME	Constants		Best parameters	
+ANN	8800FCQ, RFID	GridSearch	1	5.1386666666666665	3.819641226827905	56.53359748019322	3.052814263930434	2.527786985709028	1.0	6.0	2.0	
+Model name	Machine name	Optimization name	No periods ahead	Runtime (seconds)	RMSE	MAPE	MAE	ME	Constants		Best parameters	
+ANN	8800FCQ, RFID	GridSearch	3	5.1386666666666665	7.457830677809471	120.12699335684638	6.486857641269705	5.766612898085149	1.0	6.0	2.0	
+Model name	Machine name	Optimization name	No periods ahead	Runtime (seconds)	RMSE	MAPE	MAE	ME	Constants		Best parameters	
+ANN	8800FCQ, RFID	GridSearch	6	5.1386666666666665	9.461691002271147	147.0174688995584	7.938943320576154	6.1992304756284735	1.0	6.0	2.0	
