@@ -37,8 +37,8 @@ public class ANN extends Model {
 	public ANN(Data data,int[] noPeriods,String[] cats,int s)
 	{
 		super(data,noPeriods,cats);
-		noParameters = 2;
-		noConstants = 1;
+		noParameters = 1;
+		noConstants = 2;
 		name = "ANN";
 		seed = s;
 	}
@@ -51,19 +51,13 @@ public class ANN extends Model {
 			return false;
 		}
 
-		/*if( ( (int)parameters[0] < 1) || ( (int)parameters[1] < 1) || (parameters[2] > 1) || (parameters[2] < 0) || ( (int)parameters[3] < 1) )
-		{
-			System.out.println("Error (ANN): parameters have invalid value");
-			return false;
-		}*/
-
-		if( ( (int)parameters[0] < 1) || ( (int)parameters[1] < 1) && ( (int)constants[0] != 0) && ( (int)constants[0] != 1) )
+		if( ( (int)parameters[0] < 1) || ( (int)constants[1] < 1) && ( (int)constants[0] != 0) && ( (int)constants[0] != 1) )
 		{
 			System.out.println("Error (ANN): parameters have invalid value");
 			return false;
 		}
 
-		setNoInputs( ( (int) parameters[0] + (int) constants[0])*category.length);
+		setNoInputs( ( (int) constants[1] + (int) constants[0])*category.length);
 		initializeData();
 
 		//backpropagation();
@@ -134,30 +128,30 @@ public class ANN extends Model {
 
 	private void translateOptimalweights(double[] array)
 	{
-		lowerBias = new double[(int)parameters[1]];
+		lowerBias = new double[(int)parameters[0]];
 		for(int idx=0;idx<lowerBias.length;++idx) lowerBias[idx] = array[idx];
 
-		lowerWeights = new double[ (int)parameters[1] ][X.length];
+		lowerWeights = new double[ (int)parameters[0] ][X.length];
 
 		for(int idx1=0;idx1<lowerWeights.length;++idx1)
 		{
 			for(int idx2=0;idx2<lowerWeights[idx1].length;++idx2)
-				lowerWeights[idx1][idx2] = array[(int)parameters[1] + idx2*(int)parameters[1] + idx1];
+				lowerWeights[idx1][idx2] = array[(int)parameters[0] + idx2*(int)parameters[0] + idx1];
 		}
 
 		upperBias = new double[Y.length];
-		upperWeights = new double[(int)parameters[1]][Y.length];
+		upperWeights = new double[(int)parameters[0]][Y.length];
 		for(int idx1=0;idx1<Y.length;++idx1)
 		{
-			upperBias[idx1] = array[array.length-((int)parameters[1]+1)*Y.length];
-			for(int idx2=0;idx2<(int)parameters[1];++idx2)
-				upperWeights[idx2][idx1] = array[array.length - ((int)parameters[1]-idx2)*Y.length + idx1];
+			upperBias[idx1] = array[array.length-((int)parameters[0]+1)*Y.length];
+			for(int idx2=0;idx2<(int)parameters[0];++idx2)
+				upperWeights[idx2][idx1] = array[array.length - ((int)parameters[0]-idx2)*Y.length + idx1];
 		}
 	}
 
 	private boolean nelderMead()
 	{
-		FFANNErrorFunction f = new FFANNErrorFunction((int)parameters[1],X,Y);
+		FFANNErrorFunction f = new FFANNErrorFunction((int)parameters[0],X,Y);
 		NelderMead nm = new NelderMead(f,seed);
 
 		if(!nm.optimize()) return false;
@@ -174,7 +168,7 @@ public class ANN extends Model {
 		{
 			int cat1 = idx1 / noPersAhead.length;
 			int per = noPersAhead[idx1 % noPersAhead.length];
-			int limit = Math.max((int)(parameters[0]),(int)(constants[0])*12)+Matrix.max(noPersAhead)-1;
+			int limit = Math.max((int)(constants[1]),(int)(constants[0])*12)+Matrix.max(noPersAhead)-1;
 
 			for(int idx2=0;idx2<limit;++idx2)
 				trainingForecast[idx1][idx2] = trainingReal[idx1][idx2];
@@ -188,13 +182,13 @@ public class ANN extends Model {
 
 				for(int idx3=0;idx3<noInputs;++idx3)
 				{
-					int cat2 = idx3 / ((int)(parameters[0]) + (int)(constants[0]));
-					int lag = idx3 % ((int)(parameters[0]) + (int)(constants[0]));
+					int cat2 = idx3 / ((int)(constants[1]) + (int)(constants[0]));
+					int lag = idx3 % ((int)(constants[1]) + (int)(constants[0]));
 
-					if( ( (int)constants[0] == 1) && (lag == ((int)parameters[0] + (int)constants[0] - 1) ) )
+					if( ( (int)constants[0] == 1) && (lag == ((int)constants[1] + (int)constants[0] - 1) ) )
 						x[idx3] = standardize(data.getVolumes()[data.getValidationFirstIndex()[cat2] + idx2 - per - 11][cat2],cat2);
 					else
-						x[idx3] = standardize(data.getVolumes()[data.getValidationFirstIndex()[cat2] + idx2 + lag - (int)(parameters[0]) - per + 1][cat2],cat2);
+						x[idx3] = standardize(data.getVolumes()[data.getValidationFirstIndex()[cat2] + idx2 + lag - (int)(constants[1]) - per + 1][cat2],cat2);
 				}
 
 				validationForecast[idx1][idx2] = destandardize(predict(x)[idx1],cat1);
@@ -206,13 +200,13 @@ public class ANN extends Model {
 
 				for(int idx3=0;idx3<noInputs;++idx3)
 				{
-					int cat2 = idx3 / ((int)parameters[0] + (int)constants[0]);
-					int lag = idx3 % ((int)parameters[0] + (int)constants[0]);
+					int cat2 = idx3 / ((int)constants[1] + (int)constants[0]);
+					int lag = idx3 % ((int)constants[1] + (int)constants[0]);
 
-					if( ( (int)constants[0] == 1) && (lag == ((int)parameters[0] + (int)constants[0] - 1) ) )
+					if( ( (int)constants[0] == 1) && (lag == ((int)constants[1] + (int)constants[0] - 1) ) )
 						x[idx3] = standardize(data.getVolumes()[data.getTestingFirstIndex()[cat2] + idx2 - per - 11][cat2],cat2);
 					else
-						x[idx3] = standardize(data.getVolumes()[data.getTestingFirstIndex()[cat2] + idx2 + lag - (int)(parameters[0]) - per + 1][cat2],cat2);
+						x[idx3] = standardize(data.getVolumes()[data.getTestingFirstIndex()[cat2] + idx2 + lag - (int)(constants[1]) - per + 1][cat2],cat2);
 					}
 
 				testingForecast[idx1][idx2] = destandardize(predict(x)[idx1],cat1);
@@ -343,7 +337,7 @@ public class ANN extends Model {
 		mean = new double[index.length]; max = new double[index.length];
 		for(int idx=0;idx<index.length;++idx) {mean[idx] = Matrix.mean(data.getTrainingSet(category[idx])); max[idx] = Matrix.max(data.getTrainingSet(category[idx]));}
 
-		N = data.getValidationFirstIndex()[index[0]] - data.getTrainingFirstIndex()[index[0]] - Math.max((int) (parameters[0]),(int) (constants[0])*12) - Matrix.max(noPersAhead) + 1;
+		N = data.getValidationFirstIndex()[index[0]] - data.getTrainingFirstIndex()[index[0]] - Math.max((int) (constants[1]),(int) (constants[0])*12) - Matrix.max(noPersAhead) + 1;
 		X = new double[noInputs][N];
 		Y = new double[noOutputs][N];
 
@@ -354,18 +348,18 @@ public class ANN extends Model {
 				int out = idx2 / noPersAhead.length;
 				int cat = data.getIndexFromCat(category[out]);
 				int noPers = noPersAhead[idx2 % noPersAhead.length];
-				Y[idx2][idx1] = standardize(data.getVolumes()[idx1 + data.getTrainingFirstIndex()[cat] + Math.max((int) (parameters[0]),(int) (constants[0])*12) + noPers - 1][cat],out);
+				Y[idx2][idx1] = standardize(data.getVolumes()[idx1 + data.getTrainingFirstIndex()[cat] + Math.max((int) (constants[1]),(int) (constants[0])*12) + noPers - 1][cat],out);
 			}
 
 			for(int idx2=0;idx2<X.length;++idx2)
 			{
-				int out = idx2 / ((int)parameters[0]+(int)constants[0]);
+				int out = idx2 / ((int)constants[1]+(int)constants[0]);
 				int cat = data.getIndexFromCat(category[out]);
 
-				if( ( (int)constants[0] == 1) && (idx2 % ((int)parameters[0]+(int)constants[0]) == ((int)parameters[0]+(int)constants[0]-1) ) )
+				if( ( (int)constants[0] == 1) && (idx2 % ((int)constants[1]+(int)constants[0]) == ((int)constants[1]+(int)constants[0]-1) ) )
 					X[idx2][idx1] = standardize(data.getVolumes()[idx1 + data.getTrainingFirstIndex()[cat]][cat],out);
 				else
-					X[idx2][idx1] = standardize(data.getVolumes()[idx1 + idx2%((int)parameters[0]+(int)constants[0]) + (int)(constants[0])*(12 - (int)(parameters[0])) + data.getTrainingFirstIndex()[cat]][cat],out);
+					X[idx2][idx1] = standardize(data.getVolumes()[idx1 + idx2%((int)constants[1]+(int)constants[0]) + (int)(constants[0])*(12 - (int)(constants[1])) + data.getTrainingFirstIndex()[cat]][cat],out);
 			}
 		}
 	}

@@ -342,7 +342,7 @@ public class Experiment {
 			ann = new ANN(data,periods,category,(seed*34)%343094039);
 		}
 
-		double[] constants = {Double.parseDouble(line[4])};
+		double[] constants = {Double.parseDouble(line[4]),Double.parseDouble(line[5])};
 		ann.setConstants(constants);
 		return ann;
 	}
@@ -494,7 +494,12 @@ public class Experiment {
 
 		for(int idx1 = 0;idx1<noOutputs;++idx1)
 		{
-			outcomes[2*idx1] = new String[10];
+			int noConsts = instances.get(index).getPerformanceMeasures().getModel().getNoConstants();
+			int noPars = instances.get(index).getPerformanceMeasures().getModel().getNoParameters();
+			int cat; 
+			int pers = idx1%instances.get(index).getPerformanceMeasures().getModel().getNoPeriodsAhead().length;
+
+			outcomes[2*idx1] = new String[10+noConsts];
 			outcomes[2*idx1][0] = "Model name";
 			outcomes[2*idx1][1] = "Machine name";
 			outcomes[2*idx1][2] = "Optimization name";
@@ -504,12 +509,8 @@ public class Experiment {
 			outcomes[2*idx1][6] = "MAPE";
 			outcomes[2*idx1][7] = "MAE";
 			outcomes[2*idx1][8] = "ME";
-			outcomes[2*idx1][9] = "Best parameters";
-
-			int noPars = instances.get(index).getPerformanceMeasures().getModel().getNoParameters();
-			int cat; 
-			int pers = idx1%instances.get(index).getPerformanceMeasures().getModel().getNoPeriodsAhead().length;
-
+			outcomes[2*idx1][9] = "Constants";
+			outcomes[2*idx1][9+noConsts] = "Best parameters";			
 			
 			outcomes[2*idx1+1] = new String[9+noPars];
 			outcomes[2*idx1+1][0] = instances.get(index).getPerformanceMeasures().getModel().getName();
@@ -529,8 +530,9 @@ public class Experiment {
 				outcomes[2*idx1+1][6] = Double.toString(instances.get(index).getPerformanceMeasures().getMAPE()[idx1]);
 				outcomes[2*idx1+1][7] = Double.toString(instances.get(index).getPerformanceMeasures().getMAE()[idx1]);
 				outcomes[2*idx1+1][8] = Double.toString(instances.get(index).getPerformanceMeasures().getME()[idx1]);
-
-				for(int idx2=0;idx2<noPars;++idx2) outcomes[2*idx1+1][9+idx2] = Double.toString(instances.get(index).getOptimalParameters()[idx2]);
+				
+				for(int idx2=0;idx2<noConsts;++idx2) outcomes[2*idx1+1][9+idx2] = Double.toString(instances.get(index).getPerformanceMeasures().getModel().getConstants()[idx2]);
+				for(int idx2=0;idx2<noPars;++idx2) outcomes[2*idx1+1][9+noConsts+idx2] = Double.toString(instances.get(index).getOptimalParameters()[idx2]);
 			}
 			else outcomes[2*idx1+1][4] = "Instance failed";
 		}

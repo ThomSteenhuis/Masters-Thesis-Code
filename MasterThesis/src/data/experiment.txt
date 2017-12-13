@@ -1,1 +1,1 @@
-SVR	complete	Genetic	1	1	1	6	-5	15	29	exponential	2	-15	5	real	exponential	2	-5	15	29	exponential	2
+ANN	8800FCQ, RFID	GridSearch	1	0	3	2	50	24	linear	2

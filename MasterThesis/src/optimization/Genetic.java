@@ -12,7 +12,7 @@ public class Genetic extends Optimization {
 	private final int noOffspringMultiplyer = 1;
 	private final int maxNoEpochs = 500;
 	private final int maxNoEpochsNoImprovement = 50;
-	private final int neighborhoodSize = 2;
+	private final int neighborhoodSize = 5;
 	private final double mutationProb = 0.2;
 	private final double randomParentProb = 0.2;
 	private final double mixingGeneProb = 0.5;
@@ -61,9 +61,9 @@ public class Genetic extends Optimization {
 
 		for(int idx=0;idx<maxNoEpochs;++idx)
 		{	
-			Matrix.print(population[0].getGenevalues());
-			Matrix.print(optPars);
-			printPopulationFitness();
+			//Matrix.print(population[0].getGenevalues());
+			//Matrix.print(optPars);
+			//printPopulationFitness();
 			
 			if(!epoch())
 				return false;
