@@ -3,6 +3,7 @@ package optimization;
 import java.util.ArrayList;
 import java.util.Random;
 
+import math.Matrix;
 import performance.PerformanceMeasures;
 
 public class Genetic extends Optimization {
@@ -59,8 +60,11 @@ public class Genetic extends Optimization {
 		if(!silent) System.out.println("Genetic population initialized");
 
 		for(int idx=0;idx<maxNoEpochs;++idx)
-		{			
+		{	
+			Matrix.print(population[0].getGenevalues());
+			Matrix.print(optPars);
 			printPopulationFitness();
+			
 			if(!epoch())
 				return false;
 
@@ -328,12 +332,11 @@ public class Genetic extends Optimization {
 		for(int idx=0;idx<populationSize;++idx)
 		{
 			population[idx] = new Member(noParameters);
-
 			population[idx].initialize(idx);
+			updateBest();
 		}
 
 		sort(0,populationSize-1);
-		updateBest();
 	}
 
 	private boolean checkStoppingCriterium()
