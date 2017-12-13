@@ -364,7 +364,7 @@ public class Experiment {
 			svr = new SVR(data,periods,category,(seed*8)%92039029);
 		}
 		
-		double[] constants = {Double.parseDouble(line[4]),Double.parseDouble(line[5])};
+		double[] constants = {Double.parseDouble(line[4]),Double.parseDouble(line[5]),Double.parseDouble(line[6])};
 		svr.setConstants(constants);
 		return svr;
 	}
