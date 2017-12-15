@@ -1,1 +1,2 @@
-Naive	complete	GridSearch	1
+mDES	complete	GridSearch	6	0.01	1	50	linear	2	0.01	1	50	linear	2
+mDESd	complete	GridSearch	6	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
