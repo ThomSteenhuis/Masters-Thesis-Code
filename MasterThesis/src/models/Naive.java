@@ -10,7 +10,8 @@ public class Naive extends Model {
 		super(data,noPeriods,cat);
 		noParameters = 0;
 		noConstants = 0;
-		name = "Naive"+Integer.toString(mode);
+		mode = m;
+		name = "Naive"+Integer.toString(mode);		
 	}
 	
 	public boolean train() 

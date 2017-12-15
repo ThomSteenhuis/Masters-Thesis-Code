@@ -1,1 +1,1 @@
-ANN	complete	GridSearch	1	1	6	2	4	1	linear	2
+Naive	complete	GridSearch	1

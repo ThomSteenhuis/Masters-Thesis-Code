@@ -189,7 +189,6 @@ public class Experiment {
 		}
 	}
 
-
 	public void writeOutcomes(PrintWriter p)
 	{
 		for(int idx1=0;idx1<outcomes.length;++idx1)

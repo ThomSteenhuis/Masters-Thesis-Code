@@ -32,7 +32,6 @@ public class NelderMead extends FunctionOptimization {
 
 			while((!stop) && (iter < itersBetweenRestarts ) )
 			{			
-				System.out.printf("%d\t%f\n",restarts*itersBetweenRestarts+iter,S.xValues[0]);
 				stop = S.iterate();
 				iter ++;
 			}
