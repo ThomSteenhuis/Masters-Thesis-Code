@@ -1,2 +1,1 @@
-mDES	complete	GridSearch	6	0.01	1	50	linear	2	0.01	1	50	linear	2
-mDESd	complete	GridSearch	6	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2
+aTES	2200EVO	GridSearch	1	12	0.01	1	50	linear	2	0.01	1	50	linear	2	0.01	1	50	linear	2

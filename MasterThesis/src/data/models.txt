@@ -11,3 +11,4 @@ four
 ANN
 ARIMA
 SVR
+Naive

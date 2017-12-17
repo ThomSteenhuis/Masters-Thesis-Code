@@ -82,7 +82,7 @@ public class LineGraph{
 	}
 	
 	public void setData(double[][][] input,String[][] leftLine,String[][] header,String[][] labels)
-	{
+	{		
 		if( (input.length != leftLine.length) || (input.length != header.length) || (input.length != labels.length) )
 			initializeError();
 
@@ -95,7 +95,7 @@ public class LineGraph{
 	
 	public void plot()
 	{
-		String[] args = new String[0];
+		String[] args = {""};
 		Plot.plot(args,this);
 	}
 	

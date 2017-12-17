@@ -401,6 +401,8 @@ public class Experiment {
 
 	private static Optimization initializeGS(String[] line,PerformanceMeasures pm) throws FileNotFoundException,NumberFormatException
 	{
+		System.out.println(line.length);
+		System.out.println(pm.getModel().getNoParameters());
 		if( ( ( (line.length-4-pm.getModel().getNoConstants()) % 5) != 0) || ( ( (line.length-4-pm.getModel().getNoConstants()) / 5) != pm.getModel().getNoParameters() ) )
 			throw new FileNotFoundException("number of inputs not correct");
 

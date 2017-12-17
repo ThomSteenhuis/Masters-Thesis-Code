@@ -43,6 +43,7 @@ public class Run {
 
 		Data data = new Data(dataLocation);
 		data.setDataIndices(propTraining, propValidation);
+		data.plot();
 
 		Experiment e = new Experiment(data,seed,experimentLocation,machineLocation);
 

@@ -15,6 +15,8 @@ public class AutoPlot {
 	private static final int[] categories = {1};
 	private static final int[] filter = {3};
 	private static final String[] filterValue = {"GridSearch"};
+	private static final int[] nfilter = {};
+	private static final String[][] nfilterValue = {};
 	
 	private static String iLoc1;
 	private static String iLoc2;
@@ -54,7 +56,7 @@ public class AutoPlot {
 		iLoc1 = args[0];
 		iLoc2 = args[1];
 		oLoc = args[2];
-		
+
 		try{
 			machines = main.Run.readFile(args[3]);
 			models = main.Run.readFile(args[4]);
@@ -69,7 +71,6 @@ public class AutoPlot {
 		
 		readInput();
 		deriveData("testing");
-		
 		LineGraph lg = new LineGraph(volumes,dates,header,labels);
 		lg.autoplot(oLoc);
 	}
@@ -82,8 +83,8 @@ public class AutoPlot {
 			return false;
 		}
 		
-		String[][] splittedList = deriveList(split,false); 
-		String[][] categoriesList = deriveList(categories,true);
+		String[][] splittedList = deriveList(split,nfilter,nfilterValue,false); 
+		String[][] categoriesList = deriveList(categories,nfilter,nfilterValue,true);
 				
 		volumes = new double[splittedList.length][][];
 		dates = new String[splittedList.length][];
@@ -145,8 +146,6 @@ public class AutoPlot {
 				}
 				case "testing":
 				{
-					System.out.println(realTestingDates.length);
-					System.out.println(index);
 					tmp[idx2] = new double[realTestingDates[index].length];
 					
 					if(idx2 == 0)
@@ -256,7 +255,7 @@ public class AutoPlot {
 			noPersAhead = new int[model.length];
 			hash = new Hashtable<String,Integer>();
 			success = new boolean[model.length];
-			
+
 			for(int idx=1;idx<lines.size();idx+=2)
 			{
 				String[] l = lines.get(idx).split("\t");
@@ -340,7 +339,17 @@ public class AutoPlot {
 		}
 	}
 	
-	private static String[][] deriveList(int[] input,boolean actualData)
+	private static int whichEntry(int entry,int[] array)
+	{
+		for(int idx=0;idx<array.length;++idx)
+		{
+			if(entry == array[idx]) return idx;
+		}
+		
+		return -1;
+	}
+	
+	private static String[][] deriveList(int[] input,int[] nfilter,String[][] nfilterVal,boolean actualData)
 	{
 		String[][] table = new String[4][];
 		int l = 1;
@@ -349,12 +358,16 @@ public class AutoPlot {
 		{
 			ArrayList<String> list = new ArrayList<String>();
 			
+			int entry = whichEntry(idx1,nfilter);
+			boolean nfilt = true;
+			if(entry == -1) nfilt = false;
+			
 			switch(idx1)
 			{
-			case 0: for(int idx2=0;idx2<machine.length;++idx2) if(!list.contains(machine[idx2])) list.add(machine[idx2]);break;
-			case 1: for(int idx2=0;idx2<model.length;++idx2) if(!list.contains(model[idx2])) list.add(model[idx2]);break;
-			case 2: for(int idx2=0;idx2<noPersAhead.length;++idx2) if(!list.contains(Integer.toString(noPersAhead[idx2]))) list.add(Integer.toString(noPersAhead[idx2]));break;
-			case 3: for(int idx2=0;idx2<optimization.length;++idx2) if(!list.contains(optimization[idx2])) list.add(optimization[idx2]);break;
+			case 0: for(int idx2=0;idx2<machine.length;++idx2) {if(!list.contains(machine[idx2])) list.add(machine[idx2]); if(nfilt){ for(int idx3=0;idx3<nfilterVal[entry].length;++idx3){ if(machine[idx2].equals(nfilterVal[entry][idx3])) list.remove(machine[idx2]); }}}break;
+			case 1: for(int idx2=0;idx2<model.length;++idx2) {if(!list.contains(model[idx2])) list.add(model[idx2]); if(nfilt){ for(int idx3=0;idx3<nfilterVal[entry].length;++idx3){ if(model[idx2].equals(nfilterVal[entry][idx3])) list.remove(model[idx2]); }}}break;
+			case 2: for(int idx2=0;idx2<noPersAhead.length;++idx2) {if(!list.contains(Integer.toString(noPersAhead[idx2]))) list.add(Integer.toString(noPersAhead[idx2])); if(nfilt){ for(int idx3=0;idx3<nfilterVal[entry].length;++idx3){ if(Integer.toString(noPersAhead[idx2]).equals(nfilterVal[entry][idx3])) list.remove(Integer.toString(noPersAhead[idx2])); }}}break;
+			case 3: for(int idx2=0;idx2<optimization.length;++idx2) {if(!list.contains(optimization[idx2])) list.add(optimization[idx2]); if(nfilt){ for(int idx3=0;idx3<nfilterVal[entry].length;++idx3){ if(optimization[idx2].equals(nfilterVal[entry][idx3])) list.remove(optimization[idx2]); }}}break;
 			default:  System.out.println("Error (deriveList): default case reached");
 			}
 			

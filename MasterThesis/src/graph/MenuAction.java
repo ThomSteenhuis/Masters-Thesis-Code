@@ -29,7 +29,7 @@ public class MenuAction {
 	private final int legendLineMargin = 10;
 	private final int legendTxtMargin = 5;
 	private final int legendLineLength = 10;
-	private final int legendLineWidth = 1;
+	private final int legendLineWidth = 2;
 	private final int txtSize = 12;
 
 	public TextField location,name;
@@ -157,7 +157,10 @@ public class MenuAction {
 			lines[idx].setStartY(graph.getTopMargin()+legendBorderMargin+legendLineMargin+txtSize*idx);
 			lines[idx].setEndY(lines[idx].getStartY());
 			
-			txts[idx] = new Label(graph.getCategories()[graph.getCurrent()][idx]);
+			txts[idx] = new Label();
+			if(graph.getCategories()[graph.getCurrent()][idx].equals("2200EVO")) txts[idx].setText("2200 EVO");
+			else if(graph.getCategories()[graph.getCurrent()][idx].equals("8800FCQ, RFID")) txts[idx].setText("8800 FCQ");
+			else txts[idx].setText(graph.getCategories()[graph.getCurrent()][idx]);
 			txts[idx].setFont(new Font(txtSize));
 			txts[idx].setLayoutX(lines[idx].getEndX()+legendTxtMargin);
 			txts[idx].setLayoutY(lines[idx].getStartY()-0.7*txtSize);

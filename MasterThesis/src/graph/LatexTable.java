@@ -27,6 +27,15 @@ public class LatexTable {
 		writeLatexTable(outputLoc);
 	}
 	
+	private static String whichModel()
+	{
+		for(int idx=0;idx<filterVars.size();++idx)
+		{
+			if(filterVars.get(idx) == 0) return filterVals.get(idx);
+		}
+		return null;
+	}
+	
 	private static boolean contains(int[] vec, int val)
 	{
 		for(int idx=0;idx<vec.length;++idx)
@@ -73,14 +82,37 @@ public class LatexTable {
 			for(int idx=0;idx<configLength;++idx) p.printf("l");
 			p.printf("}\n"); 
 			
+			String model = whichModel();
+			
 			for(int idx=0;idx<(config.length-1);++idx) 
 			{
 				if(config[idx] == 9) p.printf("Number of lags &12th lag &");
-				else if(config[idx] == 10) p.printf("\\{Best number of hidden units\\} &");
+				else if(config[idx] == 10) 
+				{
+					if(model.equals("ANN")) p.printf("\\{Best number of hidden units\\} &");
+					else if(model.equals("SVR")) p.printf("\\{C,\\epsilon,\\sigma^2\\} &");
+					else if(model.equals("SES")) p.printf("\\{\\alpha\\} &");
+					else if(model.equals("aDES") || model.equals("mDES")) p.printf("\\{\\alpha,\\beta\\} &");
+					else if(model.equals("aDESd") || model.equals("mDESd")) p.printf("\\{\\alpha,\\beta,\\phi\\} &");
+					else if(model.equals("aTES") || model.equals("mTES")) p.printf("\\{\\alpha,\\beta,\\gamma\\} &");
+					else if(model.equals("aTESd") || model.equals("mTESd")) p.printf("\\{\\alpha,\\beta,\\gamma,\\phi\\} &");
+					else if(model.equals("four")) p.printf("\\{\\alpha,\\beta,\\gamma,\\delta\\} &");
+				}
 				else p.printf("%s &", input.get(0)[config[idx]]);
 			}
 			if(config[config.length-1] == 9) p.printf("Number of lags &12th lag \\\\ \\hline \n");
-			else if(config[config.length-1] == 10) p.printf("\\{C,\\epsilon,\\sigma^2\\} \\\\ \\hline \n");
+			else if(config[config.length-1] == 10) 
+			{
+				
+				if(model.equals("ANN")) p.printf("\\{Best number of hidden units\\} \\\\ \\hline \n");
+				else if(model.equals("SVR")) p.printf("\\{C,\\epsilon,\\sigma^2\\} \\\\ \\hline \n");
+				else if(model.equals("SES")) p.printf("\\{\\alpha\\} \\\\ \\hline \n");
+				else if(model.equals("aDES") || model.equals("mDES")) p.printf("\\{\\alpha,\\beta\\} \\\\ \\hline \n");
+				else if(model.equals("aDESd") || model.equals("mDESd")) p.printf("\\{\\alpha,\\beta,\\phi\\} \\\\ \\hline \n");
+				else if(model.equals("aTES") || model.equals("mTES")) p.printf("\\{\\alpha,\\beta,\\gamma\\} \\\\ \\hline \n");
+				else if(model.equals("aTESd") || model.equals("mTESd")) p.printf("\\{\\alpha,\\beta,\\gamma,\\phi\\} \\\\ \\hline \n");
+				else if(model.equals("four")) p.printf("\\{\\alpha,\\beta,\\gamma,\\delta\\} \\\\ \\hline \n");
+			}
 			else p.printf("%s\\\\ \\hline\n", input.get(0)[config[config.length-1]]);
 			
 			for(int idx1=1;idx1<input.size();idx1+=2)
@@ -113,10 +145,13 @@ public class LatexTable {
 							{
 								p.printf("\\{%.0f\\} &", Double.parseDouble(input.get(idx1)[config[idx2]+1])); 
 							}
-							else if(input.get(idx1)[0].equals("SVR"))
-							{
-								p.printf("\\{%.3f,%.3f,%.3f\\} &", Double.parseDouble(input.get(idx1)[config[idx2]+2]), Double.parseDouble(input.get(idx1)[config[idx2]+3]), Double.parseDouble(input.get(idx1)[config[idx2]+4])) ;
-							}
+							else if(input.get(idx1)[0].equals("SVR")) p.printf("\\{%.3f,%.3f,%.3f\\} &", Double.parseDouble(input.get(idx1)[config[idx2]+2]), Double.parseDouble(input.get(idx1)[config[idx2]+3]), Double.parseDouble(input.get(idx1)[config[idx2]+4])) ;
+							else if(input.get(idx1)[0].equals("SES")) p.printf("\\{%.3f\\} &",Double.parseDouble(input.get(idx1)[config[idx2]-1]));
+							else if(input.get(idx1)[0].equals("aDES") || input.get(idx1)[0].equals("mDES")) p.printf("\\{%.3f,%.3f\\} &",Double.parseDouble(input.get(idx1)[config[idx2]-1]),Double.parseDouble(input.get(idx1)[config[idx2]]));
+							else if(input.get(idx1)[0].equals("aDESd") || input.get(idx1)[0].equals("mDESd")) p.printf("\\{%.3f,%.3f,%.3f\\} &",Double.parseDouble(input.get(idx1)[config[idx2]-1]),Double.parseDouble(input.get(idx1)[config[idx2]]),Double.parseDouble(input.get(idx1)[config[idx2]+1]));
+							else if(input.get(idx1)[0].equals("aTES") || input.get(idx1)[0].equals("mTES")) p.printf("\\{%.3f,%.3f,%.3f\\} &",Double.parseDouble(input.get(idx1)[config[idx2]]),Double.parseDouble(input.get(idx1)[config[idx2]+1]),Double.parseDouble(input.get(idx1)[config[idx2]+2]));
+							else if(input.get(idx1)[0].equals("aTESd") || input.get(idx1)[0].equals("mTESd")) p.printf("\\{%.3f,%.3f,%.3f,%.3f\\} &",Double.parseDouble(input.get(idx1)[config[idx2]]),Double.parseDouble(input.get(idx1)[config[idx2]+1]),Double.parseDouble(input.get(idx1)[config[idx2]+2]),Double.parseDouble(input.get(idx1)[config[idx2]+3]));
+							else if(input.get(idx1)[0].equals("four")) p.printf("\\{%.3f,%.3f,%.3f,%.3f\\} &",Double.parseDouble(input.get(idx1)[config[idx2]]),Double.parseDouble(input.get(idx1)[config[idx2]+1]),Double.parseDouble(input.get(idx1)[config[idx2]+2]),Double.parseDouble(input.get(idx1)[config[idx2]+3]));
 						}
 						else p.printf("%s &", input.get(idx1)[config[idx2]]);					
 					}
@@ -128,10 +163,7 @@ public class LatexTable {
 						{
 							p.printf("%.0f \\\\ \n", Double.parseDouble(input.get(idx1)[config[config.length-1]+1])); p.printf("%s \\\\ \n", input.get(idx1)[config[config.length-1]]);
 						}
-						else if(input.get(idx1)[0].equals("SVR"))
-						{
-							p.printf("%.0f \\\\ \n", Double.parseDouble(input.get(idx1)[config[config.length-1]+2])); p.printf("%s &", input.get(idx1)[config[config.length-1]+1]);
-						}
+						else if(input.get(idx1)[0].equals("SVR")) {p.printf("%.0f \\\\ \n", Double.parseDouble(input.get(idx1)[config[config.length-1]+2])); p.printf("%s &", input.get(idx1)[config[config.length-1]+1]);}
 					}
 					else if(config[config.length-1] == 10)
 					{
@@ -139,10 +171,13 @@ public class LatexTable {
 						{
 							p.printf("\\{%.0f\\} \\\\ \n", Double.parseDouble(input.get(idx1)[config[config.length-1]+1])); 
 						}
-						else if(input.get(idx1)[0].equals("SVR"))
-						{
-							p.printf("\\{%.3f,%.3f,%.3f\\} \\\\ \n", Double.parseDouble(input.get(idx1)[config[config.length-1]+2]), Double.parseDouble(input.get(idx1)[config[config.length-1]+3]), Double.parseDouble(input.get(idx1)[config[config.length-1]+4])) ;
-						}
+						else if(input.get(idx1)[0].equals("SVR")) p.printf("\\{%.3f,%.3f,%.3f\\} \\\\ \n", Double.parseDouble(input.get(idx1)[config[config.length-1]+2]), Double.parseDouble(input.get(idx1)[config[config.length-1]+3]), Double.parseDouble(input.get(idx1)[config[config.length-1]+4])) ;
+						else if(input.get(idx1)[0].equals("SES")) p.printf("\\{%.3f\\} \\\\ \n",Double.parseDouble(input.get(idx1)[config[config.length-1]-1]));
+						else if(input.get(idx1)[0].equals("aDES") || input.get(idx1)[0].equals("mDES")) p.printf("\\{%.3f,%.3f\\} \\\\ \n",Double.parseDouble(input.get(idx1)[config[config.length-1]-1]),Double.parseDouble(input.get(idx1)[config[config.length-1]]));
+						else if(input.get(idx1)[0].equals("aDESd") || input.get(idx1)[0].equals("mDESd")) p.printf("\\{%.3f,%.3f,%.3f\\} \\\\ \n",Double.parseDouble(input.get(idx1)[config[config.length-1]-1]),Double.parseDouble(input.get(idx1)[config[config.length-1]]),Double.parseDouble(input.get(idx1)[config[config.length-1]+1]));
+						else if(input.get(idx1)[0].equals("aTES") || input.get(idx1)[0].equals("mTES")) p.printf("\\{%.3f,%.3f,%.3f\\} \\\\ \n",Double.parseDouble(input.get(idx1)[config[config.length-1]]),Double.parseDouble(input.get(idx1)[config[config.length-1]+1]),Double.parseDouble(input.get(idx1)[config[config.length-1]+2]));
+						else if(input.get(idx1)[0].equals("aTESd") || input.get(idx1)[0].equals("mTESd")) p.printf("\\{%.3f,%.3f,%.3f,%.3f\\} \\\\ \n",Double.parseDouble(input.get(idx1)[config[config.length-1]]),Double.parseDouble(input.get(idx1)[config[config.length-1]+1]),Double.parseDouble(input.get(idx1)[config[config.length-1]+2]),Double.parseDouble(input.get(idx1)[config[config.length-1]+3]));
+						else if(input.get(idx1)[0].equals("four")) p.printf("\\{%.3f,%.3f,%.3f,%.3f\\} \\\\ \n",Double.parseDouble(input.get(idx1)[config[config.length-1]]),Double.parseDouble(input.get(idx1)[config[config.length-1]+1]),Double.parseDouble(input.get(idx1)[config[config.length-1]+2]),Double.parseDouble(input.get(idx1)[config[config.length-1]+3]));
 					}
 					else p.printf("%s\\\\ \n", input.get(idx1)[config[config.length-1]]);	
 				}				
