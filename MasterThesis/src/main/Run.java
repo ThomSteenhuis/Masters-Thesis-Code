@@ -15,6 +15,7 @@ import org.rosuda.REngine.Rserve.RserveException;
 
 import experiments.Experiment;
 import input.Data;
+import math.GatingErrorFunction;
 import math.Matrix;
 import models.ANN;
 import models.ARIMA;
@@ -48,40 +49,20 @@ public class Run {
 
 		int[] p = {1};
 		String[] c = {"2200EVO"};
-		Gating g = new Gating(data,p,c);
-		SVR m1 = new SVR(data,p,c,254594983);
-		double[] pars1 = {20,0.5,2};
-		double[] consts1 = {0,0,2};
-		m1.setParameters(pars1);
-		m1.setConstants(consts1);
-		ANN m2 = new ANN(data,p,c,254594983,100000);
-		double[] pars2 = {4};
-		double[] consts2 = {0,2};
-		m2.setParameters(pars2);
-		m2.setConstants(consts2);
-		ExponentialSmoothing m3 = new ExponentialSmoothing("mTES",p,c,data);
-		double[] pars3 = {0.010,0.208,0.010};
-		double[] consts3 = {12};
-		m3.setParameters(pars3);
-		m3.setConstants(consts3);
-		g.addModel(m1);
-		g.addModel(m2);
-		g.addModel(m3);
+		Gating g = new Gating(data,p,c,seed);
 		
-		int cat = data.getIndexFromCat("2200EVO");
-		double[][] x = new double[data.getTestingFirstIndex()[cat]-data.getValidationFirstIndex()[cat]][2];
+		double[] consts = {3,0,0};
+		g.setConstants(consts);
 		
-		for(int idx1=0;idx1<x.length;++idx1)
-		{
-			for(int idx2=0;idx2<x[idx1].length;++idx2) x[idx1][idx2] = data.getVolumes()[data.getValidationFirstIndex()[cat]+idx1+idx2-2][cat];
-		}
-		
-		g.setX(x);
-		Matrix.print(x);
-		PerformanceMeasures pm = new PerformanceMeasures(g);
 		g.train();
-		//m3.plotForecast("validation",0);
-		g.plotForecast("validation",0);
+		g.plotForecast("testing",0);		
+		
+		//System.out.println(gef.evaluate(lu.getSolution()));
+		//Matrix.print(gef.derivative(lu.getSolution()));
+		
+		/*Matrix.print(A);
+		Matrix.print(Matrix.innerProduct(A,lu.getSolution()));
+		Matrix.print(b);*/
 		
 		/*Experiment e = new Experiment(data,seed,experimentLocation,machineLocation);
 

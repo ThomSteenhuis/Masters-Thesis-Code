@@ -27,8 +27,8 @@ public class GatingErrorFunction extends Function {
 			
 			for(int idx2=0;idx2<Y_hat[idx1].length;++idx2) 
 			{
-				double tmp2 = Math.abs(input[idx2*(X[idx1].length+1)]);
-				for(int idx3=0;idx3<X[idx1].length;++idx3) tmp2 += Math.abs(input[idx2*(X[idx1].length+1)+1+idx3]*X[idx1][idx3]);
+				double tmp2 = input[idx2];
+				for(int idx3=0;idx3<X[idx1].length;++idx3) tmp2 += input[(idx3+1)*(X[idx1].length+1)+idx2]*X[idx1][idx3];
 				tmp -= (tmp2*Y_hat[idx1][idx2]);
 			}
 			
@@ -36,6 +36,21 @@ public class GatingErrorFunction extends Function {
 		}
 		
 		return 0.5*output;
+	}
+	
+	public double[][] getX()
+	{
+		return X;
+	}
+	
+	public double[] getY()
+	{
+		return Y;
+	}
+	
+	public double[][] getYHat()
+	{
+		return Y_hat;
 	}
 
 }

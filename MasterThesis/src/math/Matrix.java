@@ -67,6 +67,33 @@ public class Matrix {
 
 		return output;
 	}
+	
+	public static double[][] innerProduct(double[][] matrix1, double[][] matrix2)
+	{
+		if(matrix1.length == 0 || matrix2.length == 0)
+		{
+			System.out.println("Error (innerProduct): matrix has 0 length");
+			return null;
+		}
+
+		if( (matrix2.length != matrix1[0].length) )
+		{
+			System.out.println("Error (innerProduct): matrices not compatible");
+			return null;
+		}
+
+		double[][] output = new double[matrix1.length][matrix2[0].length];
+
+		for(int idx1=0;idx1<output.length;++idx1)
+		{
+			for(int idx2=0;idx2<output[idx1].length;++idx2)
+			{
+				for(int idx3=0;idx3<matrix1[idx1].length;++idx3) output[idx1][idx2] += (matrix1[idx1][idx3] * matrix2[idx3][idx2]);
+			}
+		}
+
+		return output;
+	}
 
 	public static double[][] transpose(double[][] matrix)
 	{
