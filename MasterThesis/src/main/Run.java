@@ -68,7 +68,6 @@ public class Run {
 			e.run(false,p1,p2);
 			p1.close();
 			p2.close();
-			e.getInstances().get(0).getPerformanceMeasures().getModel().plotForecast("testing",0);
 		}
 		catch (FileNotFoundException e1)
 		{

@@ -379,7 +379,7 @@ public class Experiment {
 		String[] category = {cat};
 		gating = new Gating(data,periods,category,(seed*47)%747584432);
 		
-		double[] constants = {Double.parseDouble(line[4]),Double.parseDouble(line[5])};
+		double[] constants = {Double.parseDouble(line[4])};
 		gating.setConstants(constants);
 		
 		return gating;
