@@ -47,7 +47,7 @@ public class Run {
 		data.setDataIndices(propTraining, propValidation);
 		//data.plot();
 
-		int[] p = {1};
+	/*	int[] p = {1};
 		String[] c = {"2200EVO"};
 		Gating g = new Gating(data,p,c,seed);
 		
@@ -57,14 +57,9 @@ public class Run {
 		g.train();
 		g.plotForecast("testing",0);		
 		
-		//System.out.println(gef.evaluate(lu.getSolution()));
-		//Matrix.print(gef.derivative(lu.getSolution()));
+	*/
 		
-		/*Matrix.print(A);
-		Matrix.print(Matrix.innerProduct(A,lu.getSolution()));
-		Matrix.print(b);*/
-		
-		/*Experiment e = new Experiment(data,seed,experimentLocation,machineLocation);
+		Experiment e = new Experiment(data,seed,experimentLocation,machineLocation);
 
 		try
 		{
@@ -73,11 +68,12 @@ public class Run {
 			e.run(false,p1,p2);
 			p1.close();
 			p2.close();
+			e.getInstances().get(0).getPerformanceMeasures().getModel().plotForecast("testing",0);
 		}
 		catch (FileNotFoundException e1)
 		{
 			e1.printStackTrace();
-		}*/
+		}
 
 		/*double[] x = new double[4];
 		x[0] = test.standardize(data.getVolumes()[60][0],0);

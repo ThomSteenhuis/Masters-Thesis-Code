@@ -41,9 +41,10 @@ public class SVR extends Model {
 		r = new Random(s);
 	}
 
-	public boolean train()
+	public boolean train(boolean bootstrap)
 	{
 		initializeXY();
+		if(bootstrap) bootstrap();
 		initializeKernel();
 		
 		for(int idx=0;idx<noOutputs;++idx)
@@ -179,6 +180,27 @@ public class SVR extends Model {
 				}
 			}
 
+		}
+	}
+	
+	private void bootstrap()
+	{
+		int[] idcs = new int[N_train];
+		for(int idx=0;idx<idcs.length;++idx) idcs[idx] = r.nextInt(N_train);
+		
+		double[][] x_bootstrap = new double[idcs.length][x_train[0].length];
+		double[] y_bootstrap = new double[idcs.length];
+		
+		for(int idx1=0;idx1<idcs.length;++idx1)
+		{
+			y_bootstrap[idx1] = y_train[idcs[idx1]][0];
+			for(int idx2=0;idx2<x_bootstrap[idx1].length;++idx2) x_bootstrap[idx1][idx2] = x_train[idcs[idx1]][idx2];
+		}
+		
+		for(int idx1=0;idx1<x_train.length;++idx1)
+		{
+			y_train[idx1][0] = y_bootstrap[idx1];
+			for(int idx2=0;idx2<x_bootstrap[idx1].length;++idx2) x_train[idx1][idx2] = x_bootstrap[idx1][idx2];
 		}
 	}
 

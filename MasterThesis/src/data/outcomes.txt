@@ -1,2 +1,8 @@
-Model name	Machine name	Optimization name	No periods ahead	Runtime (seconds)	RMSE	MAPE	MAE	ME	Constants	Best parameters	
-aTES	2200EVO	GridSearch	1	1.289	27.02660184192965	51.7772056681564	20.607327855926247	-16.889557524724115	12.0	0.01	0.1684	0.208	
+Model name	Machine name	Optimization name	No periods ahead	Runtime (seconds)	RMSE	MAPE	MAE	ME	Constants		Best parameters	
+Gating	2200EVO	GridSearch	1	19.461	137.10549853242964	270.57060350591865	107.68710019535564	-94.38538521124022	3.0	0.0	
+Model name	Machine name	Optimization name	No periods ahead	Runtime (seconds)	RMSE	MAPE	MAE	ME	Constants		Best parameters	
+Gating	2200EVO	GridSearch	1	19.53	26.369287080345124	52.12470769724263	20.745633663502566	-18.29059449593955	3.0	1.0	
+Model name	Machine name	Optimization name	No periods ahead	Runtime (seconds)	RMSE	MAPE	MAE	ME	Constants		Best parameters	
+Gating	2200EVO	GridSearch	1	38.403	54.677684187087074	104.88563596227702	41.74448311298625	-39.403934050937046	3.0	2.0	
+Model name	Machine name	Optimization name	No periods ahead	Runtime (seconds)	RMSE	MAPE	MAE	ME	Constants		Best parameters	
+Gating	2200EVO	GridSearch	1	57.517	374.97223985718307	785.51005449968	312.6330016908726	-97.28588913459903	3.0	3.0	

@@ -14,7 +14,7 @@ public class Naive extends Model {
 		name = "Naive"+Integer.toString(mode);		
 	}
 	
-	public boolean train() 
+	public boolean train(boolean bootstrap) 
 	{
 		initializeSets();
 		forecast();

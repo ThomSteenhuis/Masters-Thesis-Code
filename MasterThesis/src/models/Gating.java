@@ -10,6 +10,7 @@ public class Gating extends Model {
 	
 	private ArrayList<Model> models;
 	private int seed;
+	private boolean modelsAdded;
 	
 	private double[][] X;
 	private double[] Y;
@@ -22,21 +23,25 @@ public class Gating extends Model {
 		name = "Gating";
 		seed = s;
 		noParameters = 0;
-		noConstants = 3;
+		noConstants = 2;
 		noOutputs = 1;
 		models = new ArrayList<Model>();
+		modelsAdded = false;
 	}
 	
-	public boolean train() 
-	{
-		addModels();
+	public boolean train(boolean bootstrap) 
+	{		
+		if(!modelsAdded) {	addModels(); modelsAdded = true; }
 		
 		if(models.size() <= 1) {System.out.println("Error (gating): number of models should be at least 2"); return false;}
 		
-		for(int idx=0;idx<models.size();++idx) {if(!models.get(idx).train()) {System.out.printf("Error (gating): training of model %d failed\n",idx); return false;}}
+		boolean b = ((int) constants[1] >= 1);
+		
+		for(int idx=0;idx<models.size();++idx) {if(!models.get(idx).train(b)) {System.out.printf("Error (gating): training of model %d failed\n",idx); return false;}}
 		
 		initializeData();
-		calculateWeights();		
+		calculateWeights();	
+		
 		initializeSets();
 		forecast();
 		
@@ -55,24 +60,32 @@ public class Gating extends Model {
 	
 	private void addModels()
 	{
-		SVR m1 = new SVR(data,noPersAhead,category,(seed*57)%330235458);
-		double[] pars1 = {20,0.001,100};
-		double[] consts1 = new double[3];
-		consts1[1] = 0;
-		consts1[2] = constants[0];
-		m1.setParameters(pars1);
-		m1.setConstants(consts1);
+		int noModels = Math.max(1,(int) constants[1]);
 		
-		ANN m2 = new ANN(data,noPersAhead,category,(seed*63)%254594983,100000);
-		double[] pars2 = {20};
-		double[] consts2 = new double[2];
-		consts2[0] = 0;
-		consts2[1] = constants[0];
-		m2.setParameters(pars2);
-		m2.setConstants(consts2);
+		SVR[] m1 = new SVR[noModels];
+		ANN[] m2 = new ANN[noModels];
 		
-		models.add(m1);
-		models.add(m2);
+		for(int idx=0;idx<noModels;++idx)
+		{
+			m1[idx] = new SVR(data,noPersAhead,category,(seed*(57-idx))%330235458);
+			double[] pars1 = {20,0.001,100};
+			double[] consts1 = new double[3];
+			consts1[1] = 0;
+			consts1[2] = constants[0];
+			m1[idx].setParameters(pars1);
+			m1[idx].setConstants(consts1);
+			
+			m2[idx] = new ANN(data,noPersAhead,category,(seed*(63-idx))%254594983,100000);
+			double[] pars2 = {20};
+			double[] consts2 = new double[2];
+			consts2[0] = 0;
+			consts2[1] = constants[0];
+			m2[idx].setParameters(pars2);
+			m2[idx].setConstants(consts2);
+			
+			models.add(m1[idx]);
+			models.add(m2[idx]);
+		}
 	}
 	
 	private void calculateWeights()
@@ -114,7 +127,7 @@ public class Gating extends Model {
 	
 	private void initializeData()
 	{
-		X = new double[models.get(0).getTrainingReal()[0].length-(int)constants[0]-noPersAhead[0]+1][(int) constants[0]];
+		X = new double[models.get(0).getValidationReal()[0].length][(int) constants[0]];
 		Y = new double[X.length];
 		Y_hat = new double[X.length][models.size()];
 		
@@ -124,13 +137,14 @@ public class Gating extends Model {
 			
 			for(int idx2=0;idx2<X[idx1].length;++idx2) 
 			{
-				X[idx1][+idx2] = models.get(0).getData().getVolumes()[idx1+idx2][cat];
+				int first = models.get(0).getData().getValidationFirstIndex()[cat];
+				X[idx1][+idx2] = models.get(0).getData().getVolumes()[first+idx1+idx2-(int)constants[0]-noPersAhead[0]+1][cat];
 			}
 			
-			Y[idx1] = models.get(0).getTrainingReal()[0][(int)constants[0]+noPersAhead[0]-1+idx1];
+			Y[idx1] = models.get(0).getValidationReal()[0][idx1];
 			
 			for(int idx2=0;idx2<Y_hat[idx1].length;++idx2) 
-				Y_hat[idx1][idx2] = models.get(idx2).getTrainingForecast()[0][(int)constants[0]+noPersAhead[0]-1+idx1];
+				Y_hat[idx1][idx2] = models.get(idx2).getValidationForecast()[0][idx1];
 		}
 	}
 	
@@ -138,7 +152,7 @@ public class Gating extends Model {
 	{
 		int start = (int)constants[0]+noPersAhead[0]-1;
 		for(int idx1=0;idx1<start;++idx1) trainingForecast[0][idx1] = models.get(0).getTrainingReal()[0][idx1];
-		
+
 		for(int idx1=0;idx1<X.length;++idx1)
 		{
 			double sum = 0;

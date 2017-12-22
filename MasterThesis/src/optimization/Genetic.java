@@ -435,7 +435,7 @@ public class Genetic extends Optimization {
 
 			measures.getModel().setParameters(parameters);
 
-			if(!measures.getModel().train())
+			if(!measures.getModel().train(false))
 				return false;
 
 			measures.calculateMeasures("validation");

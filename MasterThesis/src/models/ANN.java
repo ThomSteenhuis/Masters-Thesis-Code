@@ -42,10 +42,11 @@ public class ANN extends Model {
 		noConstants = 2;
 		name = "ANN";
 		seed = s;
+		r = new Random(s);
 		maxNoIterations = maxIters;
 	}
 
-	public boolean train()
+	public boolean train(boolean bootstrap)
 	{
 		if(parameters.length != noParameters)
 		{
@@ -61,7 +62,8 @@ public class ANN extends Model {
 
 		setNoInputs( ( (int) constants[1] + (int) constants[0])*category.length);
 		initializeData();
-
+		
+		if(bootstrap) bootstrap();
 		//backpropagation();
 		if(!nelderMead()) return false;
 
@@ -328,6 +330,27 @@ public class ANN extends Model {
 	private double destandardize(double input,int index)
 	{
 		return ((max[index]-mean[index])*input+mean[index]);
+	}
+	
+	private void bootstrap()
+	{
+		int[] idcs = new int[N];
+		for(int idx=0;idx<idcs.length;++idx) idcs[idx] = r.nextInt(N);
+		
+		double[][] x_bootstrap = new double[X.length][idcs.length];
+		double[][] y_bootstrap = new double[Y.length][idcs.length];
+		
+		for(int idx1=0;idx1<idcs.length;++idx1)
+		{
+			for(int idx2=0;idx2<Y.length;++idx2) y_bootstrap[idx2][idx1] = Y[idx2][idcs[idx1]];
+			for(int idx2=0;idx2<X.length;++idx2) x_bootstrap[idx2][idx1] = X[idx2][idcs[idx1]];
+		}
+		
+		for(int idx1=0;idx1<X[0].length;++idx1)
+		{
+			for(int idx2=0;idx2<Y.length;++idx2) Y[idx2][idx1] = y_bootstrap[idx2][idx1];
+			for(int idx2=0;idx2<X.length;++idx2) X[idx2][idx1] = x_bootstrap[idx2][idx1];
+		}
 	}
 
 	private void initializeData()

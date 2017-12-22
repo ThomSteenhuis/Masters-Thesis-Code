@@ -99,7 +99,7 @@ public abstract class Model {
 		noInputs = no;
 	}
 
-	public abstract boolean train();
+	public abstract boolean train(boolean bootstrap);
 
 	public void plotForecast(String mode,int forecastNo)
 	{

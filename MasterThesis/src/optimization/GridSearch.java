@@ -61,7 +61,7 @@ public class GridSearch extends Optimization{
 		{			
 			measures.getModel().setParameters(getGridConfig(idx));
 
-			if(measures.getModel().train())
+			if(measures.getModel().train(false))
 			{
 				measures.calculateMeasures("validation");
 				updateBest();

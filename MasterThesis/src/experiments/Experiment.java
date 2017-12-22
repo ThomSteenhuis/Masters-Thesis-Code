@@ -13,6 +13,7 @@ import math.Matrix;
 import models.ANN;
 import models.ARIMA;
 import models.ExponentialSmoothing;
+import models.Gating;
 import models.Model;
 import models.Naive;
 import models.SVR;
@@ -91,6 +92,8 @@ public class Experiment {
 						model = initializeANN(experiments.get(idx1),idx2,data);
 					else if(isSVR(experiments.get(idx1)[0]))
 						model = initializeSVR(experiments.get(idx1),idx2,data);
+					else if(isGating(experiments.get(idx1)[0]))
+						model = initializeGating(experiments.get(idx1),idx2,data);
 					else
 					{
 						System.out.println("Error (Experiment): model not recognized");
@@ -162,7 +165,7 @@ public class Experiment {
 			if(success[idx])
 			{
 				instances.get(idx).getPerformanceMeasures().getModel().setParameters(instances.get(idx).getOptimalParameters());
-				instances.get(idx).getPerformanceMeasures().getModel().train();
+				instances.get(idx).getPerformanceMeasures().getModel().train(false);
 				instances.get(idx).getPerformanceMeasures().calculateMeasures("testing");
 				createOutcomes(idx);
 				createForecasts(idx);
@@ -367,6 +370,20 @@ public class Experiment {
 		svr.setConstants(constants);
 		return svr;
 	}
+	
+	private Model initializeGating(String[] line,String cat, Data data) throws NumberFormatException
+	{
+		Gating gating;
+		
+		int[] periods = {Integer.parseInt(line[3])};
+		String[] category = {cat};
+		gating = new Gating(data,periods,category,(seed*47)%747584432);
+		
+		double[] constants = {Double.parseDouble(line[4]),Double.parseDouble(line[5])};
+		gating.setConstants(constants);
+		
+		return gating;
+	}
 
 	private static Optimization initializeGA(String[] line,PerformanceMeasures pm) throws FileNotFoundException,NumberFormatException
 	{
@@ -401,8 +418,6 @@ public class Experiment {
 
 	private static Optimization initializeGS(String[] line,PerformanceMeasures pm) throws FileNotFoundException,NumberFormatException
 	{
-		System.out.println(line.length);
-		System.out.println(pm.getModel().getNoParameters());
 		if( ( ( (line.length-4-pm.getModel().getNoConstants()) % 5) != 0) || ( ( (line.length-4-pm.getModel().getNoConstants()) / 5) != pm.getModel().getNoParameters() ) )
 			throw new FileNotFoundException("number of inputs not correct");
 
@@ -471,6 +486,14 @@ public class Experiment {
 	private static boolean isSVR(String modelName)
 	{
 		if(modelName.equals("SVR"))
+			return true;
+		else
+			return false;
+	}
+	
+	private static boolean isGating(String modelName)
+	{
+		if(modelName.equals("Gating"))
 			return true;
 		else
 			return false;

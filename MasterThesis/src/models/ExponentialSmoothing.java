@@ -119,7 +119,7 @@ public class ExponentialSmoothing extends Model{
 		}
 	}
 	
-	public boolean train()
+	public boolean train(boolean bootstrap)
 	{
 		if(parameters.length != noParameters)
 		{
