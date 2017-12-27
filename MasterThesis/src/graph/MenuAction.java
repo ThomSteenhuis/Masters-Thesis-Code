@@ -160,6 +160,7 @@ public class MenuAction {
 			txts[idx] = new Label();
 			if(graph.getCategories()[graph.getCurrent()][idx].equals("2200EVO")) txts[idx].setText("2200 EVO");
 			else if(graph.getCategories()[graph.getCurrent()][idx].equals("8800FCQ, RFID")) txts[idx].setText("8800 FCQ");
+			else if(graph.getCategories()[graph.getCurrent()][idx].equals("Gating")) txts[idx].setText("Competative mixture of experts");
 			else txts[idx].setText(graph.getCategories()[graph.getCurrent()][idx]);
 			txts[idx].setFont(new Font(txtSize));
 			txts[idx].setLayoutX(lines[idx].getEndX()+legendTxtMargin);

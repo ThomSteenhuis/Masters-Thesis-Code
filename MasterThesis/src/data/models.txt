@@ -12,3 +12,4 @@ ANN
 ARIMA
 SVR
 Naive
+Gating

@@ -100,7 +100,7 @@ public class AutoPlot {
 			{
 				String key = makeKey(idx1,idx2,splittedList,categoriesList);
 				int index = hash.get(key);
-				
+
 				header[idx1][idx2] = "";
 				for(int idx3=0;idx3<categoriesList[idx2].length;++idx3) 
 					header[idx1][idx2] = header[idx1][idx2] + categoriesList[idx2][idx3];
