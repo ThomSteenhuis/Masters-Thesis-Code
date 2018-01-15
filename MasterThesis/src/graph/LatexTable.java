@@ -90,6 +90,7 @@ public class LatexTable {
 				else if(config[idx] == 10) 
 				{
 					if(model.equals("ANN")) p.printf("\\{Best number of hidden units\\} &");
+					else if(model.equals("Gating")) p.printf("\\{Best number of hidden units,C,\\epsilon,\\sigma^2\\} &");
 					else if(model.equals("SVR")) p.printf("\\{C,\\epsilon,\\sigma^2\\} &");
 					else if(model.equals("SES")) p.printf("\\{\\alpha\\} &");
 					else if(model.equals("aDES") || model.equals("mDES")) p.printf("\\{\\alpha,\\beta\\} &");
@@ -106,6 +107,7 @@ public class LatexTable {
 				
 				if(model.equals("ANN")) p.printf("\\{Best number of hidden units\\} \\\\ \\hline \n");
 				else if(model.equals("SVR")) p.printf("\\{C,\\epsilon,\\sigma^2\\} \\\\ \\hline \n");
+				else if(model.equals("Gating")) p.printf("\\{Best number of hidden units,C,\\epsilon,\\sigma^2\\} \\\\ \\hline \n");
 				else if(model.equals("SES")) p.printf("\\{\\alpha\\} \\\\ \\hline \n");
 				else if(model.equals("aDES") || model.equals("mDES")) p.printf("\\{\\alpha,\\beta\\} \\\\ \\hline \n");
 				else if(model.equals("aDESd") || model.equals("mDESd")) p.printf("\\{\\alpha,\\beta,\\phi\\} \\\\ \\hline \n");
@@ -146,6 +148,7 @@ public class LatexTable {
 								p.printf("\\{%.0f\\} &", Double.parseDouble(input.get(idx1)[config[idx2]+1])); 
 							}
 							else if(input.get(idx1)[0].equals("SVR")) p.printf("\\{%.3f,%.3f,%.3f\\} &", Double.parseDouble(input.get(idx1)[config[idx2]+2]), Double.parseDouble(input.get(idx1)[config[idx2]+3]), Double.parseDouble(input.get(idx1)[config[idx2]+4])) ;
+							else if(input.get(idx1)[0].equals("Gating")) p.printf("\\{%.0f,%.3f,%.3f,%.3f\\} &", Double.parseDouble(input.get(idx1)[config[idx2]+1]), Double.parseDouble(input.get(idx1)[config[idx2]+2]), Double.parseDouble(input.get(idx1)[config[idx2]+3]), Double.parseDouble(input.get(idx1)[config[idx2]+4])) ;
 							else if(input.get(idx1)[0].equals("SES")) p.printf("\\{%.3f\\} &",Double.parseDouble(input.get(idx1)[config[idx2]-1]));
 							else if(input.get(idx1)[0].equals("aDES") || input.get(idx1)[0].equals("mDES")) p.printf("\\{%.3f,%.3f\\} &",Double.parseDouble(input.get(idx1)[config[idx2]-1]),Double.parseDouble(input.get(idx1)[config[idx2]]));
 							else if(input.get(idx1)[0].equals("aDESd") || input.get(idx1)[0].equals("mDESd")) p.printf("\\{%.3f,%.3f,%.3f\\} &",Double.parseDouble(input.get(idx1)[config[idx2]-1]),Double.parseDouble(input.get(idx1)[config[idx2]]),Double.parseDouble(input.get(idx1)[config[idx2]+1]));
@@ -172,6 +175,7 @@ public class LatexTable {
 							p.printf("\\{%.0f\\} \\\\ \n", Double.parseDouble(input.get(idx1)[config[config.length-1]+1])); 
 						}
 						else if(input.get(idx1)[0].equals("SVR")) p.printf("\\{%.3f,%.3f,%.3f\\} \\\\ \n", Double.parseDouble(input.get(idx1)[config[config.length-1]+2]), Double.parseDouble(input.get(idx1)[config[config.length-1]+3]), Double.parseDouble(input.get(idx1)[config[config.length-1]+4])) ;
+						else if(input.get(idx1)[0].equals("Gating")) p.printf("\\{%.0f,%.3f,%.3f,%.3f\\} \\\\ \n", Double.parseDouble(input.get(idx1)[config[config.length-1]+1]), Double.parseDouble(input.get(idx1)[config[config.length-1]+2]), Double.parseDouble(input.get(idx1)[config[config.length-1]+3]), Double.parseDouble(input.get(idx1)[config[config.length-1]+4])) ;
 						else if(input.get(idx1)[0].equals("SES")) p.printf("\\{%.3f\\} \\\\ \n",Double.parseDouble(input.get(idx1)[config[config.length-1]-1]));
 						else if(input.get(idx1)[0].equals("aDES") || input.get(idx1)[0].equals("mDES")) p.printf("\\{%.3f,%.3f\\} \\\\ \n",Double.parseDouble(input.get(idx1)[config[config.length-1]-1]),Double.parseDouble(input.get(idx1)[config[config.length-1]]));
 						else if(input.get(idx1)[0].equals("aDESd") || input.get(idx1)[0].equals("mDESd")) p.printf("\\{%.3f,%.3f,%.3f\\} \\\\ \n",Double.parseDouble(input.get(idx1)[config[config.length-1]-1]),Double.parseDouble(input.get(idx1)[config[config.length-1]]),Double.parseDouble(input.get(idx1)[config[config.length-1]+1]));
